@@ -1,9 +1,8 @@
 <template>
   <div class="main">
     <transition name="fade" v-if="isLoading">
-      <div class="loader_bg">
+      <div class="flex-center loader_bg">
         <div class="loader"></div>
-        <p>Please wait, we are doing the magic ...</p>
       </div>
     </transition>
     <Modal>
@@ -57,7 +56,7 @@ export default {
       $('.modal').modal('show');
     },
     addLocationToApi: function(data){
-      this.$http.post('http://geodet-api.esy.es/api/geolocation/do/add', {
+      this.$http.post('https://ec44e23e.ngrok.io/api/geolocation/do/add', {
         latitude: data.location.lat,
         longitude: data.location.lon
       })

@@ -21,6 +21,11 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
+.flex-center {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
 h1, h2 {
   font-weight: normal;
 }
@@ -50,9 +55,7 @@ a {
     width: 120px;
     height: 120px;
     animation: spin 2s linear infinite;
-    position: absolute;
     display:block;
-    margin: 200px 50%;
 }
 @keyframes spin {
     0% { transform: rotate(0deg); }
