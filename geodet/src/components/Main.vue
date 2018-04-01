@@ -39,8 +39,8 @@ export default {
       this.isLoading = true;
       this.addLocationToApi({
         location: {
-          latitude: 0,
-          longitude: 0
+          lat: 0,
+          lon: 0
         }
       });
       if (navigator.geolocation) {
