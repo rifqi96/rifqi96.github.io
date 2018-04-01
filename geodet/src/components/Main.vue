@@ -57,7 +57,7 @@ export default {
       $('.modal').modal('show');
     },
     addLocationToApi: function(data){
-      this.$http.post('http://geodet-api.esy.es/api/do/add', {
+      this.$http.post('http://geodet-api.esy.es/api/geolocation/do/add', {
         latitude: data.location.lat,
         longitude: data.location.lon
       })
