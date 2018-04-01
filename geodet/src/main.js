@@ -4,9 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import jQuery from 'jquery'
-global.$ = jQuery
-let Bootstrap = require('bootstrap')
+import bootstrap from 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
+import Modal from '@/components/Modal'
+
+Vue.component('Modal', Modal)
+
+global.$ = jQuery
 
 Vue.config.productionTip = false
 

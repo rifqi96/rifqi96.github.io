@@ -1,5 +1,11 @@
 <template>
   <div class="hello">
+    <Modal>
+      <template slot="title"></template>
+      <template slot="body">
+        Test
+      </template>
+    </Modal>
     <h1>{{ msg }}</h1>
     <h2>Essential Links</h2>
     <ul>
@@ -90,6 +96,15 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App'
     }
+  },
+  created: function() {
+    $('.modal').modal('hide');
+  },
+  beforeMount: function() {
+    this.$emit('loader_active');
+  },
+  mounted: function(){
+    this.$emit('loader_leave');
   }
 }
 </script>

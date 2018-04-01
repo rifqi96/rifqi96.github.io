@@ -1,10 +1,5 @@
 <template>
   <div class="main">
-    <transition name="fade" v-if="isLoading">
-      <div class="flex-center loader_bg">
-        <div class="loader"></div>
-      </div>
-    </transition>
     <Modal>
       <template slot="title">Your Geolocation</template>
       <template slot="body">
@@ -21,22 +16,16 @@
 </template>
 
 <script>
-import Modal from '@/components/Modal'
-
 export default {
   name: 'Main',
-  components: {
-    Modal
-  },
   data(){
     return {
-      location: {},
-      isLoading: true
+      location: {}
     }
   },
   methods: {
     getLocation: function(){
-      this.isLoading = true;
+      this.$emit('loader_active');
       this.addLocationToApi({
         location: {
           lat: 0,
@@ -50,12 +39,12 @@ export default {
             lon: position.coords.longitude
           }
           this.addLocationToApi(this);
-          this.loaderLeave();
+          this.$emit('loader_leave');
           this.showLocation();
         });
       } else {
           console.log("Geolocation is not supported by this browser.");
-          this.loaderLeave();
+          this.$emit('loader_leave');
       }
     },
     showLocation: function(){
@@ -72,14 +61,10 @@ export default {
         (err) => {
           console.log(err);
         });
-    },
-    loaderLeave: function(){
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 1500)
     }
   },
   created: function(){
+    $('.modal').modal('hide');
     this.getLocation();
   },
   mounted: function(){

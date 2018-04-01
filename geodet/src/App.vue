@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <Loader></Loader>
     <img src="./assets/logo.png">
     <Main></Main>
     <router-view/>
@@ -7,12 +8,15 @@
 </template>
 
 <script>
+import Loader from '@/components/Loader'
+
 export default {
-  name: 'App'
+  name: 'App',
+  components: { Loader }
 }
 </script>
 
-<style scope>
+<style>
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,27 +43,6 @@ li {
 }
 a {
   color: #42b983;
-}
-.loader_bg {
-  background:snow;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-}
-.loader {
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #3498db; /* Blue */
-    border-radius: 50%;
-    width: 120px;
-    height: 120px;
-    animation: spin 2s linear infinite;
-    display:block;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
