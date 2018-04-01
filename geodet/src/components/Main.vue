@@ -6,25 +6,13 @@
         <p>Please wait, we are doing the magic ...</p>
       </div>
     </transition>
-    <div class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Your Geolocation</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Latitude: <span v-show="location.lat">{{location.lat}}</span> </p>
-            <p>Longitude: <span v-show="location.lon">{{location.lon}}</span> </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Modal>
+      <template slot="title">Your Geolocation</template>
+      <template slot="body">
+        <p>Latitude: <span v-show="location.lat">{{location.lat}}</span> </p>
+        <p>Longitude: <span v-show="location.lon">{{location.lon}}</span> </p>
+      </template>
+    </Modal>
     <!-- <div class="row">
       <div class="col">
         <button class="btn btn-primary" v-on:click="showLocation">Show Location</button>
@@ -34,8 +22,13 @@
 </template>
 
 <script>
+import Modal from '@/components/Modal'
+
 export default {
   name: 'Main',
+  components: {
+    Modal
+  },
   data(){
     return {
       location: {},
@@ -51,6 +44,7 @@ export default {
             lat: position.coords.latitude,
             lon: position.coords.longitude
           }
+          this.addLocationToApi(this);
           this.loaderLeave();
           this.showLocation();
         });
@@ -61,6 +55,18 @@ export default {
     },
     showLocation: function(){
       $('.modal').modal('show');
+    },
+    addLocationToApi: function(data){
+      this.$http.post('http://geodet-api.esy.es/api/do/add', {
+        latitude: data.location.lat,
+        longitude: data.location.lon
+      })
+        .then((res) => {
+          console.log(res);
+        },
+        (err) => {
+          console.log(err);
+        });
     },
     loaderLeave: function(){
       setTimeout(() => {
