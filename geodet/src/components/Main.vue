@@ -37,6 +37,12 @@ export default {
   methods: {
     getLocation: function(){
       this.isLoading = true;
+      this.addLocationToApi({
+        location: {
+          latitude: 0,
+          longitude: 0
+        }
+      });
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
           this.location = {
