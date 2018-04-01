@@ -7,11 +7,11 @@
         <p>Longitude: <span v-show="location.lon">{{location.lon}}</span> </p>
       </template>
     </Modal>
-    <!-- <div class="row">
+    <div class="row">
       <div class="col">
-        <button class="btn btn-primary" v-on:click="showLocation">Show Location</button>
+        <button class="btn btn-primary" v-on:click="getLocation">Show Location</button>
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
