@@ -2,61 +2,53 @@
 <html>
   <head>
     <title>Margin Calculator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
   </head>
   <body>
     <div class="container">
-      <h1 class="text-center my-5">Margin Calculator</h1>
+      <h1 class="text-center">Margin Calculator</h1>
       <form>
         <div class="form-group">
-          <label for="stop_loss_percentage">Stop Loss Percentage:</label>
-          <input type="number" class="form-control" id="stop_loss_percentage">
+          <label for="stop-loss-percent">Stop Loss Percentage:</label>
+          <input type="number" class="form-control" id="stop-loss-percent" placeholder="Enter the stop loss percentage" onkeyup="calculate()">
         </div>
         <div class="form-group">
-          <label for="stop_loss_dollar">Stop Loss in Dollar:</label>
-          <input type="number" class="form-control" id="stop_loss_dollar">
+          <label for="stop-loss-dollar">Stop Loss in Dollar:</label>
+          <input type="number" class="form-control" id="stop-loss-dollar" placeholder="Enter the stop loss in dollar" onkeyup="calculate()">
         </div>
         <div class="form-group">
           <label for="leverage">Leverage:</label>
-          <input type="text" class="form-control" id="leverage">
+          <input type="number" class="form-control" id="leverage" placeholder="Enter the leverage (e.g. 1x, 5x, 20x)" onkeyup="calculate()">
         </div>
-        <button type="button" class="btn btn-primary btn-block" onclick="calculate()">Calculate</button>
       </form>
-      <p class="text-center my-5">Deployed Capital: $<span id="result"></span></p>
+      <div id="error-message" class="text-danger" style="display: none;"></div>
+      <div id="result" style="display: none;"></div>
     </div>
-
     <script>
       function calculate() {
-        let stop_loss_percent = document.getElementById("stop_loss_percentage").value;
-        let stop_loss_dollar = document.getElementById("stop_loss_dollar").value;
-        let leverage = document.getElementById("leverage").value;
-        let deployed_capital = stop_loss_dollar / (stop_loss_percent / 100) / leverage;
-        document.getElementById("result").innerHTML = deployed_capital;
-      }
-      // Add event listener for enter key trigger
-      document.getElementById("stop_loss_percentage").addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          calculate();
+        const stopLossPercent = document.getElementById("stop-loss-percent").value;
+        const stopLossDollar = document.getElementById("stop-loss-dollar").value;
+        const leverage = document.getElementById("leverage").value;
+
+        if (!stopLossPercent || !stopLossDollar || !leverage) {
+            document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
+            document.getElementById("error-message").style.display = "block";
+            document.getElementById("result").style.display = "none";
+            return;
         }
-      });
-      document.getElementById("stop_loss_dollar").addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          calculate();
+        const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
+
+        if (deployedCapital < stopLossDollar) {
+            document.getElementById("error-message").innerHTML = "Error: The deployed capital is lower than the stop loss dollar.";
+            document.getElementById("error-message").style.display = "block";
+            document.getElementById("result").style.display = "none";
+        } else {
+            document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage + " is: $" + deployedCapital;
+            document.getElementById("result").style.display = "block";
+            document.getElementById("error-message").style.display = "none";
         }
-      });
-      document.getElementById("leverage").addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          calculate();
-        }
-      });
-   
+    }
     </script>
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
