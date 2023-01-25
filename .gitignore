@@ -1,0 +1,90 @@
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build systems
+bin/
+obj/
+out/
+target/
+
+# Visual Studio files
+*.user
+*.suo
+*.sln
+*.cache
+*.dbproj
+*.ncb
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.VC.opendb
+
+# Compiled sources
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Config files
+*.cfg
+*.conf
+*.ini
+*.properties
+
+# Credentials
+*.key
+*.pem
+*.pfx
+
+# Environment variables
+*.env
+
+# Shell scripts
+*.sh
+
+# Output files
+*.log
+*.out
+*.err
+
+# Temporary files
+*.bak
+*.tmp
+*.swp
+
+# Images
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.ico
+*.svg
+*.webp
+
+# Videos
+*.avi
+*.mkv
+*.mp
