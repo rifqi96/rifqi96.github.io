@@ -27,11 +27,50 @@
         <input type="number" class="form-control" id="leverage" placeholder="Enter the leverage (e.g. 1x, 5x, 20x)"
           onkeyup="calculate()">
       </div>
+      <div class="form-group">
+        <label for="trade-text">Use the following text to open a trade:</label>
+        <textarea class="form-control" id="trade-text" rows="3" readonly></textarea>
+        <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
+        <button type="button" class="btn btn-primary mt-4" onclick="copyToClipboard()" data-toggle="tooltip"
+          data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
+      </div>
     </form>
     <div id="error-message" class="text-danger" style="display: none;"></div>
     <div id="result" style="display: none;"></div>
   </div>
   <script>
+    let password = prompt("Please enter the password to access this page:");
+    while (password !== "satuduatiga") {
+      alert("Wrong password! Please try again.");
+      password = prompt("Please enter the password to access this page:");
+    }
+
+    const apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
+    let text = '';
+
+    function copyToClipboard() {
+      text += `, ${apiSecret}`;
+      copyTextToClipboard(text);
+    }
+    // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+    function copyTextToClipboard(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Copying text command was ' + msg);
+      } catch (err) {
+        console.log('Oops, unable to copy');
+      }
+
+      document.body.removeChild(textArea);
+    }
+
     function calculate() {
       const stopLossPercent = document.getElementById("stop-loss-percent").value;
       const stopLossDollar = document.getElementById("stop-loss-dollar").value;
@@ -41,6 +80,8 @@
         document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
         document.getElementById("error-message").style.display = "block";
         document.getElementById("result").style.display = "none";
+        text = '';
+        document.getElementById("trade-text").value = text;
         return;
       }
       const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
@@ -50,12 +91,18 @@
           "Error: The deployed capital is lower than the stop loss dollar.";
         document.getElementById("error-message").style.display = "block";
         document.getElementById("result").style.display = "none";
+        text = '';
+        document.getElementById("trade-text").value = text;
+        document.querySelector("button").disabled = true;
       } else {
         // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
         document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
           " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById("result").style.display = "block";
         document.getElementById("error-message").style.display = "none";
+        text = `PAIR(x${leverage}), POSITION, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, 3`;
+        document.getElementById("trade-text").value = text;
+        document.querySelector("button").disabled = false;
       }
     }
   </script>
