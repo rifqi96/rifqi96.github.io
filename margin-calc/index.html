@@ -28,10 +28,14 @@
           onkeyup="calculate()">
       </div>
       <div class="form-group">
+        <button type="button" class="btn btn-success" onclick="calculate()">Buy</button>
+        <button type="button" class="btn btn-danger" onclick="calculate()">Sell</button>
+      </div>
+      <div class="form-group">
         <label for="trade-text">Use the following text to open a trade:</label>
         <textarea class="form-control" id="trade-text" rows="3" readonly></textarea>
         <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
-        <button type="button" class="btn btn-primary mt-4" onclick="copyToClipboard()" data-toggle="tooltip"
+        <button type="button" class="btn btn-primary mt-4 copy-to-clipboard" onclick="copyToClipboard()" data-toggle="tooltip"
           data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
       </div>
     </form>
@@ -75,6 +79,28 @@
       const stopLossPercent = document.getElementById("stop-loss-percent").value;
       const stopLossDollar = document.getElementById("stop-loss-dollar").value;
       const leverage = document.getElementById("leverage").value;
+      let position = 'POSITION';
+      // Change the buy/sell button text to have biggger font size and bold when it's clicked.
+      // Change back to normal when the other button is clicked.
+      if (event.target.innerHTML === "Buy") {
+        event.target.innerHTML = "BUY";
+        event.target.style.fontSize = "20px";
+        event.target.style.fontWeight = "bold";
+        document.querySelector("button.btn-danger").innerHTML = "Sell";
+        document.querySelector("button.btn-danger").style.fontSize = "16px";
+        document.querySelector("button.btn-danger").style.fontWeight = "normal";
+        position = 'buy';
+        document.getElementById("trade-text").value = text;
+      } else if (event.target.innerHTML === "Sell") {
+        event.target.innerHTML = "SELL";
+        event.target.style.fontSize = "20px";
+        event.target.style.fontWeight = "bold";
+        document.querySelector("button.btn-success").innerHTML = "Buy";
+        document.querySelector("button.btn-success").style.fontSize = "16px";
+        document.querySelector("button.btn-success").style.fontWeight = "normal";
+        position = 'sell';
+        document.getElementById("trade-text").value = text;
+      }
 
       if (!stopLossPercent || !stopLossDollar || !leverage) {
         document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
@@ -93,16 +119,18 @@
         document.getElementById("result").style.display = "none";
         text = '';
         document.getElementById("trade-text").value = text;
-        document.querySelector("button").disabled = true;
+        // Disable copy to clipboard button when there's an error.
+        document.querySelector("button.copy-to-clipboard").disabled = true;
       } else {
         // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
         document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
           " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById("result").style.display = "block";
         document.getElementById("error-message").style.display = "none";
-        text = `PAIR(x${leverage}), POSITION, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, 3`;
+        text = `PAIR(x${leverage}), ${position}, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, 3`;
         document.getElementById("trade-text").value = text;
-        document.querySelector("button").disabled = false;
+        // Enable copy to clipboard button when there's no error.
+        document.querySelector("button.copy-to-clipboard").disabled = false;
       }
     }
   </script>
