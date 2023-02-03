@@ -52,9 +52,8 @@
         document.getElementById("result").style.display = "none";
       } else {
         // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-        deployedCapital = deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
-          " is: $" + deployedCapital;
+          " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         document.getElementById("result").style.display = "block";
         document.getElementById("error-message").style.display = "none";
       }
