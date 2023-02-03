@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Margin Calculator</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="container">
-      <h1 class="text-center">Margin Calculator</h1>
-      <form>
-        <div class="form-group">
-          <label for="stop-loss-percent">Stop Loss Percentage:</label>
-          <input type="number" class="form-control" id="stop-loss-percent" placeholder="Enter the stop loss percentage" onkeyup="calculate()">
-        </div>
-        <div class="form-group">
-          <label for="stop-loss-dollar">Stop Loss in Dollar:</label>
-          <input type="number" class="form-control" id="stop-loss-dollar" placeholder="Enter the stop loss in dollar" onkeyup="calculate()">
-        </div>
-        <div class="form-group">
-          <label for="leverage">Leverage:</label>
-          <input type="number" class="form-control" id="leverage" placeholder="Enter the leverage (e.g. 1x, 5x, 20x)" onkeyup="calculate()">
-        </div>
-      </form>
-      <div id="error-message" class="text-danger" style="display: none;"></div>
-      <div id="result" style="display: none;"></div>
-    </div>
-    <script>
-      function calculate() {
-        const stopLossPercent = document.getElementById("stop-loss-percent").value;
-        const stopLossDollar = document.getElementById("stop-loss-dollar").value;
-        const leverage = document.getElementById("leverage").value;
 
-        if (!stopLossPercent || !stopLossDollar || !leverage) {
-            document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
-            document.getElementById("error-message").style.display = "block";
-            document.getElementById("result").style.display = "none";
-            return;
-        }
-        const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
+<head>
+  <title>Margin Calculator</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
 
-        if (deployedCapital < stopLossDollar) {
-            document.getElementById("error-message").innerHTML = "Error: The deployed capital is lower than the stop loss dollar.";
-            document.getElementById("error-message").style.display = "block";
-            document.getElementById("result").style.display = "none";
-        } else {
-            document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage + " is: $" + deployedCapital;
-            document.getElementById("result").style.display = "block";
-            document.getElementById("error-message").style.display = "none";
-        }
+<body>
+  <div class="container">
+    <h1 class="text-center">Margin Calculator</h1>
+    <form>
+      <div class="form-group">
+        <label for="stop-loss-percent">Stop Loss Percentage:</label>
+        <input type="number" class="form-control" id="stop-loss-percent" placeholder="Enter the stop loss percentage"
+          onkeyup="calculate()">
+      </div>
+      <div class="form-group">
+        <label for="stop-loss-dollar">Stop Loss in Dollar:</label>
+        <input type="number" class="form-control" id="stop-loss-dollar" placeholder="Enter the stop loss in dollar"
+          onkeyup="calculate()">
+      </div>
+      <div class="form-group">
+        <label for="leverage">Leverage:</label>
+        <input type="number" class="form-control" id="leverage" placeholder="Enter the leverage (e.g. 1x, 5x, 20x)"
+          onkeyup="calculate()">
+      </div>
+    </form>
+    <div id="error-message" class="text-danger" style="display: none;"></div>
+    <div id="result" style="display: none;"></div>
+  </div>
+  <script>
+    function calculate() {
+      const stopLossPercent = document.getElementById("stop-loss-percent").value;
+      const stopLossDollar = document.getElementById("stop-loss-dollar").value;
+      const leverage = document.getElementById("leverage").value;
+
+      if (!stopLossPercent || !stopLossDollar || !leverage) {
+        document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
+        document.getElementById("error-message").style.display = "block";
+        document.getElementById("result").style.display = "none";
+        return;
+      }
+      const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
+
+      if (deployedCapital < stopLossDollar) {
+        document.getElementById("error-message").innerHTML =
+          "Error: The deployed capital is lower than the stop loss dollar.";
+        document.getElementById("error-message").style.display = "block";
+        document.getElementById("result").style.display = "none";
+      } else {
+        // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+        deployedCapital = deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
+          " is: $" + deployedCapital;
+        document.getElementById("result").style.display = "block";
+        document.getElementById("error-message").style.display = "none";
+      }
     }
-    </script>
+  </script>
 </body>
+
 </html>
