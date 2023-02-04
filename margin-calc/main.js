@@ -45,33 +45,34 @@ function fetchTickersList() {
   request.onload = handleOnLoad;
   // Handle network error
   request.onerror = handleError;
+  
+  function handleOnLoad(e) {
+    const res = this;
+    if (res.status >= 200 && res.status < 400) {
+      // Successful request
+      handleSuccess(res);
+    } else {
+      // We reached our target server, but it returned an error
+      handleError(res);
+    }
+  }
 
-  function handleOnProgress(event) {
-    if (event.lengthComputable) {
+  function handleOnProgress(e) {
+    if (e.lengthComputable) {
       // Update the progress bar width percentage based on the loaded data
-      const percentComplete = (event.loaded / event.total) * 100;
+      const percentComplete = (e.loaded / e.total) * 100;
       progressBar.style.width = `${percentComplete}%`;
       progressBar.setAttribute('aria-valuenow', percentComplete);
     }
   }
-  
-  function handleOnLoad() {
-    if (this.status >= 200 && this.status < 400) {
-      // Successful request
-      handleSuccess();
-    } else {
-      // We reached our target server, but it returned an error
-      handleError();
-    }
-  }
 
-  function handleSuccess() {
+  function handleSuccess(res) {
     // Hide the fetching text
     const fetchingText = document.querySelector('.fetching-text');
     fetchingText.style.display = 'none';
     // Hide the progress bar
     progressBar.style.display = 'none';
-    const data = JSON.parse(this.response);
+    const data = JSON.parse(res.response);
     const symbols = data.symbols.map(symbol => symbol.symbol);
     
     const tickerDropdown = document.querySelector('#tickerDropdown');
