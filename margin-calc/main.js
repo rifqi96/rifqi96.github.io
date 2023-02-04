@@ -27,9 +27,6 @@ function bootstrap() {
 // Use above API to fetch the data, use the "assets.symbol" property
 // Put the list in the #tickerDropdown with following format <a href="#">{{symbol}}</a>
 function fetchTickersList() {
-  const request = new XMLHttpRequest();
-  request.open('GET', 'https://fapi.binance.com/fapi/v1/exchangeInfo', true);
-
   // Show the progress bar
   const progressBar = document.querySelector('.progress');
   progressBar.style.display = 'block';
@@ -37,45 +34,64 @@ function fetchTickersList() {
   // aria-valuenow is used by screen readers
   progressBar.setAttribute('aria-valuenow', '0');
 
-  request.onprogress = function (event) {
+  // Create a new request
+  const request = new XMLHttpRequest();
+  // Open a new connection, using the GET request on the URL endpoint
+  request.open('GET', 'https://fapi.binance.com/fapi/v1/exchangeInfo', true);
+  // Handle progress
+  request.onprogress = handleOnProgress;
+  // Handle successful request
+  request.onload = handleOnLoad;
+  // Handle network error
+  request.onerror = handleError;
+
+  function handleOnProgress(event) {
     if (event.lengthComputable) {
       // Update the progress bar width percentage based on the loaded data
       const percentComplete = (event.loaded / event.total) * 100;
       progressBar.style.width = `${percentComplete}%`;
       progressBar.setAttribute('aria-valuenow', percentComplete);
     }
-  };
-
-  request.onload = function() {
+  }
+  
+  function handleOnLoad() {
     if (this.status >= 200 && this.status < 400) {
       // Successful request
-
-      // Hide the fetching text
-      const fetchingText = document.querySelector('.fetching-text');
-      fetchingText.style.display = 'none';
-      // Hide the progress bar
-      progressBar.style.display = 'none';
-      const data = JSON.parse(this.response);
-      const symbols = data.symbols.map(symbol => symbol.symbol);
-      
-      const tickerDropdown = document.querySelector('#tickerDropdown');
-      symbols.forEach(symbol => {
-        const option = document.createElement('a');
-        option.className = 'ticker';
-        option.href = '#';
-        option.text = symbol;
-        tickerDropdown.appendChild(option);
-      });
+      handleSuccess();
     } else {
-      // Handle error
-      console.log ('Failed to load the data');
-      // Change fetching text to error text
-      const fetchingText = document.querySelector('.fetching-text');
-      fetchingText.textContent = 'Failed to load the data';
-      // Give error text a bootstrap error class
-      fetchingText.classList.add('text-danger');
+      // We reached our target server, but it returned an error
+      handleError();
     }
-  };
+  }
+
+  function handleSuccess() {
+    // Hide the fetching text
+    const fetchingText = document.querySelector('.fetching-text');
+    fetchingText.style.display = 'none';
+    // Hide the progress bar
+    progressBar.style.display = 'none';
+    const data = JSON.parse(this.response);
+    const symbols = data.symbols.map(symbol => symbol.symbol);
+    
+    const tickerDropdown = document.querySelector('#tickerDropdown');
+    symbols.forEach(symbol => {
+      const option = document.createElement('a');
+      option.className = 'ticker';
+      option.href = '#';
+      option.text = symbol;
+      tickerDropdown.appendChild(option);
+    });
+  }
+
+  function handleError(error) {
+    // Handle error
+    console.log ('Failed to load the data', error);
+    // Change fetching text to error text
+    const fetchingText = document.querySelector('.fetching-text');
+    fetchingText.textContent = 'Failed to load the data';
+    // Give error text a bootstrap error class
+    fetchingText.classList.add('text-danger');
+  }
 
   request.send();
 }
@@ -142,6 +158,7 @@ function tickersDropdownBootstrap() {
   });
 }
 
+// https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
   text += `, ${apiSecret}`;
   copyTextToClipboard(text);
@@ -165,6 +182,7 @@ function copyTextToClipboard(text) {
   document.body.removeChild(textArea);
 }
 
+// https://www.w3schools.com/howto/howto_js_filter_lists.asp
 function filterFunction() {
   var input, filter, ul, li, a, i;
   input = document.getElementById("ticker");
@@ -180,6 +198,7 @@ function filterFunction() {
   }
 }
 
+// The main calculate function
 function calculate() {
   const stopLossPercent = document.getElementById("stop-loss-percent").value;
   const stopLossDollar = document.getElementById("stop-loss-dollar").value;
