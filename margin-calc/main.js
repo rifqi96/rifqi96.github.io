@@ -6,7 +6,7 @@ let slot = 0;
 let apiSecret = '';
 let text = '';
 let position = 'POSITION';
-let rr = 3;
+let rr = 4;
 
 console.log('Hello from main.js');
 
