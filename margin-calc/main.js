@@ -69,6 +69,11 @@ function fetchTickersList() {
     } else {
       // Handle error
       console.log ('Failed to load the data');
+      // Change fetching text to error text
+      const fetchingText = document.querySelector('.fetching-text');
+      fetchingText.textContent = 'Failed to load the data';
+      // Give error text a bootstrap error class
+      fetchingText.classList.add('text-danger');
     }
   };
 
