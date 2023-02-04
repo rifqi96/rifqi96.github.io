@@ -2,6 +2,7 @@
 // This file is called from index.html
 
 // Global variables
+let slot = 0;
 let apiSecret = '';
 let text = '';
 let position = 'POSITION';
@@ -18,7 +19,19 @@ function bootstrap() {
     password = prompt("Please enter the password to access this page:");
   }
 
-  apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
+  // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
+  // Else the app will use the api secret key and the slot that the user entered
+  slot = prompt("Please enter your slot number (optional):");
+  if (!slot) {
+    slot = 3;
+  } else {
+    
+  }
+  apiSecret = prompt("Please enter your API secret key (optional):");
+  if (!apiSecret) {
+    apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
+  }
+  
   fetchTickersList();
 
   tickersDropdownBootstrap();
@@ -263,7 +276,7 @@ function calculate(event) {
     // Get pair from the ticker input.
     // Else if the ticker input is empty, use the word 'PAIR'
     const pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
-    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, 3`;
+    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, ${slot}`;
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
