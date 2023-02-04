@@ -6,6 +6,10 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <!-- Import main.js -->
+  <script src="main.js"></script>
+  <!-- Import style.css -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -28,6 +32,22 @@
           onkeyup="calculate()">
       </div>
       <div class="form-group">
+        <!-- Searchable dropdown component -->
+        <!-- https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
+        <label for="ticker">Ticker:</label>
+        <input type="text" class="form-control" id="ticker" placeholder="Enter the ticker" onkeyup="filterFunction()" onkeydown="calculate()">
+        <span class="fetching-text">Fetching data, please wait...</span>
+        <!-- Progress bar -->
+        <!-- https://www.w3schools.com/howto/howto_css_progressbar.asp -->
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated mt-4" role="progressbar" aria-valuenow="75"
+            aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
+        </div>
+        <div id="tickerDropdown" class="dropdown-content">
+          <!-- <a href="#">BTCUSDT</a> -->
+        </div>
+      </div>
+      <div class="form-group">
         <button type="button" class="btn btn-success" onclick="calculate()">Buy</button>
         <button type="button" class="btn btn-danger" onclick="calculate()">Sell</button>
       </div>
@@ -42,98 +62,6 @@
     <div id="error-message" class="text-danger" style="display: none;"></div>
     <div id="result" style="display: none;"></div>
   </div>
-  <script>
-    let password = prompt("Please enter the password to access this page:");
-    while (password !== "satuduatiga") {
-      alert("Wrong password! Please try again.");
-      password = prompt("Please enter the password to access this page:");
-    }
-
-    const apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
-    let text = '';
-
-    function copyToClipboard() {
-      text += `, ${apiSecret}`;
-      copyTextToClipboard(text);
-    }
-    // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-    function copyTextToClipboard(text) {
-      var textArea = document.createElement("textarea");
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
-        console.log('Copying text command was ' + msg);
-      } catch (err) {
-        console.log('Oops, unable to copy');
-      }
-
-      document.body.removeChild(textArea);
-    }
-
-    function calculate() {
-      const stopLossPercent = document.getElementById("stop-loss-percent").value;
-      const stopLossDollar = document.getElementById("stop-loss-dollar").value;
-      const leverage = document.getElementById("leverage").value;
-      let position = 'POSITION';
-      // Change the buy/sell button text to have biggger font size and bold when it's clicked.
-      // Change back to normal when the other button is clicked.
-      if (event.target.innerHTML === "Buy") {
-        event.target.innerHTML = "BUY";
-        event.target.style.fontSize = "20px";
-        event.target.style.fontWeight = "bold";
-        document.querySelector("button.btn-danger").innerHTML = "Sell";
-        document.querySelector("button.btn-danger").style.fontSize = "16px";
-        document.querySelector("button.btn-danger").style.fontWeight = "normal";
-        position = 'buy';
-        document.getElementById("trade-text").value = text;
-      } else if (event.target.innerHTML === "Sell") {
-        event.target.innerHTML = "SELL";
-        event.target.style.fontSize = "20px";
-        event.target.style.fontWeight = "bold";
-        document.querySelector("button.btn-success").innerHTML = "Buy";
-        document.querySelector("button.btn-success").style.fontSize = "16px";
-        document.querySelector("button.btn-success").style.fontWeight = "normal";
-        position = 'sell';
-        document.getElementById("trade-text").value = text;
-      }
-
-      if (!stopLossPercent || !stopLossDollar || !leverage) {
-        document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
-        document.getElementById("error-message").style.display = "block";
-        document.getElementById("result").style.display = "none";
-        text = '';
-        document.getElementById("trade-text").value = text;
-        return;
-      }
-      const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
-
-      if (deployedCapital < stopLossDollar) {
-        document.getElementById("error-message").innerHTML =
-          "Error: The deployed capital is lower than the stop loss dollar.";
-        document.getElementById("error-message").style.display = "block";
-        document.getElementById("result").style.display = "none";
-        text = '';
-        document.getElementById("trade-text").value = text;
-        // Disable copy to clipboard button when there's an error.
-        document.querySelector("button.copy-to-clipboard").disabled = true;
-      } else {
-        // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-        document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
-          " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        document.getElementById("result").style.display = "block";
-        document.getElementById("error-message").style.display = "none";
-        text = `PAIR(x${leverage}), ${position}, $${deployedCapital}, market|$${stopLossPercent * 4}%|${stopLossPercent}%, 3`;
-        document.getElementById("trade-text").value = text;
-        // Enable copy to clipboard button when there's no error.
-        document.querySelector("button.copy-to-clipboard").disabled = false;
-      }
-    }
-  </script>
 </body>
 
 </html>

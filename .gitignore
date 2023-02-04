@@ -88,3 +88,6 @@ target/
 *.avi
 *.mkv
 *.mp
+
+# Prompt file for CoPilot
+copilot-prompt.js
