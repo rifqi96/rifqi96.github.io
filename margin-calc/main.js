@@ -4,6 +4,7 @@
 // Global variables
 let apiSecret = '';
 let text = '';
+let position = 'POSITION';
 
 // On dom content loaded
 document.addEventListener('DOMContentLoaded', bootstrap);
@@ -20,7 +21,13 @@ function bootstrap() {
   apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
   fetchTickersList();
 
-  tickersDropdownBootstrap();;
+  tickersDropdownBootstrap();
+
+  // .buy and .sell button event listeners
+  const buyButton = document.querySelector('.buy');
+  buyButton.addEventListener('click', calculate);
+  const sellButton = document.querySelector('.sell');
+  sellButton.addEventListener('click', calculate);
 }
 
 // List of crypto currencies from binance futures API
@@ -202,29 +209,28 @@ function filterFunction() {
 }
 
 // The main calculate function
-function calculate() {
+function calculate(event) {
   const stopLossPercent = document.getElementById("stop-loss-percent").value;
   const stopLossDollar = document.getElementById("stop-loss-dollar").value;
   const leverage = document.getElementById("leverage").value;
-  let position = 'POSITION';
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
-  if (event.target.innerHTML === "Buy") {
+  if (event && event.target.innerHTML === "Buy") {
     event.target.innerHTML = "BUY";
     event.target.style.fontSize = "20px";
     event.target.style.fontWeight = "bold";
-    document.querySelector("button.btn-danger").innerHTML = "Sell";
-    document.querySelector("button.btn-danger").style.fontSize = "16px";
-    document.querySelector("button.btn-danger").style.fontWeight = "normal";
+    document.querySelector("button.sell").innerHTML = "Sell";
+    document.querySelector("button.sell").style.fontSize = "16px";
+    document.querySelector("button.sell").style.fontWeight = "normal";
     position = 'buy';
     document.getElementById("trade-text").value = text;
-  } else if (event.target.innerHTML === "Sell") {
+  } else if (event && event.target.innerHTML === "Sell") {
     event.target.innerHTML = "SELL";
     event.target.style.fontSize = "20px";
     event.target.style.fontWeight = "bold";
-    document.querySelector("button.btn-success").innerHTML = "Buy";
-    document.querySelector("button.btn-success").style.fontSize = "16px";
-    document.querySelector("button.btn-success").style.fontWeight = "normal";
+    document.querySelector("button.buy").innerHTML = "Buy";
+    document.querySelector("button.buy").style.fontSize = "16px";
+    document.querySelector("button.buy").style.fontWeight = "normal";
     position = 'sell';
     document.getElementById("trade-text").value = text;
   }
