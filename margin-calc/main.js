@@ -9,6 +9,7 @@ let text = '';
 document.addEventListener('DOMContentLoaded', bootstrap);
 
 
+// Bootstrap the app
 function bootstrap() {
   let password = prompt("Please enter the password to access this page:");
   while (password !== "satuduatiga") {
@@ -96,6 +97,7 @@ function fetchTickersList() {
   request.send();
 }
 
+// Bootstrap the tickers dropdown
 function tickersDropdownBootstrap() {
   // Make the dropdown list appear when the input is clicked and type something
   const ticker = document.querySelector('#ticker');
