@@ -6,6 +6,9 @@ let slot = 0;
 let apiSecret = '';
 let text = '';
 let position = 'POSITION';
+let rr = 3;
+
+console.log('Hello from main.js');
 
 // On dom content loaded
 document.addEventListener('DOMContentLoaded', bootstrap);
@@ -33,6 +36,14 @@ function bootstrap() {
   fetchTickersList();
 
   tickersDropdownBootstrap();
+
+  // Reward to risk ratio slider
+  const rrSlider = document.querySelector('#rr');
+  rrSlider.addEventListener('input', function() {
+    rr = rrSlider.value;
+    document.querySelector('#rr-value').textContent = rr;
+    calculate();
+  });
 
   // .buy and .sell button event listeners
   const buyButton = document.querySelector('.buy');
@@ -274,7 +285,9 @@ function calculate(event) {
     // Get pair from the ticker input.
     // Else if the ticker input is empty, use the word 'PAIR'
     const pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
-    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${stopLossPercent * 4}%|${stopLossPercent}%, ${slot}`;
+    const rewardPercent = stopLossPercent * rr;
+    console.log(rewardPercent, stopLossPercent, rr);
+    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%, ${slot}`;
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
