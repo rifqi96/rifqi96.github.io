@@ -24,8 +24,6 @@ function bootstrap() {
   slot = prompt("Please enter your slot number (optional):");
   if (!slot) {
     slot = 3;
-  } else {
-    
   }
   apiSecret = prompt("Please enter your API secret key (optional):");
   if (!apiSecret) {
