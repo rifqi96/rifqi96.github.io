@@ -10,6 +10,8 @@
   <script src="main.js"></script>
   <!-- Import style.css -->
   <link rel="stylesheet" href="style.css">
+  <!-- Tradingview js -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
 
 <body>
@@ -60,6 +62,18 @@
         <button type="button" class="btn btn-primary send-order ml-2" disabled>Send order</button>
         <!-- Close trade -->
         <button type="button" class="btn btn-outline-danger close-trade ml-2" disabled>Close trade</button>
+      </div>
+      <div class="form-group">
+        <!-- Collapsible component that shows a tradingview embed chart -->
+        <!-- https://www.w3schools.com/howto/howto_js_collapsible.asp -->
+        <button type="button" class="btn btn-primary collapse-toggle-btn" data-toggle="collapse" data-target="#chart">Show chart</button>
+        <div class="collapse">
+          <!-- TradingView Widget BEGIN -->
+          <div id="chart" class="tradingview-widget-container">
+            <div id="tradingview_5e9ab"></div>
+          </div>
+          <!-- TradingView Widget END -->
+        </div>
       </div>
       <div class="form-group">
         <label for="trade-text">Use the following text to open a trade:</label>

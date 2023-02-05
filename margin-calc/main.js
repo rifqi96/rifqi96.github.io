@@ -37,6 +37,25 @@ function bootstrap() {
 
   tickersDropdownBootstrap();
 
+  // Add collapsible function to the collapsible elements
+  // Toggle .collapse-toggle-button text with Show/hide
+  const collapsibleElements = document.querySelectorAll('.collapsible');
+  collapsibleElements.forEach(collapsible => {
+    collapsible.addEventListener('click', function() {
+      this.classList.toggle('active');
+      const content = this.nextElementSibling;
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        this.querySelector('.collapse-toggle-button').textContent = 'Show';
+      } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        this.querySelector('.collapse-toggle-button').textContent = 'Hide';
+      }
+    });
+  });
+
+  tradingviewChartBootstrap();
+
   // Reward to risk ratio slider
   const rrSlider = document.querySelector('#rr');
   rrSlider.addEventListener('input', function() {
@@ -58,6 +77,27 @@ function bootstrap() {
   // .close-trade button event listener
   const closeTradeBtn = document.querySelector('.close-trade');
   closeTradeBtn.addEventListener('click', closeTrade);
+}
+
+function tradingviewChartBootstrap(pair = null) {
+  const tvPair = pair ? pair : 'BTCUSDT';
+  new TradingView.widget(
+    {
+      "autosize": true,
+      "symbol": `BINANCE:${tvPair}PERP`,
+      "interval": "1",
+      "timezone": "Asia/Jakarta",
+      "theme": "dark",
+      "style": "1",
+      "locale": "en",
+      "toolbar_bg": "#f1f3f6",
+      "enable_publishing": false,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "save_image": false,
+      "container_id": "tradingview_5e9ab"
+    }
+  );
 }
 
 // List of crypto currencies from binance futures API
@@ -365,6 +405,7 @@ function calculate(event) {
     // Validate if the pair is not 'PAIR'
     if (pair !== 'PAIR') {
       document.querySelector("button.close-trade").disabled = false;
+      tradingviewChartBootstrap(pair);
     }
 
     // Enable the formReady flag when there's no error.
