@@ -7,6 +7,8 @@ let apiSecret = '';
 let text = '';
 let position = 'POSITION';
 let rr = 4;
+let formReady = false;
+let pair = 'PAIR';
 
 // On dom content loaded
 document.addEventListener('DOMContentLoaded', bootstrap);
@@ -48,6 +50,14 @@ function bootstrap() {
   buyButton.addEventListener('click', calculate);
   const sellButton = document.querySelector('.sell');
   sellButton.addEventListener('click', calculate);
+
+  // .send-order button event listener
+  const sendOrderBtn = document.querySelector('.send-order');
+  sendOrderBtn.addEventListener('click', sendOrder);
+
+  // .close-trade button event listener
+  const closeTradeBtn = document.querySelector('.close-trade');
+  closeTradeBtn.addEventListener('click', closeTrade);
 }
 
 // List of crypto currencies from binance futures API
@@ -188,6 +198,56 @@ function tickersDropdownBootstrap() {
   });
 }
 
+function sendOrder() {
+  if (!formReady) return;
+  const message = `${text}, ${slot}, ${apiSecret}`;
+
+  // Send a post request to https://aleeert.com/api/v1/
+  // with the message as the raw text body
+  // and the Content-Type header set to text/plain
+  // but before that, prompt the user to confirm the order with js dialog box
+  // and if the user confirms, send the request
+  // and if the user cancels, do nothing
+  const question = `You are about to send the following order to the server: ${message}. Are you sure?`;
+  if (confirm(question)) {
+    const request = new XMLHttpRequest();
+    request.open('POST', 'https://aleeert.com/api/v1/', true);
+    request.setRequestHeader('Content-Type', 'text/plain');
+    request.send(message);
+  }
+}
+
+function closeTrade() {
+  if (!formReady) return;
+  let closePercent = 100;
+
+  // prompt the user to fill in the close percent
+  // and if the user confirms, send the request
+  // and if the user cancels, do nothing
+  const question = 'Please enter the close percent:';
+  closePercent = prompt(question, closePercent);
+  // Close percent must be a number between 0 and 100
+  // Do nothing if the user cancels
+  // Validate in one line
+  if (closePercent === null || closePercent === '' || isNaN(closePercent) || closePercent < 0 || closePercent > 100) return;
+  
+  const message = `${pair}, close, ${closePercent}%, -, ${slot}, ${apiSecret}`;
+
+  // Send a post request to https://aleeert.com/api/v1/
+  // with the message as the raw text body
+  // and the Content-Type header set to text/plain
+  // but before that, prompt the user to confirm the order with js dialog box
+  // and if the user confirms, send the request
+  // and if the user cancels, do nothing
+  const question2 = `You are about to send the following order to the server: ${message}. Are you sure?`;
+  if (confirm(question2)) {
+    const request = new XMLHttpRequest();
+    request.open('POST', 'https://aleeert.com/api/v1/', true);
+    request.setRequestHeader('Content-Type', 'text/plain');
+    request.send(message);
+  }
+}
+
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
   text += `${slot}, ${apiSecret}`;
@@ -261,6 +321,9 @@ function calculate(event) {
     document.getElementById("result").style.display = "none";
     text = '';
     document.getElementById("trade-text").value = text;
+    // Disable send order button when there's an error.
+    document.querySelector("button.send-order").disabled = true;
+    formReady = false;
     return;
   }
   const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
@@ -274,6 +337,11 @@ function calculate(event) {
     document.getElementById("trade-text").value = text;
     // Disable copy to clipboard button when there's an error.
     document.querySelector("button.copy-to-clipboard").disabled = true;
+    // Disable send order button when there's an error.
+    document.querySelector("button.send-order").disabled = true;
+    // Disable close trade button when there's an error.
+    document.querySelector("button.close-trade").disabled = true;
+    formReady = false;
   } else {
     // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
     document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
@@ -282,12 +350,30 @@ function calculate(event) {
     document.getElementById("error-message").style.display = "none";
     // Get pair from the ticker input.
     // Else if the ticker input is empty, use the word 'PAIR'
-    const pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
+    pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
-    console.log(rewardPercent, stopLossPercent, rr);
     text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
+    // Enable send order button when there's no error.
+    // But validate if the position is set to either buy or sell.
+    if (position === 'buy' || position === 'sell') {
+      document.querySelector("button.send-order").disabled = false;
+    }
+    // Enable close position button when there's no error.
+    // Validate if the pair is not 'PAIR'
+    if (pair !== 'PAIR') {
+      document.querySelector("button.close-trade").disabled = false;
+    }
+
+    // Enable the formReady flag when there's no error.
+    // This is used to validate if the form is ready to be submitted to the server.
+    // Pair and position are required fields.
+    // Pair is validated by the ticker input and position is validated by the buy/sell button.
+    // Pair can't be "PAIR" and position can't be "POSITION"
+    if (pair !== 'PAIR' && (position === 'buy' || position === 'sell')) {
+      formReady = true;
+    }
   }
 }
