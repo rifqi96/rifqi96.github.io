@@ -8,8 +8,6 @@ let text = '';
 let position = 'POSITION';
 let rr = 4;
 
-console.log('Hello from main.js');
-
 // On dom content loaded
 document.addEventListener('DOMContentLoaded', bootstrap);
 
@@ -192,7 +190,7 @@ function tickersDropdownBootstrap() {
 
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
-  text += `, ${apiSecret}`;
+  text += `${slot}, ${apiSecret}`;
   copyTextToClipboard(text);
 }
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
@@ -287,7 +285,7 @@ function calculate(event) {
     const pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
     console.log(rewardPercent, stopLossPercent, rr);
-    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%, ${slot}`;
+    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
