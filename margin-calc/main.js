@@ -436,7 +436,7 @@ function filterFunction() {
 }
 
 function generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage) {
-  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
+  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent.toFixed(2)}%|${stopLossPercent.toFixed(2)}%`;
 }
 
 // The main calculate function
