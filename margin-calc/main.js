@@ -323,7 +323,7 @@ function sendOrder() {
         messages[i][j] = `${messages[i][j]}, ${slot}, ${apiSecret}`;
       }
 
-      const question = `You are about to send the following order to the server: ${messages[i]}. Are you sure?`;
+      const question = `Order #${i + 1}: You are about to send the following order to the server: ${messages[i]}. Are you sure?`;
       if (confirm(question)) {
         const request = new XMLHttpRequest();
         request.open('POST', 'https://aleeert.com/api/v1/', true);
@@ -367,12 +367,12 @@ function closeTrade() {
 
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
-  text = generateText();
+  text = generateText(true);
   
   copyTextToClipboard(text);
 }
 
-function generateText() {
+function generateText(showSecret = false) {
   // Check if orders array is not empty
   // Loop through and combine the slot and apiSecret with the orders
   // and copy the combined text to the clipboard
@@ -380,14 +380,22 @@ function generateText() {
   if (orders.length > 0) {
     for (let i = 0; i < orders.length; i++) {
       for (let j = 0; j < orders[i].length; j++) {
-        orderText += `${orders[i][j]}, ${slot}, ${apiSecret}\n`;
+        if (showSecret) {
+          orderText += `${orders[i][j]}, ${slot}, ${apiSecret}\n`;
+        } else {
+          orderText += `${orders[i][j]}\n`;
+        }
         if ((j + 1) % maxCommands === 0) {
           orderText += '\n';
         }
       }
     }
   } else {
-    orderText = `${text}, ${slot}, ${apiSecret}`;
+    if (showSecret) {
+      orderText = `${text}, ${slot}, ${apiSecret}`;
+    } else {
+      orderText = text;
+    }
   }
   return orderText;
 }
