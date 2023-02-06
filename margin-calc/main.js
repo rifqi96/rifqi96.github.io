@@ -9,6 +9,13 @@ let position = 'POSITION';
 let rr = 4;
 let formReady = false;
 let pair = 'PAIR';
+let pairPrice = 0;
+let socket;
+let symbolsData;
+let leverage;
+let price;
+let orders = [];
+const maxCommands = 3;
 
 // On dom content loaded
 document.addEventListener('DOMContentLoaded', bootstrap);
@@ -39,22 +46,22 @@ function bootstrap() {
 
   // Add collapsible function to the collapsible elements
   // Toggle .collapse-toggle-button text with Show/hide
-  const collapsibleElements = document.querySelectorAll('.collapsible');
-  collapsibleElements.forEach(collapsible => {
-    collapsible.addEventListener('click', function() {
-      this.classList.toggle('active');
-      const content = this.nextElementSibling;
-      if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        this.querySelector('.collapse-toggle-button').textContent = 'Show';
-      } else {
-        content.style.maxHeight = content.scrollHeight + 'px';
-        this.querySelector('.collapse-toggle-button').textContent = 'Hide';
-      }
-    });
-  });
+  // const collapsibleElements = document.querySelectorAll('.collapsible');
+  // collapsibleElements.forEach(collapsible => {
+  //   collapsible.addEventListener('click', function() {
+  //     this.classList.toggle('active');
+  //     const content = this.nextElementSibling;
+  //     if (content.style.maxHeight) {
+  //       content.style.maxHeight = null;
+  //       this.querySelector('.collapse-toggle-button').textContent = 'Show';
+  //     } else {
+  //       content.style.maxHeight = content.scrollHeight + 'px';
+  //       this.querySelector('.collapse-toggle-button').textContent = 'Hide';
+  //     }
+  //   });
+  // });
 
-  tradingviewChartBootstrap();
+  // tradingviewChartBootstrap();
 
   // Reward to risk ratio slider
   const rrSlider = document.querySelector('#rr');
@@ -150,7 +157,8 @@ function fetchTickersList() {
     // Hide the progress bar
     progressBar.style.display = 'none';
     const data = JSON.parse(res.response);
-    const symbols = data.symbols.map(symbol => symbol.symbol);
+    symbolsData = data.symbols;
+    const symbols = symbolsData.map(symbol => symbol.symbol);
     
     const tickerDropdown = document.querySelector('#tickerDropdown');
     symbols.forEach(symbol => {
@@ -173,6 +181,60 @@ function fetchTickersList() {
   }
 
   request.send();
+}
+
+// Watch the price of the selected symbol
+function watchPrice(symbol) {
+  console.log('watchPrice', symbol);
+  if (socket) {
+    socket.close();
+  }
+  socket = new WebSocket(`wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`);
+  console.log('socket', socket);
+
+  socket.onclose = function(event) {
+    console.log('event onclose', event);
+  };
+
+  socket.onerror = function(event) {
+    console.log('event onerror', event);
+  };
+
+  socket.onopen = function(event) {
+    console.log('event onopen', event);
+  };
+
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    price = data.c;
+    // Update .current-price-value
+    const currentPriceValue = document.querySelector('.current-price-value');
+    currentPriceValue.textContent = price;
+  };
+}
+
+// Get min and max MARKET_LOT_SIZE of the symbol
+// The MARKET_LOT_SIZE is from the tickers list
+function getMinMaxLotSize(symbol) {
+  const symbolData = symbolsData.find(symbolData => symbolData.symbol === symbol);
+  const filters = symbolData.filters;
+  const marketLotSize = filters.find(filter => filter.filterType === 'MARKET_LOT_SIZE');
+  const minQty = marketLotSize.minQty;
+  const maxQty = marketLotSize.maxQty;
+  return { minQty, maxQty };
+}
+
+function getOrderLotSize(price, leverage) {
+  const orderLotSize = price * leverage;
+  return orderLotSize;
+}
+
+function isEligibleForMinLotSize(orderLotSize, minQty) {
+  return orderLotSize >= minQty;
+}
+
+function isEligibleForMaxLotSize(orderLotSize, maxQty) {
+  return orderLotSize <= maxQty;
 }
 
 // Bootstrap the tickers dropdown
@@ -198,6 +260,7 @@ function tickersDropdownBootstrap() {
     const ticker = event.target;
     if (ticker.classList.contains('ticker')) {
       document.getElementById("ticker").value = ticker.text;
+      watchPrice(ticker.text);
       calculate();
     }
   });
@@ -232,6 +295,7 @@ function tickersDropdownBootstrap() {
     } else if (event.key === 'Enter') {
       if (activeItem) {
         document.getElementById("ticker").value = activeItem.text;
+        watchPrice(activeItem.text);
         calculate();
       }
     }
@@ -240,7 +304,8 @@ function tickersDropdownBootstrap() {
 
 function sendOrder() {
   if (!formReady) return;
-  const message = `${text}, ${slot}, ${apiSecret}`;
+
+  const messages = [];
 
   // Send a post request to https://aleeert.com/api/v1/
   // with the message as the raw text body
@@ -248,12 +313,24 @@ function sendOrder() {
   // but before that, prompt the user to confirm the order with js dialog box
   // and if the user confirms, send the request
   // and if the user cancels, do nothing
-  const question = `You are about to send the following order to the server: ${message}. Are you sure?`;
-  if (confirm(question)) {
-    const request = new XMLHttpRequest();
-    request.open('POST', 'https://aleeert.com/api/v1/', true);
-    request.setRequestHeader('Content-Type', 'text/plain');
-    request.send(message);
+  // Loop through the orders and add them to the messages array
+  if (orders.length > 0) {
+    // Put in slot and apiSecret to the string in the orders array
+    for (let i = 0; i < orders.length; i++) {
+      messages.push(orders[i]);
+
+      for (let j = 0; j < orders[i].length; j++) {
+        messages[i][j] = `${messages[i][j]}, ${slot}, ${apiSecret}`;
+      }
+
+      const question = `You are about to send the following order to the server: ${messages[i]}. Are you sure?`;
+      if (confirm(question)) {
+        const request = new XMLHttpRequest();
+        request.open('POST', 'https://aleeert.com/api/v1/', true);
+        request.setRequestHeader('Content-Type', 'text/plain');
+        request.send(messages[i].join('\n'));
+      }
+    }
   }
 }
 
@@ -290,9 +367,31 @@ function closeTrade() {
 
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
-  text += `${slot}, ${apiSecret}`;
+  text = generateText();
+  
   copyTextToClipboard(text);
 }
+
+function generateText() {
+  // Check if orders array is not empty
+  // Loop through and combine the slot and apiSecret with the orders
+  // and copy the combined text to the clipboard
+  let orderText = '';
+  if (orders.length > 0) {
+    for (let i = 0; i < orders.length; i++) {
+      for (let j = 0; j < orders[i].length; j++) {
+        orderText += `${orders[i][j]}, ${slot}, ${apiSecret}\n`;
+        if ((j + 1) % maxCommands === 0) {
+          orderText += '\n';
+        }
+      }
+    }
+  } else {
+    orderText = `${text}, ${slot}, ${apiSecret}`;
+  }
+  return orderText;
+}
+
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyTextToClipboard(text) {
   var textArea = document.createElement("textarea");
@@ -328,11 +427,15 @@ function filterFunction() {
   }
 }
 
+function generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage) {
+  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
+}
+
 // The main calculate function
 function calculate(event) {
   const stopLossPercent = document.getElementById("stop-loss-percent").value;
   const stopLossDollar = document.getElementById("stop-loss-dollar").value;
-  const leverage = document.getElementById("leverage").value;
+  leverage = document.getElementById("leverage").value;
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
   if (event && event.target.innerHTML === "Buy") {
@@ -355,7 +458,7 @@ function calculate(event) {
     document.getElementById("trade-text").value = text;
   }
 
-  if (!stopLossPercent || !stopLossDollar || !leverage) {
+  if (!stopLossPercent || !stopLossDollar || !leverage || isNaN(stopLossPercent) || isNaN(stopLossDollar) || isNaN(leverage)) {
     document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
@@ -392,20 +495,26 @@ function calculate(event) {
     // Else if the ticker input is empty, use the word 'PAIR'
     pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
-    text = `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
+    text = generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage);
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
     // Enable send order button when there's no error.
     // But validate if the position is set to either buy or sell.
     if (position === 'buy' || position === 'sell') {
-      document.querySelector("button.send-order").disabled = false;
+      // If the order size is less than minimum order size, disable the send order button.
+      const minimumOrderSize = getMinMaxLotSize(pair, 'min').minQty;
+      if (deployedCapital * leverage < minimumOrderSize) {
+        document.querySelector("button.send-order").disabled = true;
+      } else {
+        document.querySelector("button.send-order").disabled = false;
+      }
     }
     // Enable close position button when there's no error.
     // Validate if the pair is not 'PAIR'
     if (pair !== 'PAIR') {
       document.querySelector("button.close-trade").disabled = false;
-      tradingviewChartBootstrap(pair);
+      // tradingviewChartBootstrap(pair);
     }
 
     // Enable the formReady flag when there's no error.
@@ -414,7 +523,62 @@ function calculate(event) {
     // Pair is validated by the ticker input and position is validated by the buy/sell button.
     // Pair can't be "PAIR" and position can't be "POSITION"
     if (pair !== 'PAIR' && (position === 'buy' || position === 'sell')) {
+      // The order size can't be greater than the maximum order size.
+      // If it is, it can be split into multiple orders.
+      // Split the order size into multiple orders if it's greater than the maximum order size.
+      const maximumOrderSize = getMinMaxLotSize(pair, 'max').maxQty;
+      // Split the deployedCapital size into multiple orders.
+      // The order size can't be greater than the maximum order size.
+      // Loop through the deployedCapital size and split it into multiple orders.
+      // Then push each order into the orders array.
+      // An order is a text using generateCommand()
+      let orderSize = deployedCapital * leverage;
+      let maximumOrderSizeInDollar = maximumOrderSize * price;
+      orders = [];
+      console.log('maximumOrderSizeInDollar: ' + maximumOrderSizeInDollar);
+      while (orderSize > maximumOrderSizeInDollar) {
+        orderSize -= maximumOrderSizeInDollar;
+        const command = generateCommand(pair, position, maximumOrderSizeInDollar / leverage, rewardPercent, stopLossPercent, leverage);
+        orders.push(command);
+      }
+      // Push the remaining order size into the orders array.
+      // Check if n is lower than maxCommands const.
+      // If it is, push the order into the current array.
+      // Else, push the order into the next array.
+      if (orderSize > 0) {
+        const command = generateCommand(pair, position, orderSize / leverage, rewardPercent, stopLossPercent, leverage);
+        orders.push(command);
+      }
+
+      // Change the orders array structure into 2D array.
+      // Each array contains maxCommands items.
+      const orders2D = [];
+      let n = 0;
+      let i = 0;
+      orders.forEach((order) => {
+        if (n === 0) {
+          orders2D.push([]);
+        }
+        orders2D[i].push(order);
+        n++;
+        if (n === maxCommands) {
+          n = 0;
+          i++;
+        }
+      });
+      orders = orders2D;
+
+      // Print the orders array to the textarea.
+      // The textarea is used to display the orders.
+      // The textarea is also used to copy the orders to the clipboard.
+      // The textarea is also used to send the orders to the server.
+      // Each order is separated by a new line.
+      // Max command per request is defined in maxCommands const.
+      // Add more new lines per max commands.
+      const orderText = generateText();
+      document.getElementById("trade-text").value = orderText;
       formReady = true;
+      
     }
   }
 }
