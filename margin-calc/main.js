@@ -320,7 +320,12 @@ function sendOrder() {
       messages.push(orders[i]);
 
       for (let j = 0; j < orders[i].length; j++) {
-        messages[i][j] = `${messages[i][j]}, ${slot}, ${apiSecret}`;
+        // Check if slot and apiSecret are already in the string
+        // Combine slot and apiSecret with a comma and a space first before checking
+        if (orders[i][j].indexOf(`${slot}, ${apiSecret}`) === -1) {
+          // If slot and apiSecret are not in the string, add them
+          messages[i][j] = `${orders[i][j]}, ${slot}, ${apiSecret}`;
+        }
       }
 
       const question = `Order #${i + 1}: You are about to send the following order to the server: ${messages[i]}. Are you sure?`;
@@ -439,6 +444,8 @@ function generateCommand(pair, position, deployedCapital, rewardPercent, stopLos
   // Round the reward and stop loss percent to 2 decimal places
   rewardPercent = Math.round(rewardPercent * 100) / 100;
   stopLossPercent = Math.round(stopLossPercent * 100) / 100;
+  // Round the deployed capital to without decimal places
+  deployedCapital = Math.round(deployedCapital);
   return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
 }
 
