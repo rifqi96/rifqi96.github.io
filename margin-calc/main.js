@@ -33,7 +33,7 @@ function bootstrap() {
   // Else the app will use the api secret key and the slot that the user entered
   slot = prompt("Please enter your slot number (optional):");
   if (!slot) {
-    slot = 3;
+    slot = 5;
   }
   apiSecret = prompt("Please enter your API secret key (optional):");
   if (!apiSecret) {
@@ -476,7 +476,7 @@ function calculate(event) {
     document.getElementById("trade-text").value = text;
   }
 
-  if (!stopLossPercent || !stopLossDollar || !leverage || isNaN(stopLossPercent) || isNaN(stopLossDollar) || isNaN(leverage)) {
+  if (!stopLossPercent || !stopLossDollar || !leverage || isNaN(stopLossPercent) || isNaN(stopLossDollar) || isNaN(leverage) || stopLossPercent === '' || stopLossDollar === '' || leverage === '' || stopLossPercent <= 0 || stopLossDollar <= 0 || leverage <= 0) {
     document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
