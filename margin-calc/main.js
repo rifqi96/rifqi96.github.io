@@ -33,7 +33,7 @@ function bootstrap() {
   // Else the app will use the api secret key and the slot that the user entered
   slot = prompt("Please enter your slot number (optional):");
   if (!slot) {
-    slot = 5;
+    slot = 7;
   }
   apiSecret = prompt("Please enter your API secret key (optional):");
   if (!apiSecret) {
