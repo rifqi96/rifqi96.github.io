@@ -19,6 +19,13 @@
     <h1 class="text-center">Margin Calculator</h1>
     <form>
       <div class="form-group">
+        <label for="mode">Trading Mode:</label>
+        <select class="form-control" id="mode" onchange="calculate()">
+          <option value="one-way">One-way</option>
+          <option value="hedge" selected>Hedge</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label for="stop-loss-percent">Stop Loss Percentage:</label>
         <input type="number" step="0.01" class="form-control" id="stop-loss-percent" placeholder="Enter the stop loss percentage"
           onkeyup="calculate()">

@@ -6,6 +6,7 @@ let slot = 0;
 let apiSecret = '';
 let text = '';
 let position = 'POSITION';
+let positionCmd = 'POSITION';
 let rr = 4;
 let formReady = false;
 let pair = 'PAIR';
@@ -15,6 +16,7 @@ let symbolsData;
 let leverage;
 let price;
 let orders = [];
+let mode = 'hedge'; // one-way or hedge
 const maxCommands = 3;
 
 // On dom content loaded
@@ -62,6 +64,13 @@ function bootstrap() {
   // });
 
   // tradingviewChartBootstrap();
+
+  // Trading mode -- dropdown
+  const tradingMode = document.querySelector('#mode');
+  tradingMode.addEventListener('change', function() {
+    mode = tradingMode.value;
+    calculate();
+  });
 
   // Reward to risk ratio slider
   const rrSlider = document.querySelector('#rr');
@@ -352,8 +361,13 @@ function closeTrade() {
   // Do nothing if the user cancels
   // Validate in one line
   if (closePercent === null || closePercent === '' || isNaN(closePercent) || closePercent < 0 || closePercent > 100) return;
+
+  let closeCmd = 'close';
+  if (mode === 'hedge') {
+    closeCmd = 'close_h';
+  }
   
-  const message = `${pair}, close, ${closePercent}%, -, ${slot}, ${apiSecret}`;
+  const message = `${pair}, ${closeCmd}, ${closePercent}%, -, ${slot}, ${apiSecret}`;
 
   // Send a post request to https://aleeert.com/api/v1/
   // with the message as the raw text body
@@ -372,9 +386,9 @@ function closeTrade() {
 
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
-  text = generateText(true);
+  const generatedText = generateText(true);
   
-  copyTextToClipboard(text);
+  copyTextToClipboard(generatedText);
 }
 
 function generateText(showSecret = false) {
@@ -382,6 +396,7 @@ function generateText(showSecret = false) {
   // Loop through and combine the slot and apiSecret with the orders
   // and copy the combined text to the clipboard
   let orderText = '';
+  // Check if orders array is not empty
   if (orders.length > 0) {
     for (let i = 0; i < orders.length; i++) {
       for (let j = 0; j < orders[i].length; j++) {
@@ -395,7 +410,9 @@ function generateText(showSecret = false) {
         }
       }
     }
-  } else {
+  }
+  // If orders array is empty, use the text variable
+  else {
     if (showSecret) {
       orderText = `${text}, ${slot}, ${apiSecret}`;
     } else {
@@ -464,6 +481,12 @@ function calculate(event) {
     document.querySelector("button.sell").style.fontSize = "16px";
     document.querySelector("button.sell").style.fontWeight = "normal";
     position = 'buy';
+    // Check the hedge mode
+    if (mode === 'hedge') {
+      positionCmd = 'openlong';
+    } else {
+      positionCmd = 'buy';
+    }
     document.getElementById("trade-text").value = text;
   } else if (event && event.target.innerHTML === "Sell") {
     event.target.innerHTML = "SELL";
@@ -473,6 +496,12 @@ function calculate(event) {
     document.querySelector("button.buy").style.fontSize = "16px";
     document.querySelector("button.buy").style.fontWeight = "normal";
     position = 'sell';
+    // Check the hedge mode
+    if (mode === 'hedge') {
+      positionCmd = 'openshort';
+    } else {
+      positionCmd = 'sell';
+    }
     document.getElementById("trade-text").value = text;
   }
 
@@ -489,6 +518,7 @@ function calculate(event) {
   }
   const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
 
+  // If the deployed capital is lower than the stop loss dollar, show an error message.
   if (deployedCapital < stopLossDollar) {
     document.getElementById("error-message").innerHTML =
       "Error: The deployed capital is lower than the stop loss dollar.";
@@ -503,7 +533,9 @@ function calculate(event) {
     // Disable close trade button when there's an error.
     document.querySelector("button.close-trade").disabled = true;
     formReady = false;
-  } else {
+  }
+  // Show the result.
+  else {
     // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
     document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
       " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -513,7 +545,7 @@ function calculate(event) {
     // Else if the ticker input is empty, use the word 'PAIR'
     pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
-    text = generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage);
+    text = generateCommand(pair, positionCmd, deployedCapital, rewardPercent, stopLossPercent, leverage);
     document.getElementById("trade-text").value = text;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
@@ -556,7 +588,7 @@ function calculate(event) {
       console.log('maximumOrderSizeInDollar: ' + maximumOrderSizeInDollar);
       while (orderSize > maximumOrderSizeInDollar) {
         orderSize -= maximumOrderSizeInDollar;
-        const command = generateCommand(pair, position, maximumOrderSizeInDollar / leverage, rewardPercent, stopLossPercent, leverage);
+        const command = generateCommand(pair, positionCmd, maximumOrderSizeInDollar / leverage, rewardPercent, stopLossPercent, leverage);
         orders.push(command);
       }
       // Push the remaining order size into the orders array.
@@ -564,7 +596,7 @@ function calculate(event) {
       // If it is, push the order into the current array.
       // Else, push the order into the next array.
       if (orderSize > 0) {
-        const command = generateCommand(pair, position, orderSize / leverage, rewardPercent, stopLossPercent, leverage);
+        const command = generateCommand(pair, positionCmd, orderSize / leverage, rewardPercent, stopLossPercent, leverage);
         orders.push(command);
       }
 
