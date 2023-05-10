@@ -5,8 +5,11 @@
 let slot = 0;
 let apiSecret = '';
 let text = '';
+let beText = '';
 let position = 'POSITION';
 let positionCmd = 'POSITION';
+let positionH = '-';
+let tpsl = 'tpsl';
 let rr = 4;
 let formReady = false;
 let pair = 'PAIR';
@@ -225,12 +228,17 @@ function watchPrice(symbol) {
 // Get min and max MARKET_LOT_SIZE of the symbol
 // The MARKET_LOT_SIZE is from the tickers list
 function getMinMaxLotSize(symbol) {
-  const symbolData = symbolsData.find(symbolData => symbolData.symbol === symbol);
-  const filters = symbolData.filters;
-  const marketLotSize = filters.find(filter => filter.filterType === 'MARKET_LOT_SIZE');
-  const minQty = marketLotSize.minQty;
-  const maxQty = marketLotSize.maxQty;
-  return { minQty, maxQty };
+  try {
+    const symbolData = symbolsData.find(symbolData => symbolData.symbol === symbol);
+    const filters = symbolData.filters || [];
+    const marketLotSize = filters.find(filter => filter.filterType === 'MARKET_LOT_SIZE');
+    const minQty = marketLotSize.minQty;
+    const maxQty = marketLotSize.maxQty;
+    return { minQty, maxQty };
+  } catch (error) {
+    console.log('getMinMaxLotSize error', error);
+    return { minQty: 0, maxQty: 0 };
+  }
 }
 
 function getOrderLotSize(price, leverage) {
@@ -391,6 +399,12 @@ function copyToClipboard() {
   copyTextToClipboard(generatedText);
 }
 
+function copyBeToClipboard() {
+  const generatedText = generateBeText(true);
+  
+  copyTextToClipboard(generatedText);
+}
+
 function generateText(showSecret = false) {
   // Check if orders array is not empty
   // Loop through and combine the slot and apiSecret with the orders
@@ -418,6 +432,14 @@ function generateText(showSecret = false) {
     } else {
       orderText = text;
     }
+  }
+  return orderText;
+}
+
+function generateBeText(showSecret = false) {
+  let orderText = beText;
+  if (showSecret) {
+    orderText += `, ${slot}, ${apiSecret}`;
   }
   return orderText;
 }
@@ -458,12 +480,18 @@ function filterFunction() {
 }
 
 function generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage) {
+  console.log('generateCommand', pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage);
   // Round the reward and stop loss percent to 2 decimal places
   rewardPercent = Math.round(rewardPercent * 100) / 100;
   stopLossPercent = Math.round(stopLossPercent * 100) / 100;
   // Round the deployed capital to without decimal places
   deployedCapital = Math.round(deployedCapital);
   return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
+}
+
+function generateBeCommand(pair, tpsl, positionH) {
+  console.log('generateBeCommand', pair, tpsl, positionH);
+  return `${pair}, ${tpsl}, ${positionH}, - | 0%(100%)`;
 }
 
 // The main calculate function
@@ -484,10 +512,15 @@ function calculate(event) {
     // Check the hedge mode
     if (mode === 'hedge') {
       positionCmd = 'openlong';
+      positionH = 'long';
+      tpsl = 'tpsl_h';
     } else {
       positionCmd = 'buy';
+      positionH = '-';
+      tpsl = 'tpsl';
     }
     document.getElementById("trade-text").value = text;
+    document.getElementById("be-trade-text").value = beText;
   } else if (event && event.target.innerHTML === "Sell") {
     event.target.innerHTML = "SELL";
     event.target.style.fontSize = "20px";
@@ -499,10 +532,15 @@ function calculate(event) {
     // Check the hedge mode
     if (mode === 'hedge') {
       positionCmd = 'openshort';
+      positionH = 'short';
+      tpsl = 'tpsl_h';
     } else {
       positionCmd = 'sell';
+      positionH = '-';
+      tpsl = 'tpsl';
     }
     document.getElementById("trade-text").value = text;
+    document.getElementById("be-trade-text").value = beText;
   }
 
   if (!stopLossPercent || !stopLossDollar || !leverage || isNaN(stopLossPercent) || isNaN(stopLossDollar) || isNaN(leverage) || stopLossPercent === '' || stopLossDollar === '' || leverage === '' || stopLossPercent <= 0 || stopLossDollar <= 0 || leverage <= 0) {
@@ -510,7 +548,9 @@ function calculate(event) {
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
     text = '';
+    beText = '';
     document.getElementById("trade-text").value = text;
+    document.getElementById("be-trade-text").value = beText;
     // Disable send order button when there's an error.
     document.querySelector("button.send-order").disabled = true;
     formReady = false;
@@ -525,9 +565,12 @@ function calculate(event) {
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
     text = '';
+    beText = '';
     document.getElementById("trade-text").value = text;
+    document.getElementById("be-trade-text").value = beText;
     // Disable copy to clipboard button when there's an error.
     document.querySelector("button.copy-to-clipboard").disabled = true;
+    document.querySelector("button.copy-be-to-clipboard").disabled = true;
     // Disable send order button when there's an error.
     document.querySelector("button.send-order").disabled = true;
     // Disable close trade button when there's an error.
@@ -546,9 +589,12 @@ function calculate(event) {
     pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
     text = generateCommand(pair, positionCmd, deployedCapital, rewardPercent, stopLossPercent, leverage);
+    beText = generateBeCommand(pair, tpsl, positionH);
     document.getElementById("trade-text").value = text;
+    document.getElementById("be-trade-text").value = beText;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
+    document.querySelector("button.copy-be-to-clipboard").disabled = false;
     // Enable send order button when there's no error.
     // But validate if the position is set to either buy or sell.
     if (position === 'buy' || position === 'sell') {
@@ -626,7 +672,9 @@ function calculate(event) {
       // Max command per request is defined in maxCommands const.
       // Add more new lines per max commands.
       const orderText = generateText();
+      const beOrderText = generateBeText();
       document.getElementById("trade-text").value = orderText;
+      document.getElementById("be-trade-text").value = beOrderText;
       formReady = true;
       
     }
