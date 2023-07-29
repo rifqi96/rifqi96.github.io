@@ -5,9 +5,11 @@
 let slot = 0;
 let apiSecret = '';
 let text = '';
+let reduceText = '';
 let beText = '';
 let position = 'POSITION';
 let positionCmd = 'POSITION';
+let positionReduce = 'POSITION';
 let positionH = '-';
 let tpsl = 'tpsl';
 let rr = 4;
@@ -399,6 +401,12 @@ function copyToClipboard() {
   copyTextToClipboard(generatedText);
 }
 
+function copyReduceToClipboard()  {
+  const generatedText = generateReduceText(true);
+  
+  copyTextToClipboard(generatedText);
+}
+
 function copyBeToClipboard() {
   const generatedText = generateBeText(true);
   
@@ -432,6 +440,14 @@ function generateText(showSecret = false) {
     } else {
       orderText = text;
     }
+  }
+  return orderText;
+}
+
+function generateReduceText(showSecret = false) {
+  let orderText = reduceText;
+  if (showSecret) {
+    orderText += `, ${slot}, ${apiSecret}`;
   }
   return orderText;
 }
@@ -489,6 +505,11 @@ function generateCommand(pair, position, deployedCapital, rewardPercent, stopLos
   return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
 }
 
+function generateReduceCommand(pair, position, reduceAmount, leverage) {
+  console.log('generateReduceCommand', pair, position, reduceAmount, leverage);
+  return `${pair}(x${leverage}), ${position}, $${reduceAmount}, market`;
+}
+
 function generateBeCommand(pair, tpsl, positionH) {
   console.log('generateBeCommand', pair, tpsl, positionH);
   return `${pair}, ${tpsl}, ${positionH}, - | 0%(100%)`;
@@ -498,6 +519,7 @@ function generateBeCommand(pair, tpsl, positionH) {
 function calculate(event) {
   const stopLossPercent = document.getElementById("stop-loss-percent").value;
   const stopLossDollar = document.getElementById("stop-loss-dollar").value;
+  const reduceAmount = document.getElementById("reduce-trade-amount").value;
   leverage = document.getElementById("leverage").value;
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
@@ -512,14 +534,17 @@ function calculate(event) {
     // Check the hedge mode
     if (mode === 'hedge') {
       positionCmd = 'openlong';
+      positionReduce = 'closelong';
       positionH = 'long';
       tpsl = 'tpsl_h';
     } else {
       positionCmd = 'buy';
+      positionReduce = 'sell';
       positionH = '-';
       tpsl = 'tpsl';
     }
     document.getElementById("trade-text").value = text;
+    document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
   } else if (event && event.target.innerHTML === "Sell") {
     event.target.innerHTML = "SELL";
@@ -532,14 +557,17 @@ function calculate(event) {
     // Check the hedge mode
     if (mode === 'hedge') {
       positionCmd = 'openshort';
+      positionReduce = 'closeshort';
       positionH = 'short';
       tpsl = 'tpsl_h';
     } else {
       positionCmd = 'sell';
+      positionReduce = 'buy';
       positionH = '-';
       tpsl = 'tpsl';
     }
     document.getElementById("trade-text").value = text;
+    document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
   }
 
@@ -548,8 +576,10 @@ function calculate(event) {
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
     text = '';
+    reduceText = '';
     beText = '';
     document.getElementById("trade-text").value = text;
+    document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
     // Disable send order button when there's an error.
     document.querySelector("button.send-order").disabled = true;
@@ -565,11 +595,14 @@ function calculate(event) {
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
     text = '';
+    reduceText = '';
     beText = '';
     document.getElementById("trade-text").value = text;
+    document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
     // Disable copy to clipboard button when there's an error.
     document.querySelector("button.copy-to-clipboard").disabled = true;
+    document.querySelector("button.copy-reduce-to-clipboard").disabled = true;
     document.querySelector("button.copy-be-to-clipboard").disabled = true;
     // Disable send order button when there's an error.
     document.querySelector("button.send-order").disabled = true;
@@ -589,11 +622,14 @@ function calculate(event) {
     pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
     const rewardPercent = stopLossPercent * rr;
     text = generateCommand(pair, positionCmd, deployedCapital, rewardPercent, stopLossPercent, leverage);
+    reduceText = generateReduceCommand(pair, positionReduce, reduceAmount, leverage);
     beText = generateBeCommand(pair, tpsl, positionH);
     document.getElementById("trade-text").value = text;
+    document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
     // Enable copy to clipboard button when there's no error.
     document.querySelector("button.copy-to-clipboard").disabled = false;
+    document.querySelector("button.copy-reduce-to-clipboard").disabled = false;
     document.querySelector("button.copy-be-to-clipboard").disabled = false;
     // Enable send order button when there's no error.
     // But validate if the position is set to either buy or sell.
@@ -672,8 +708,10 @@ function calculate(event) {
       // Max command per request is defined in maxCommands const.
       // Add more new lines per max commands.
       const orderText = generateText();
+      const reduceOrderText = generateReduceText();
       const beOrderText = generateBeText();
       document.getElementById("trade-text").value = orderText;
+      document.getElementById("reduce-trade-text").value = reduceOrderText;
       document.getElementById("be-trade-text").value = beOrderText;
       formReady = true;
       

@@ -44,7 +44,7 @@
         <!-- Reward to risk ratio slider (rr). Default is 3. -->
         <!-- https://www.w3schools.com/howto/howto_js_rangeslider.asp -->
         <label for="rr">Reward to Risk Ratio: <span id="rr-value" class="mt-4">4</span>:1</label>
-        <input type="range" step="0.1" min="1" max="30" value="4" class="form-control-range" id="rr">
+        <input type="range" step="0.1" min="1" max="30" value="4" class="form-control-range" id="rr" onchange="calculate()">
       </div>
       <div class="form-group">
         <!-- Searchable dropdown component -->
@@ -91,6 +91,16 @@
         <textarea class="form-control" id="trade-text" rows="4" readonly></textarea>
         <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
         <button type="button" class="btn btn-primary mt-4 copy-to-clipboard" onclick="copyToClipboard()" data-toggle="tooltip"
+          data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
+      </div>
+      <div class="form-group">
+        <label for="reduce-trade-amount">How much to reduce the trade for:</label>
+        <input type="number" class="form-control" id="reduce-trade-amount" placeholder="Enter the amount to reduce the trade for"
+          onkeyup="calculate()">
+        <label for="reduce-trade-text">Use the following text to reduce the trade above:</label>
+        <textarea class="form-control" id="reduce-trade-text" rows="4" readonly></textarea>
+        <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
+        <button type="button" class="btn btn-primary mt-4 copy-reduce-to-clipboard" onclick="copyReduceToClipboard()" data-toggle="tooltip"
           data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
       </div>
       <div class="form-group">
