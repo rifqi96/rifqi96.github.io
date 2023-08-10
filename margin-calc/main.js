@@ -190,6 +190,7 @@ function loadTrade(tradeData) {
   document.querySelector('#stop-loss-dollar').value = stopLossDollar;
   document.querySelector('#leverage').value = leverage;
   document.querySelector('#rr').value = rr;
+  document.querySelector('#rr-value').textContent = rr;
   document.querySelector('#ticker').value = pair;
   document.querySelector('#reduce-trade-amount').value = reduceAmount;
 
