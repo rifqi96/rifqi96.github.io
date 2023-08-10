@@ -11,8 +11,15 @@
   background-color: #ddd;
 }
 
+#trade-history-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
 #trade-history-list li {
   cursor: pointer;
+}
+#trade-history-list li:hover {
+  background-color: #ddd;
 }
 
 .show {

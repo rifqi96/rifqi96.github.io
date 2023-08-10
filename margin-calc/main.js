@@ -109,6 +109,7 @@ function addTrade() {
   }
 
   const tradeData = {
+    datetime: new Date().toLocaleString(),
     pair: pair,
     leverage: leverage,
     price: price,
@@ -154,7 +155,7 @@ function loadTradeHistory() {
   tradeHistoryList.innerHTML = '';
   trades.forEach((trade, index) => {
     const li = document.createElement('li');
-    li.textContent = `Trade ${index + 1}: ${trade.text}`;
+    li.textContent = `Trade ${trade.datetime}: ${trade.text}`;
     li.addEventListener('click', () => loadTrade(trade));
     tradeHistoryList.appendChild(li);
   });
