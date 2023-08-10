@@ -73,6 +73,9 @@
         <button type="button" class="btn btn-primary send-order ml-2" disabled>Send order</button>
         <!-- Close trade -->
         <button type="button" class="btn btn-outline-danger close-trade ml-2" disabled>Close trade</button>
+        <button type="button" class="btn btn-outline-success ml-2" id="add-trade-button">Add Trade</button>
+        <button type="button" class="btn btn-outline-dark" id="clear-trades-button">Clear Trades</button>
+
       </div>
       <!-- <div class="form-group"> -->
         <!-- Collapsible component that shows a tradingview embed chart -->
@@ -111,6 +114,10 @@
           data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
       </div>
     </form>
+    <section id="trade-history">
+      <h3>Trade History</h3>
+      <ul id="trade-history-list"></ul>
+    </section>
     <div id="error-message" class="text-danger" style="display: none;"></div>
     <div id="result" style="display: none;"></div>
   </div>

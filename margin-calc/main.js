@@ -22,6 +22,9 @@ let leverage;
 let price;
 let orders = [];
 let mode = 'hedge'; // one-way or hedge
+let stopLossPercent = 0;
+let stopLossDollar = 0;
+let reduceAmount = 0;
 const maxCommands = 3;
 
 // On dom content loaded
@@ -30,56 +33,28 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 
 // Bootstrap the app
 function bootstrap() {
-  let password = prompt("Please enter the password to access this page:");
-  while (password !== "satuduatiga") {
-    alert("Wrong password! Please try again.");
-    password = prompt("Please enter the password to access this page:");
-  }
-
-  // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
-  // Else the app will use the api secret key and the slot that the user entered
-  slot = prompt("Please enter your slot number (optional):");
-  if (!slot) {
-    slot = 7;
-  }
-  apiSecret = prompt("Please enter your API secret key (optional):");
-  if (!apiSecret) {
-    apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
-  }
+  authenticate();
   
   fetchTickersList();
 
   tickersDropdownBootstrap();
 
-  // Add collapsible function to the collapsible elements
-  // Toggle .collapse-toggle-button text with Show/hide
-  // const collapsibleElements = document.querySelectorAll('.collapsible');
-  // collapsibleElements.forEach(collapsible => {
-  //   collapsible.addEventListener('click', function() {
-  //     this.classList.toggle('active');
-  //     const content = this.nextElementSibling;
-  //     if (content.style.maxHeight) {
-  //       content.style.maxHeight = null;
-  //       this.querySelector('.collapse-toggle-button').textContent = 'Show';
-  //     } else {
-  //       content.style.maxHeight = content.scrollHeight + 'px';
-  //       this.querySelector('.collapse-toggle-button').textContent = 'Hide';
-  //     }
-  //   });
-  // });
+  registerEvents();
 
-  // tradingviewChartBootstrap();
+  loadTradeHistory();
+}
 
+function registerEvents() {
   // Trading mode -- dropdown
   const tradingMode = document.querySelector('#mode');
-  tradingMode.addEventListener('change', function() {
+  tradingMode.addEventListener('change', function () {
     mode = tradingMode.value;
     calculate();
   });
 
   // Reward to risk ratio slider
   const rrSlider = document.querySelector('#rr');
-  rrSlider.addEventListener('input', function() {
+  rrSlider.addEventListener('input', function () {
     rr = rrSlider.value;
     document.querySelector('#rr-value').textContent = rr;
     calculate();
@@ -98,27 +73,134 @@ function bootstrap() {
   // .close-trade button event listener
   const closeTradeBtn = document.querySelector('.close-trade');
   closeTradeBtn.addEventListener('click', closeTrade);
+
+  // Event listener for the "Add Trade" button
+  document.getElementById('add-trade-button').addEventListener('click', addTrade);
+
+  // Event listener for the "Clear Trades" button
+  document.getElementById('clear-trades-button').addEventListener('click', clearTrades);
 }
 
-function tradingviewChartBootstrap(pair = null) {
-  const tvPair = pair ? pair : 'BTCUSDT';
-  new TradingView.widget(
-    {
-      "autosize": true,
-      "symbol": `BINANCE:${tvPair}PERP`,
-      "interval": "1",
-      "timezone": "Asia/Jakarta",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#f1f3f6",
-      "enable_publishing": false,
-      "hide_top_toolbar": true,
-      "hide_legend": true,
-      "save_image": false,
-      "container_id": "tradingview_5e9ab"
-    }
-  );
+function authenticate() {
+  let password = prompt("Please enter the password to access this page:");
+  while (password !== "satuduatiga") {
+    alert("Wrong password! Please try again.");
+    password = prompt("Please enter the password to access this page:");
+  }
+
+  // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
+  // Else the app will use the api secret key and the slot that the user entered
+  slot = prompt("Please enter your slot number (optional):");
+  if (!slot) {
+    slot = 7;
+  }
+  apiSecret = prompt("Please enter your API secret key (optional):");
+  if (!apiSecret) {
+    apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
+  }
+}
+
+// Function to add a trade
+function addTrade() {
+  // Check if all fields are filled
+  if (!formReady) {
+    alert('Error: Please fill in all the fields.');
+    return;
+  }
+
+  const tradeData = {
+    pair: pair,
+    leverage: leverage,
+    price: price,
+    position: position,
+    positionCmd: positionCmd,
+    positionReduce: positionReduce,
+    positionH: positionH,
+    tpsl: tpsl,
+    rr: rr,
+    slot: slot,
+    apiSecret: apiSecret,
+    text: text,
+    reduceText: reduceText,
+    beText: beText,
+    orders: orders,
+    mode: mode,
+    stopLossDollar: stopLossDollar,
+    stopLossPercent: stopLossPercent,
+    reduceAmount: reduceAmount
+  };
+  saveTrade(tradeData);
+  loadTradeHistory();
+}
+
+// Function to clear trades
+function clearTrades() {
+  localStorage.removeItem('trades');
+  loadTradeHistory();
+}
+
+// Function to save trade to local storage
+function saveTrade(tradeData) {
+  const trades = JSON.parse(localStorage.getItem('trades')) || [];
+  trades.push(tradeData);
+  localStorage.setItem('trades', JSON.stringify(trades));
+}
+
+// Function to load trade history
+function loadTradeHistory() {
+  console.log('loadTradeHistory');
+  const trades = JSON.parse(localStorage.getItem('trades')) || [];
+  const tradeHistoryList = document.getElementById('trade-history-list');
+  tradeHistoryList.innerHTML = '';
+  trades.forEach((trade, index) => {
+    const li = document.createElement('li');
+    li.textContent = `Trade ${index + 1}: ${trade.text}`;
+    li.addEventListener('click', () => loadTrade(trade));
+    tradeHistoryList.appendChild(li);
+  });
+}
+
+// Function to load a specific trade
+function loadTrade(tradeData) {
+  console.log('loadTrade');
+  pair = tradeData.pair;
+  leverage = tradeData.leverage;
+  price = tradeData.price;
+  position = tradeData.position;
+  positionCmd = tradeData.positionCmd;
+  positionReduce = tradeData.positionReduce;
+  positionH = tradeData.positionH;
+  tpsl = tradeData.tpsl;
+  rr = tradeData.rr;
+  slot = tradeData.slot;
+  apiSecret = tradeData.apiSecret;
+  text = tradeData.text;
+  reduceText = tradeData.reduceText;
+  beText = tradeData.beText;
+  orders = tradeData.orders;
+  mode = tradeData.mode;
+  stopLossDollar = tradeData.stopLossDollar;
+  stopLossPercent = tradeData.stopLossPercent;
+  reduceAmount = tradeData.reduceAmount;
+  formReady = true;
+
+  // Update the UI
+  document.querySelector('#mode').value = mode;
+  document.querySelector('#stop-loss-percent').value = stopLossPercent;
+  document.querySelector('#stop-loss-dollar').value = stopLossDollar;
+  document.querySelector('#leverage').value = leverage;
+  document.querySelector('#rr').value = rr;
+  document.querySelector('#ticker').value = pair;
+  document.querySelector('#reduce-trade-amount').value = reduceAmount;
+
+  // Update the UI for the position
+  if (position === 'buy') {
+    document.querySelector('.buy').click();
+  }
+  else if (position === 'sell') {
+    console.log('sell');
+    document.querySelector('.sell').click();
+  }
 }
 
 // List of crypto currencies from binance futures API
@@ -517,9 +599,9 @@ function generateBeCommand(pair, tpsl, positionH) {
 
 // The main calculate function
 function calculate(event) {
-  const stopLossPercent = document.getElementById("stop-loss-percent").value;
-  const stopLossDollar = document.getElementById("stop-loss-dollar").value;
-  const reduceAmount = document.getElementById("reduce-trade-amount").value;
+  stopLossPercent = document.getElementById("stop-loss-percent").value;
+  stopLossDollar = document.getElementById("stop-loss-dollar").value;
+  reduceAmount = document.getElementById("reduce-trade-amount").value;
   leverage = document.getElementById("leverage").value;
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
