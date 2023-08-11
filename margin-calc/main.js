@@ -323,6 +323,9 @@ function getMinMaxLotSize(symbol) {
     const symbolData = symbolsData.find(
       (symbolData) => symbolData.symbol === symbol
     );
+    if (!symbolData) {
+      return { minQty: 0, maxQty: 0 };
+    }
     const filters = symbolData.filters || [];
     const marketLotSize = filters.find(
       (filter) => filter.filterType === "MARKET_LOT_SIZE"
@@ -820,7 +823,7 @@ function calculate(event) {
       let maximumOrderSizeInDollar = maximumOrderSize * price;
       orders = [];
       console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
-      if (orderSize > maximumOrderSizeInDollar) {
+      if (maximumOrderSizeInDollar > 0 && orderSize > maximumOrderSizeInDollar) {
         console.log("orderSize: " + orderSize);
         while (orderSize > maximumOrderSizeInDollar) {
           orderSize -= maximumOrderSizeInDollar;
