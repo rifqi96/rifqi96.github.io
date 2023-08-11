@@ -3,38 +3,37 @@
 
 // Global variables
 let slot = 0;
-let apiSecret = '';
-let text = '';
-let reduceText = '';
-let beText = '';
-let position = 'POSITION';
-let positionCmd = 'POSITION';
-let positionReduce = 'POSITION';
-let positionH = '-';
-let tpsl = 'tpsl';
+let apiSecret = "";
+let text = "";
+let reduceText = "";
+let beText = "";
+let position = "POSITION";
+let positionCmd = "POSITION";
+let positionReduce = "POSITION";
+let positionH = "-";
+let tpsl = "tpsl";
 let rr = 4;
 let formReady = false;
-let pair = 'PAIR';
+let pair = "PAIR";
 let pairPrice = 0;
 let socket;
 let symbolsData;
 let leverage;
 let price;
 let orders = [];
-let mode = 'hedge'; // one-way or hedge
+let mode = "hedge"; // one-way or hedge
 let stopLossPercent = 0;
 let stopLossDollar = 0;
 let reduceAmount = 0;
 const maxCommands = 3;
 
 // On dom content loaded
-document.addEventListener('DOMContentLoaded', bootstrap);
-
+document.addEventListener("DOMContentLoaded", bootstrap);
 
 // Bootstrap the app
 function bootstrap() {
   authenticate();
-  
+
   fetchTickersList();
 
   tickersDropdownBootstrap();
@@ -46,39 +45,43 @@ function bootstrap() {
 
 function registerEvents() {
   // Trading mode -- dropdown
-  const tradingMode = document.querySelector('#mode');
-  tradingMode.addEventListener('change', function () {
+  const tradingMode = document.querySelector("#mode");
+  tradingMode.addEventListener("change", function () {
     mode = tradingMode.value;
     calculate();
   });
 
   // Reward to risk ratio slider
-  const rrSlider = document.querySelector('#rr');
-  rrSlider.addEventListener('input', function () {
+  const rrSlider = document.querySelector("#rr");
+  rrSlider.addEventListener("input", function () {
     rr = rrSlider.value;
-    document.querySelector('#rr-value').textContent = rr;
+    document.querySelector("#rr-value").textContent = rr;
     calculate();
   });
 
   // .buy and .sell button event listeners
-  const buyButton = document.querySelector('.buy');
-  buyButton.addEventListener('click', calculate);
-  const sellButton = document.querySelector('.sell');
-  sellButton.addEventListener('click', calculate);
+  const buyButton = document.querySelector(".buy");
+  buyButton.addEventListener("click", calculate);
+  const sellButton = document.querySelector(".sell");
+  sellButton.addEventListener("click", calculate);
 
   // .send-order button event listener
-  const sendOrderBtn = document.querySelector('.send-order');
-  sendOrderBtn.addEventListener('click', sendOrder);
+  const sendOrderBtn = document.querySelector(".send-order");
+  sendOrderBtn.addEventListener("click", sendOrder);
 
   // .close-trade button event listener
-  const closeTradeBtn = document.querySelector('.close-trade');
-  closeTradeBtn.addEventListener('click', closeTrade);
+  const closeTradeBtn = document.querySelector(".close-trade");
+  closeTradeBtn.addEventListener("click", closeTrade);
 
   // Event listener for the "Add Trade" button
-  document.getElementById('add-trade-button').addEventListener('click', addTrade);
+  document
+    .getElementById("add-trade-button")
+    .addEventListener("click", addTrade);
 
   // Event listener for the "Clear Trades" button
-  document.getElementById('clear-trades-button').addEventListener('click', clearTrades);
+  document
+    .getElementById("clear-trades-button")
+    .addEventListener("click", clearTrades);
 }
 
 function authenticate() {
@@ -96,7 +99,8 @@ function authenticate() {
   }
   apiSecret = prompt("Please enter your API secret key (optional):");
   if (!apiSecret) {
-    apiSecret = '3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419';
+    apiSecret =
+      "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
   }
 }
 
@@ -104,7 +108,7 @@ function authenticate() {
 function addTrade() {
   // Check if all fields are filled
   if (!formReady) {
-    alert('Error: Please fill in all the fields.');
+    alert("Error: Please fill in all the fields.");
     return;
   }
 
@@ -128,7 +132,7 @@ function addTrade() {
     mode: mode,
     stopLossDollar: stopLossDollar,
     stopLossPercent: stopLossPercent,
-    reduceAmount: reduceAmount
+    reduceAmount: reduceAmount,
   };
   saveTrade(tradeData);
   loadTradeHistory();
@@ -136,34 +140,34 @@ function addTrade() {
 
 // Function to clear trades
 function clearTrades() {
-  localStorage.removeItem('trades');
+  localStorage.removeItem("trades");
   loadTradeHistory();
 }
 
 // Function to save trade to local storage
 function saveTrade(tradeData) {
-  const trades = JSON.parse(localStorage.getItem('trades')) || [];
+  const trades = JSON.parse(localStorage.getItem("trades")) || [];
   trades.push(tradeData);
-  localStorage.setItem('trades', JSON.stringify(trades));
+  localStorage.setItem("trades", JSON.stringify(trades));
 }
 
 // Function to load trade history
 function loadTradeHistory() {
-  console.log('loadTradeHistory');
-  const trades = JSON.parse(localStorage.getItem('trades')) || [];
-  const tradeHistoryList = document.getElementById('trade-history-list');
-  tradeHistoryList.innerHTML = '';
+  console.log("loadTradeHistory");
+  const trades = JSON.parse(localStorage.getItem("trades")) || [];
+  const tradeHistoryList = document.getElementById("trade-history-list");
+  tradeHistoryList.innerHTML = "";
   trades.forEach((trade, index) => {
-    const li = document.createElement('li');
+    const li = document.createElement("li");
     li.textContent = `Trade ${trade.datetime}: ${trade.text}`;
-    li.addEventListener('click', () => loadTrade(trade));
+    li.addEventListener("click", () => loadTrade(trade));
     tradeHistoryList.appendChild(li);
   });
 }
 
 // Function to load a specific trade
 function loadTrade(tradeData) {
-  console.log('loadTrade');
+  console.log("loadTrade");
   pair = tradeData.pair;
   leverage = tradeData.leverage;
   price = tradeData.price;
@@ -186,22 +190,21 @@ function loadTrade(tradeData) {
   formReady = true;
 
   // Update the UI
-  document.querySelector('#mode').value = mode;
-  document.querySelector('#stop-loss-percent').value = stopLossPercent;
-  document.querySelector('#stop-loss-dollar').value = stopLossDollar;
-  document.querySelector('#leverage').value = leverage;
-  document.querySelector('#rr').value = rr;
-  document.querySelector('#rr-value').textContent = rr;
-  document.querySelector('#ticker').value = pair;
-  document.querySelector('#reduce-trade-amount').value = reduceAmount;
+  document.querySelector("#mode").value = mode;
+  document.querySelector("#stop-loss-percent").value = stopLossPercent;
+  document.querySelector("#stop-loss-dollar").value = stopLossDollar;
+  document.querySelector("#leverage").value = leverage;
+  document.querySelector("#rr").value = rr;
+  document.querySelector("#rr-value").textContent = rr;
+  document.querySelector("#ticker").value = pair;
+  document.querySelector("#reduce-trade-amount").value = reduceAmount;
 
   // Update the UI for the position
-  if (position === 'buy') {
-    document.querySelector('.buy').click();
-  }
-  else if (position === 'sell') {
-    console.log('sell');
-    document.querySelector('.sell').click();
+  if (position === "buy") {
+    document.querySelector(".buy").click();
+  } else if (position === "sell") {
+    console.log("sell");
+    document.querySelector(".sell").click();
   }
 }
 
@@ -211,23 +214,23 @@ function loadTrade(tradeData) {
 // Put the list in the #tickerDropdown with following format <a href="#">{{symbol}}</a>
 function fetchTickersList() {
   // Show the progress bar
-  const progressBar = document.querySelector('.progress');
-  progressBar.style.display = 'block';
-  progressBar.style.width = '0%';
+  const progressBar = document.querySelector(".progress");
+  progressBar.style.display = "block";
+  progressBar.style.width = "0%";
   // aria-valuenow is used by screen readers
-  progressBar.setAttribute('aria-valuenow', '0');
+  progressBar.setAttribute("aria-valuenow", "0");
 
   // Create a new request
   const request = new XMLHttpRequest();
   // Open a new connection, using the GET request on the URL endpoint
-  request.open('GET', 'https://fapi.binance.com/fapi/v1/exchangeInfo', true);
+  request.open("GET", "https://fapi.binance.com/fapi/v1/exchangeInfo", true);
   // Handle progress
   request.onprogress = handleOnProgress;
   // Handle successful request
   request.onload = handleOnLoad;
   // Handle network error
   request.onerror = handleError;
-  
+
   function handleOnLoad(e) {
     const res = this;
     if (res.status >= 200 && res.status < 400) {
@@ -244,25 +247,25 @@ function fetchTickersList() {
       // Update the progress bar width percentage based on the loaded data
       const percentComplete = (e.loaded / e.total) * 100;
       progressBar.style.width = `${percentComplete}%`;
-      progressBar.setAttribute('aria-valuenow', percentComplete);
+      progressBar.setAttribute("aria-valuenow", percentComplete);
     }
   }
 
   function handleSuccess(res) {
     // Hide the fetching text
-    const fetchingText = document.querySelector('.fetching-text');
-    fetchingText.style.display = 'none';
+    const fetchingText = document.querySelector(".fetching-text");
+    fetchingText.style.display = "none";
     // Hide the progress bar
-    progressBar.style.display = 'none';
+    progressBar.style.display = "none";
     const data = JSON.parse(res.response);
     symbolsData = data.symbols;
-    const symbols = symbolsData.map(symbol => symbol.symbol);
-    
-    const tickerDropdown = document.querySelector('#tickerDropdown');
-    symbols.forEach(symbol => {
-      const option = document.createElement('a');
-      option.className = 'ticker';
-      option.href = '#';
+    const symbols = symbolsData.map((symbol) => symbol.symbol);
+
+    const tickerDropdown = document.querySelector("#tickerDropdown");
+    symbols.forEach((symbol) => {
+      const option = document.createElement("a");
+      option.className = "ticker";
+      option.href = "#";
       option.text = symbol;
       tickerDropdown.appendChild(option);
     });
@@ -270,12 +273,12 @@ function fetchTickersList() {
 
   function handleError(error) {
     // Handle error
-    console.log ('Failed to load the data', error);
+    console.log("Failed to load the data", error);
     // Change fetching text to error text
-    const fetchingText = document.querySelector('.fetching-text');
-    fetchingText.textContent = 'Failed to load the data';
+    const fetchingText = document.querySelector(".fetching-text");
+    fetchingText.textContent = "Failed to load the data";
     // Give error text a bootstrap error class
-    fetchingText.classList.add('text-danger');
+    fetchingText.classList.add("text-danger");
   }
 
   request.send();
@@ -283,30 +286,32 @@ function fetchTickersList() {
 
 // Watch the price of the selected symbol
 function watchPrice(symbol) {
-  console.log('watchPrice', symbol);
+  console.log("watchPrice", symbol);
   if (socket) {
     socket.close();
   }
-  socket = new WebSocket(`wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`);
-  console.log('socket', socket);
+  socket = new WebSocket(
+    `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
+  );
+  console.log("socket", socket);
 
-  socket.onclose = function(event) {
-    console.log('event onclose', event);
+  socket.onclose = function (event) {
+    console.log("event onclose", event);
   };
 
-  socket.onerror = function(event) {
-    console.log('event onerror', event);
+  socket.onerror = function (event) {
+    console.log("event onerror", event);
   };
 
-  socket.onopen = function(event) {
-    console.log('event onopen', event);
+  socket.onopen = function (event) {
+    console.log("event onopen", event);
   };
 
-  socket.onmessage = function(event) {
+  socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     price = data.c;
     // Update .current-price-value
-    const currentPriceValue = document.querySelector('.current-price-value');
+    const currentPriceValue = document.querySelector(".current-price-value");
     currentPriceValue.textContent = price;
   };
 }
@@ -315,14 +320,18 @@ function watchPrice(symbol) {
 // The MARKET_LOT_SIZE is from the tickers list
 function getMinMaxLotSize(symbol) {
   try {
-    const symbolData = symbolsData.find(symbolData => symbolData.symbol === symbol);
+    const symbolData = symbolsData.find(
+      (symbolData) => symbolData.symbol === symbol
+    );
     const filters = symbolData.filters || [];
-    const marketLotSize = filters.find(filter => filter.filterType === 'MARKET_LOT_SIZE');
+    const marketLotSize = filters.find(
+      (filter) => filter.filterType === "MARKET_LOT_SIZE"
+    );
     const minQty = marketLotSize.minQty;
     const maxQty = marketLotSize.maxQty;
     return { minQty, maxQty };
   } catch (error) {
-    console.log('getMinMaxLotSize error', error);
+    console.log("getMinMaxLotSize error", error);
     return { minQty: 0, maxQty: 0 };
   }
 }
@@ -343,25 +352,25 @@ function isEligibleForMaxLotSize(orderLotSize, maxQty) {
 // Bootstrap the tickers dropdown
 function tickersDropdownBootstrap() {
   // Make the dropdown list appear when the input is clicked and type something
-  const ticker = document.querySelector('#ticker');
-  ticker.addEventListener('click', function() {
-    tickerDropdown.style.display = 'block';
+  const ticker = document.querySelector("#ticker");
+  ticker.addEventListener("click", function () {
+    tickerDropdown.style.display = "block";
   });
-  ticker.addEventListener('keyup', function() {
-    tickerDropdown.style.display = 'block';
+  ticker.addEventListener("keyup", function () {
+    tickerDropdown.style.display = "block";
   });
   // Make the dropdown list disappear when the input is clicked and type something
-  document.addEventListener('click', function(event) {
-    if (event.target.id !== 'ticker') {
-      tickerDropdown.style.display = 'none';
+  document.addEventListener("click", function (event) {
+    if (event.target.id !== "ticker") {
+      tickerDropdown.style.display = "none";
     }
   });
 
   // Make the dropdown list clickable and put the selected value in the input
-  const tickerDropdown = document.querySelector('#tickerDropdown');
-  tickerDropdown.addEventListener('click', function(event) {
+  const tickerDropdown = document.querySelector("#tickerDropdown");
+  tickerDropdown.addEventListener("click", function (event) {
     const ticker = event.target;
-    if (ticker.classList.contains('ticker')) {
+    if (ticker.classList.contains("ticker")) {
       document.getElementById("ticker").value = ticker.text;
       watchPrice(ticker.text);
       calculate();
@@ -369,33 +378,35 @@ function tickersDropdownBootstrap() {
   });
 
   // Make the dropdown list selection keyboard accessible
-  ticker.addEventListener('keydown', function(event) {
-    const tickerDropdown = document.querySelector('#tickerDropdown');
-    const tickerDropdownItems = tickerDropdown.querySelectorAll('.ticker');
-    const activeItem = tickerDropdown.querySelector('.active');
+  ticker.addEventListener("keydown", function (event) {
+    const tickerDropdown = document.querySelector("#tickerDropdown");
+    const tickerDropdownItems = tickerDropdown.querySelectorAll(".ticker");
+    const activeItem = tickerDropdown.querySelector(".active");
     let activeItemIndex = 0;
     if (activeItem) {
       activeItemIndex = Array.from(tickerDropdownItems).indexOf(activeItem);
     }
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       if (activeItem) {
-        activeItem.classList.remove('active');
+        activeItem.classList.remove("active");
       }
       if (activeItemIndex < tickerDropdownItems.length - 1) {
-        tickerDropdownItems[activeItemIndex + 1].classList.add('active');
+        tickerDropdownItems[activeItemIndex + 1].classList.add("active");
       } else {
-        tickerDropdownItems[0].classList.add('active');
+        tickerDropdownItems[0].classList.add("active");
       }
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === "ArrowUp") {
       if (activeItem) {
-        activeItem.classList.remove('active');
+        activeItem.classList.remove("active");
       }
       if (activeItemIndex > 0) {
-        tickerDropdownItems[activeItemIndex - 1].classList.add('active');
+        tickerDropdownItems[activeItemIndex - 1].classList.add("active");
       } else {
-        tickerDropdownItems[tickerDropdownItems.length - 1].classList.add('active');
+        tickerDropdownItems[tickerDropdownItems.length - 1].classList.add(
+          "active"
+        );
       }
-    } else if (event.key === 'Enter') {
+    } else if (event.key === "Enter") {
       if (activeItem) {
         document.getElementById("ticker").value = activeItem.text;
         watchPrice(activeItem.text);
@@ -431,12 +442,16 @@ function sendOrder() {
         }
       }
 
-      const question = `Order #${i + 1}: You are about to send the following order to the server: ${messages[i]}. Are you sure?`;
+      const question = `Order #${
+        i + 1
+      }: You are about to send the following order to the server: ${
+        messages[i]
+      }. Are you sure?`;
       if (confirm(question)) {
         const request = new XMLHttpRequest();
-        request.open('POST', 'https://aleeert.com/api/v1/', true);
-        request.setRequestHeader('Content-Type', 'text/plain');
-        request.send(messages[i].join('\n'));
+        request.open("POST", "https://aleeert.com/api/v1/", true);
+        request.setRequestHeader("Content-Type", "text/plain");
+        request.send(messages[i].join("\n"));
       }
     }
   }
@@ -449,18 +464,25 @@ function closeTrade() {
   // prompt the user to fill in the close percent
   // and if the user confirms, send the request
   // and if the user cancels, do nothing
-  const question = 'Please enter the close percent:';
+  const question = "Please enter the close percent:";
   closePercent = prompt(question, closePercent);
   // Close percent must be a number between 0 and 100
   // Do nothing if the user cancels
   // Validate in one line
-  if (closePercent === null || closePercent === '' || isNaN(closePercent) || closePercent < 0 || closePercent > 100) return;
+  if (
+    closePercent === null ||
+    closePercent === "" ||
+    isNaN(closePercent) ||
+    closePercent < 0 ||
+    closePercent > 100
+  )
+    return;
 
-  let closeCmd = 'close';
-  if (mode === 'hedge') {
-    closeCmd = 'close_h';
+  let closeCmd = "close";
+  if (mode === "hedge") {
+    closeCmd = "close_h";
   }
-  
+
   const message = `${pair}, ${closeCmd}, ${closePercent}%, -, ${slot}, ${apiSecret}`;
 
   // Send a post request to https://aleeert.com/api/v1/
@@ -472,8 +494,8 @@ function closeTrade() {
   const question2 = `You are about to send the following order to the server: ${message}. Are you sure?`;
   if (confirm(question2)) {
     const request = new XMLHttpRequest();
-    request.open('POST', 'https://aleeert.com/api/v1/', true);
-    request.setRequestHeader('Content-Type', 'text/plain');
+    request.open("POST", "https://aleeert.com/api/v1/", true);
+    request.setRequestHeader("Content-Type", "text/plain");
     request.send(message);
   }
 }
@@ -481,19 +503,19 @@ function closeTrade() {
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
   const generatedText = generateText(true);
-  
+
   copyTextToClipboard(generatedText);
 }
 
-function copyReduceToClipboard()  {
+function copyReduceToClipboard() {
   const generatedText = generateReduceText(true);
-  
+
   copyTextToClipboard(generatedText);
 }
 
 function copyBeToClipboard() {
   const generatedText = generateBeText(true);
-  
+
   copyTextToClipboard(generatedText);
 }
 
@@ -501,7 +523,7 @@ function generateText(showSecret = false) {
   // Check if orders array is not empty
   // Loop through and combine the slot and apiSecret with the orders
   // and copy the combined text to the clipboard
-  let orderText = '';
+  let orderText = "";
   // Check if orders array is not empty
   if (orders.length > 0) {
     for (let i = 0; i < orders.length; i++) {
@@ -512,7 +534,7 @@ function generateText(showSecret = false) {
           orderText += `${orders[i][j]}\n`;
         }
         if ((j + 1) % maxCommands === 0) {
-          orderText += '\n';
+          orderText += "\n";
         }
       }
     }
@@ -553,11 +575,11 @@ function copyTextToClipboard(text) {
   textArea.select();
 
   try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Copying text command was ' + msg);
+    var successful = document.execCommand("copy");
+    var msg = successful ? "successful" : "unsuccessful";
+    console.log("Copying text command was " + msg);
   } catch (err) {
-    console.log('Oops, unable to copy');
+    console.log("Oops, unable to copy");
   }
 
   document.body.removeChild(textArea);
@@ -579,8 +601,23 @@ function filterFunction() {
   }
 }
 
-function generateCommand(pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage) {
-  console.log('generateCommand', pair, position, deployedCapital, rewardPercent, stopLossPercent, leverage);
+function generateCommand(
+  pair,
+  position,
+  deployedCapital,
+  rewardPercent,
+  stopLossPercent,
+  leverage
+) {
+  console.log(
+    "generateCommand",
+    pair,
+    position,
+    deployedCapital,
+    rewardPercent,
+    stopLossPercent,
+    leverage
+  );
   // Round the reward and stop loss percent to 2 decimal places
   rewardPercent = Math.round(rewardPercent * 100) / 100;
   stopLossPercent = Math.round(stopLossPercent * 100) / 100;
@@ -590,12 +627,12 @@ function generateCommand(pair, position, deployedCapital, rewardPercent, stopLos
 }
 
 function generateReduceCommand(pair, position, reduceAmount, leverage) {
-  console.log('generateReduceCommand', pair, position, reduceAmount, leverage);
+  console.log("generateReduceCommand", pair, position, reduceAmount, leverage);
   return `${pair}(x${leverage}), ${position}, $${reduceAmount}, market`;
 }
 
 function generateBeCommand(pair, tpsl, positionH) {
-  console.log('generateBeCommand', pair, tpsl, positionH);
+  console.log("generateBeCommand", pair, tpsl, positionH);
   return `${pair}, ${tpsl}, ${positionH}, - | 0%(100%)`;
 }
 
@@ -614,18 +651,18 @@ function calculate(event) {
     document.querySelector("button.sell").innerHTML = "Sell";
     document.querySelector("button.sell").style.fontSize = "16px";
     document.querySelector("button.sell").style.fontWeight = "normal";
-    position = 'buy';
+    position = "buy";
     // Check the hedge mode
-    if (mode === 'hedge') {
-      positionCmd = 'openlong';
-      positionReduce = 'closelong';
-      positionH = 'long';
-      tpsl = 'tpsl_h';
+    if (mode === "hedge") {
+      positionCmd = "openlong";
+      positionReduce = "closelong";
+      positionH = "long";
+      tpsl = "tpsl_h";
     } else {
-      positionCmd = 'buy';
-      positionReduce = 'sell';
-      positionH = '-';
-      tpsl = 'tpsl';
+      positionCmd = "buy";
+      positionReduce = "sell";
+      positionH = "-";
+      tpsl = "tpsl";
     }
     document.getElementById("trade-text").value = text;
     document.getElementById("reduce-trade-text").value = reduceText;
@@ -637,31 +674,45 @@ function calculate(event) {
     document.querySelector("button.buy").innerHTML = "Buy";
     document.querySelector("button.buy").style.fontSize = "16px";
     document.querySelector("button.buy").style.fontWeight = "normal";
-    position = 'sell';
+    position = "sell";
     // Check the hedge mode
-    if (mode === 'hedge') {
-      positionCmd = 'openshort';
-      positionReduce = 'closeshort';
-      positionH = 'short';
-      tpsl = 'tpsl_h';
+    if (mode === "hedge") {
+      positionCmd = "openshort";
+      positionReduce = "closeshort";
+      positionH = "short";
+      tpsl = "tpsl_h";
     } else {
-      positionCmd = 'sell';
-      positionReduce = 'buy';
-      positionH = '-';
-      tpsl = 'tpsl';
+      positionCmd = "sell";
+      positionReduce = "buy";
+      positionH = "-";
+      tpsl = "tpsl";
     }
     document.getElementById("trade-text").value = text;
     document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
   }
 
-  if (!stopLossPercent || !stopLossDollar || !leverage || isNaN(stopLossPercent) || isNaN(stopLossDollar) || isNaN(leverage) || stopLossPercent === '' || stopLossDollar === '' || leverage === '' || stopLossPercent <= 0 || stopLossDollar <= 0 || leverage <= 0) {
-    document.getElementById("error-message").innerHTML = "Error: Please fill in all the fields.";
+  if (
+    !stopLossPercent ||
+    !stopLossDollar ||
+    !leverage ||
+    isNaN(stopLossPercent) ||
+    isNaN(stopLossDollar) ||
+    isNaN(leverage) ||
+    stopLossPercent === "" ||
+    stopLossDollar === "" ||
+    leverage === "" ||
+    stopLossPercent <= 0 ||
+    stopLossDollar <= 0 ||
+    leverage <= 0
+  ) {
+    document.getElementById("error-message").innerHTML =
+      "Error: Please fill in all the fields.";
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
-    text = '';
-    reduceText = '';
-    beText = '';
+    text = "";
+    reduceText = "";
+    beText = "";
     document.getElementById("trade-text").value = text;
     document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
@@ -678,9 +729,9 @@ function calculate(event) {
       "Error: The deployed capital is lower than the stop loss dollar.";
     document.getElementById("error-message").style.display = "block";
     document.getElementById("result").style.display = "none";
-    text = '';
-    reduceText = '';
-    beText = '';
+    text = "";
+    reduceText = "";
+    beText = "";
     document.getElementById("trade-text").value = text;
     document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
@@ -697,16 +748,33 @@ function calculate(event) {
   // Show the result.
   else {
     // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-    document.getElementById("result").innerHTML = "The capital to deploy for the trade with leverage " + leverage +
-      " is: $" + deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.getElementById("result").innerHTML =
+      "The capital to deploy for the trade with leverage " +
+      leverage +
+      " is: $" +
+      deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     document.getElementById("result").style.display = "block";
     document.getElementById("error-message").style.display = "none";
     // Get pair from the ticker input.
     // Else if the ticker input is empty, use the word 'PAIR'
-    pair = document.getElementById("ticker").value ? document.getElementById("ticker").value : 'PAIR';
+    pair = document.getElementById("ticker").value
+      ? document.getElementById("ticker").value
+      : "PAIR";
     const rewardPercent = stopLossPercent * rr;
-    text = generateCommand(pair, positionCmd, deployedCapital, rewardPercent, stopLossPercent, leverage);
-    reduceText = generateReduceCommand(pair, positionReduce, reduceAmount, leverage);
+    text = generateCommand(
+      pair,
+      positionCmd,
+      deployedCapital,
+      rewardPercent,
+      stopLossPercent,
+      leverage
+    );
+    reduceText = generateReduceCommand(
+      pair,
+      positionReduce,
+      reduceAmount,
+      leverage
+    );
     beText = generateBeCommand(pair, tpsl, positionH);
     document.getElementById("trade-text").value = text;
     document.getElementById("reduce-trade-text").value = reduceText;
@@ -717,9 +785,9 @@ function calculate(event) {
     document.querySelector("button.copy-be-to-clipboard").disabled = false;
     // Enable send order button when there's no error.
     // But validate if the position is set to either buy or sell.
-    if (position === 'buy' || position === 'sell') {
+    if (position === "buy" || position === "sell") {
       // If the order size is less than minimum order size, disable the send order button.
-      const minimumOrderSize = getMinMaxLotSize(pair, 'min').minQty;
+      const minimumOrderSize = getMinMaxLotSize(pair, "min").minQty || 0;
       if (deployedCapital * leverage < minimumOrderSize) {
         document.querySelector("button.send-order").disabled = true;
       } else {
@@ -728,7 +796,7 @@ function calculate(event) {
     }
     // Enable close position button when there's no error.
     // Validate if the pair is not 'PAIR'
-    if (pair !== 'PAIR') {
+    if (pair !== "PAIR") {
       document.querySelector("button.close-trade").disabled = false;
       // tradingviewChartBootstrap(pair);
     }
@@ -738,11 +806,11 @@ function calculate(event) {
     // Pair and position are required fields.
     // Pair is validated by the ticker input and position is validated by the buy/sell button.
     // Pair can't be "PAIR" and position can't be "POSITION"
-    if (pair !== 'PAIR' && (position === 'buy' || position === 'sell')) {
+    if (pair !== "PAIR" && (position === "buy" || position === "sell")) {
       // The order size can't be greater than the maximum order size.
       // If it is, it can be split into multiple orders.
       // Split the order size into multiple orders if it's greater than the maximum order size.
-      const maximumOrderSize = getMinMaxLotSize(pair, 'max').maxQty;
+      const maximumOrderSize = getMinMaxLotSize(pair, "max").maxQty || 0;
       // Split the deployedCapital size into multiple orders.
       // The order size can't be greater than the maximum order size.
       // Loop through the deployedCapital size and split it into multiple orders.
@@ -751,18 +819,35 @@ function calculate(event) {
       let orderSize = deployedCapital * leverage;
       let maximumOrderSizeInDollar = maximumOrderSize * price;
       orders = [];
-      console.log('maximumOrderSizeInDollar: ' + maximumOrderSizeInDollar);
-      while (orderSize > maximumOrderSizeInDollar) {
-        orderSize -= maximumOrderSizeInDollar;
-        const command = generateCommand(pair, positionCmd, maximumOrderSizeInDollar / leverage, rewardPercent, stopLossPercent, leverage);
-        orders.push(command);
+      console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
+      if (orderSize > maximumOrderSizeInDollar) {
+        console.log("orderSize: " + orderSize);
+        while (orderSize > maximumOrderSizeInDollar) {
+          orderSize -= maximumOrderSizeInDollar;
+          const command = generateCommand(
+            pair,
+            positionCmd,
+            maximumOrderSizeInDollar / leverage,
+            rewardPercent,
+            stopLossPercent,
+            leverage
+          );
+          orders.push(command);
+        }
       }
       // Push the remaining order size into the orders array.
       // Check if n is lower than maxCommands const.
       // If it is, push the order into the current array.
       // Else, push the order into the next array.
       if (orderSize > 0) {
-        const command = generateCommand(pair, positionCmd, orderSize / leverage, rewardPercent, stopLossPercent, leverage);
+        const command = generateCommand(
+          pair,
+          positionCmd,
+          orderSize / leverage,
+          rewardPercent,
+          stopLossPercent,
+          leverage
+        );
         orders.push(command);
       }
 
@@ -798,7 +883,6 @@ function calculate(event) {
       document.getElementById("reduce-trade-text").value = reduceOrderText;
       document.getElementById("be-trade-text").value = beOrderText;
       formReady = true;
-      
     }
   }
 }
