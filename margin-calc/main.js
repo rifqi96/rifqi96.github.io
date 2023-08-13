@@ -154,15 +154,35 @@ function saveTrade(tradeData) {
 // Function to load trade history
 function loadTradeHistory() {
   console.log("loadTradeHistory");
-  const trades = JSON.parse(localStorage.getItem("trades")) || [];
+  let trades = JSON.parse(localStorage.getItem("trades")) || [];
+  
+  // Sorting trades by datetime in descending order
+  trades = trades.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+  
   const tradeHistoryList = document.getElementById("trade-history-list");
   tradeHistoryList.innerHTML = "";
   trades.forEach((trade, index) => {
     const li = document.createElement("li");
     li.textContent = `Trade ${trade.datetime}: ${trade.text}`;
     li.addEventListener("click", () => loadTrade(trade));
+
+    // Adding delete button for each trade
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn btn-danger btn-sm ml-2";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deleteTrade(index));
+    li.appendChild(deleteButton);
+
     tradeHistoryList.appendChild(li);
   });
+}
+
+// Function to delete a specific trade
+function deleteTrade(index) {
+  let trades = JSON.parse(localStorage.getItem("trades")) || [];
+  trades.splice(index, 1);
+  localStorage.setItem("trades", JSON.stringify(trades));
+  loadTradeHistory();
 }
 
 // Function to load a specific trade
