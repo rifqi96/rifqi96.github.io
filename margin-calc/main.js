@@ -830,38 +830,56 @@ function calculate(event) {
     // Pair is validated by the ticker input and position is validated by the buy/sell button.
     // Pair can't be "PAIR" and position can't be "POSITION"
     if (pair !== "PAIR" && (position === "buy" || position === "sell")) {
-      // The order size can't be greater than the maximum order size.
-      // If it is, it can be split into multiple orders.
-      // Split the order size into multiple orders if it's greater than the maximum order size.
-      const maximumOrderSize = getMinMaxLotSize(pair, "max").maxQty || 0;
-      // Split the deployedCapital size into multiple orders.
-      // The order size can't be greater than the maximum order size.
-      // Loop through the deployedCapital size and split it into multiple orders.
+      // TODO: Remove below code after one order implementation is stable
+      // // The order size can't be greater than the maximum order size.
+      // // If it is, it can be split into multiple orders.
+      // // Split the order size into multiple orders if it's greater than the maximum order size.
+      // const maximumOrderSize = getMinMaxLotSize(pair, "max").maxQty || 0;
+      // // Split the deployedCapital size into multiple orders.
+      // // The order size can't be greater than the maximum order size.
+      // // Loop through the deployedCapital size and split it into multiple orders.
+      // // Then push each order into the orders array.
+      // // An order is a text using generateCommand()
+      // let orderSize = deployedCapital * leverage;
+      // let maximumOrderSizeInDollar = maximumOrderSize * price;
+      // orders = [];
+      // console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
+      // if (maximumOrderSizeInDollar > 0 && orderSize > maximumOrderSizeInDollar) {
+      //   console.log("orderSize: " + orderSize);
+      //   while (orderSize > maximumOrderSizeInDollar) {
+      //     orderSize -= maximumOrderSizeInDollar;
+      //     const command = generateCommand(
+      //       pair,
+      //       positionCmd,
+      //       maximumOrderSizeInDollar / leverage,
+      //       rewardPercent,
+      //       stopLossPercent,
+      //       leverage
+      //     );
+      //     orders.push(command);
+      //   }
+      // }
+      // // Push the remaining order size into the orders array.
+      // // Check if n is lower than maxCommands const.
+      // // If it is, push the order into the current array.
+      // // Else, push the order into the next array.
+      // if (orderSize > 0) {
+      //   const command = generateCommand(
+      //     pair,
+      //     positionCmd,
+      //     orderSize / leverage,
+      //     rewardPercent,
+      //     stopLossPercent,
+      //     leverage
+      //   );
+      //   orders.push(command);
+      // }
+
+      // Loop through the deployedCapital size.
       // Then push each order into the orders array.
       // An order is a text using generateCommand()
       let orderSize = deployedCapital * leverage;
-      let maximumOrderSizeInDollar = maximumOrderSize * price;
       orders = [];
-      console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
-      if (maximumOrderSizeInDollar > 0 && orderSize > maximumOrderSizeInDollar) {
-        console.log("orderSize: " + orderSize);
-        while (orderSize > maximumOrderSizeInDollar) {
-          orderSize -= maximumOrderSizeInDollar;
-          const command = generateCommand(
-            pair,
-            positionCmd,
-            maximumOrderSizeInDollar / leverage,
-            rewardPercent,
-            stopLossPercent,
-            leverage
-          );
-          orders.push(command);
-        }
-      }
-      // Push the remaining order size into the orders array.
-      // Check if n is lower than maxCommands const.
-      // If it is, push the order into the current array.
-      // Else, push the order into the next array.
       if (orderSize > 0) {
         const command = generateCommand(
           pair,
