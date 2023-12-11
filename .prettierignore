@@ -1,0 +1,42 @@
+# Env files
+.env
+
+# Logs
+logs
+*.log
+*.log*
+
+# Editor directories and files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Storybook
+storybook-static
+*.stories.asString.js
+
+# Vendors
+node_modules
+/cypress/videos/
+/cypress/screenshots/
+
+# Outputs
+dist
+dist-ssr
+output
+.output
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+*.snap
+!*.snapshot.test.ts.snap
+
+.nitro
+.cache
+coverage
+*.md
+*.mdx
+.DS_Store

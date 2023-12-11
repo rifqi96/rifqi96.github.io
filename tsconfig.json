@@ -1,0 +1,56 @@
+{
+  "include": [
+    "index.d.ts",
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "public",
+    "dist",
+    "dist/**/*",
+    "coverage",
+    "output",
+    "eslintrc.cjs",
+    "margin-calc",
+    "margin-calc/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "declaration": true,
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "types": ["vite/client"]
+    },
+    "types": ["node", "vite/client"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "allowJs": true,
+    // workaround for https://github.com/vuejs/tsconfig/issues/6
+    "ignoreDeprecations": "5.0"
+
+    // Either above or below
+    // "preserveValueImports": false,
+    // "importsNotUsedAsValues": "remove",
+    // "verbatimModuleSyntax": true
+
+    // end workaround
+  },
+  "references": [
+    {
+      "path": "./tsconfig.config.json"
+    }
+  ]
+}
