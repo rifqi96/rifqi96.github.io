@@ -1,7 +1,8 @@
 {
   "include": [
-    "index.d.ts",
-    "env.d.ts",
+    "auto-import.d.ts",
+    "components.d.ts",
+    "src/vite-env.d.ts",
     "src/**/*",
     "src/**/*.d.ts",
     "src/**/*.tsx",
@@ -15,8 +16,8 @@
     "coverage",
     "output",
     "eslintrc.cjs",
-    "margin-calc",
-    "margin-calc/**/*"
+    "public/margin-calc-legacy",
+    "public/margin-calc-legacy/**/*"
   ],
   "compilerOptions": {
     "target": "ESNext",
@@ -32,9 +33,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "types": ["vite/client"]
+      "types": ["vuetify", "vite/client"]
     },
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "vuetify"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "allowJs": true,
