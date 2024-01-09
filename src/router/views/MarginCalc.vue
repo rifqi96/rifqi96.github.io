@@ -1,6 +1,20 @@
+<script setup lang="ts">
+import MarginCalc from "@/components/MarginCalc.vue";
+</script>
+
 <template>
-  <div class="home">
-    <h1>Margin Calc</h1>
-    <p>Content goes here.</p>
-  </div>
+  <v-layout row wrap>
+    <v-container>
+      <v-row>
+        <v-col cols="12" sm="12" md="12">
+          <h1>Margin Calculator</h1>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="12" md="12">
+          <MarginCalc />
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-layout>
 </template>

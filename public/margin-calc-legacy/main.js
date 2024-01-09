@@ -155,10 +155,10 @@ function saveTrade(tradeData) {
 function loadTradeHistory() {
   console.log("loadTradeHistory");
   let trades = JSON.parse(localStorage.getItem("trades")) || [];
-  
+
   // Sorting trades by datetime in descending order
   trades = trades.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
-  
+
   const tradeHistoryList = document.getElementById("trade-history-list");
   tradeHistoryList.innerHTML = "";
   trades.forEach((trade, index) => {
@@ -311,7 +311,7 @@ function watchPrice(symbol) {
     socket.close();
   }
   socket = new WebSocket(
-    `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
+    `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`,
   );
   console.log("socket", socket);
 
@@ -341,14 +341,14 @@ function watchPrice(symbol) {
 function getMinMaxLotSize(symbol) {
   try {
     const symbolData = symbolsData.find(
-      (symbolData) => symbolData.symbol === symbol
+      (symbolData) => symbolData.symbol === symbol,
     );
     if (!symbolData) {
       return { minQty: 0, maxQty: 0 };
     }
     const filters = symbolData.filters || [];
     const marketLotSize = filters.find(
-      (filter) => filter.filterType === "MARKET_LOT_SIZE"
+      (filter) => filter.filterType === "MARKET_LOT_SIZE",
     );
     const minQty = marketLotSize.minQty;
     const maxQty = marketLotSize.maxQty;
@@ -426,7 +426,7 @@ function tickersDropdownBootstrap() {
         tickerDropdownItems[activeItemIndex - 1].classList.add("active");
       } else {
         tickerDropdownItems[tickerDropdownItems.length - 1].classList.add(
-          "active"
+          "active",
         );
       }
     } else if (event.key === "Enter") {
@@ -630,7 +630,7 @@ function generateCommand(
   deployedCapital,
   rewardPercent,
   stopLossPercent,
-  leverage
+  leverage,
 ) {
   console.log(
     "generateCommand",
@@ -639,7 +639,7 @@ function generateCommand(
     deployedCapital,
     rewardPercent,
     stopLossPercent,
-    leverage
+    leverage,
   );
   // Round the reward and stop loss percent to 2 decimal places
   rewardPercent = Math.round(rewardPercent * 100) / 100;
@@ -790,13 +790,13 @@ function calculate(event) {
       deployedCapital,
       rewardPercent,
       stopLossPercent,
-      leverage
+      leverage,
     );
     reduceText = generateReduceCommand(
       pair,
       positionReduce,
       reduceAmount,
-      leverage
+      leverage,
     );
     beText = generateBeCommand(pair, tpsl, positionH);
     document.getElementById("trade-text").value = text;
@@ -887,7 +887,7 @@ function calculate(event) {
           orderSize / leverage,
           rewardPercent,
           stopLossPercent,
-          leverage
+          leverage,
         );
         orders.push(command);
       }
