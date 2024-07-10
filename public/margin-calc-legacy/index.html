@@ -1,133 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>Margin Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <!-- Import main.js -->
+    <script src="main.js"></script>
+    <!-- Import style.css -->
+    <link rel="stylesheet" href="style.css" />
+    <!-- Tradingview js -->
+    <!-- <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script> -->
+  </head>
 
-<head>
-  <title>Margin Calculator</title>
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  <!-- Import main.js -->
-  <script src="main.js"></script>
-  <!-- Import style.css -->
-  <link rel="stylesheet" href="style.css">
-  <!-- Tradingview js -->
-  <!-- <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script> -->
-</head>
-
-<body>
-  <div class="container container-fluid my-4">
-    <h1 class="text-center">Margin Calculator</h1>
-    <div class="row">
-      <div class="col col-8">
-        <form>
-          <div class="form-group">
-            <label for="mode">Trading Mode:</label>
-            <select class="form-control" id="mode" onchange="calculate()">
-              <option value="one-way">One-way</option>
-              <option value="hedge" selected>Hedge</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="stop-loss-percent">Stop Loss Percentage:</label>
-            <input type="number" step="0.01" class="form-control" id="stop-loss-percent" placeholder="Enter the stop loss percentage"
-              onkeyup="calculate()">
-          </div>
-          <div class="form-group">
-            <label for="stop-loss-dollar">Stop Loss in Dollar:</label>
-            <input type="number" class="form-control" id="stop-loss-dollar" placeholder="Enter the stop loss in dollar"
-              onkeyup="calculate()">
-          </div>
-          <div class="form-group">
-            <label for="leverage">Leverage:</label>
-            <input type="number" class="form-control" id="leverage" placeholder="Enter the leverage (e.g. 1x, 5x, 20x)"
-              onkeyup="calculate()">
-          </div>
-          <div class="form-group">
-            <!-- Reward to risk ratio slider (rr). Default is 3. -->
-            <!-- https://www.w3schools.com/howto/howto_js_rangeslider.asp -->
-            <label for="rr">Reward to Risk Ratio: <span id="rr-value" class="mt-4">4</span>:1</label>
-            <input type="range" step="0.1" min="1" max="30" value="4" class="form-control-range" id="rr" onchange="calculate()">
-          </div>
-          <div class="form-group">
-            <!-- Searchable dropdown component -->
-            <!-- https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
-            <label for="ticker">Ticker:</label>
-            <input type="text" class="form-control" id="ticker" placeholder="Enter the ticker" onkeyup="filterFunction()" onkeydown="calculate()">
-            <span class="fetching-text mt-4">Fetching data, please wait...</span>
-            <!-- Progress bar -->
-            <!-- https://www.w3schools.com/howto/howto_css_progressbar.asp -->
-            <div class="progress">
-              <div class="progress-bar progress-bar-striped progress-bar-animated mt-4" role="progressbar" aria-valuenow="75"
-                aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
+  <body>
+    <div class="container container-fluid my-4">
+      <h1 class="text-center">Margin Calculator</h1>
+      <div class="row">
+        <div class="col col-8">
+          <form>
+            <div class="form-group">
+              <label for="mode">Trading Mode:</label>
+              <select class="form-control" id="mode" onchange="calculate()">
+                <option value="one-way">One-way</option>
+                <option value="hedge" selected>Hedge</option>
+              </select>
             </div>
-            <div id="tickerDropdown" class="dropdown-content">
-              <!-- <a href="#">BTCUSDT</a> -->
+            <div class="form-group">
+              <label for="stop-loss-percent">Stop Loss Percentage:</label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                id="stop-loss-percent"
+                placeholder="Enter the stop loss percentage"
+                onkeyup="calculate()"
+              />
             </div>
-            <div class="current-price">
-              <span class="current-price-text">Current price: </span>
-              <span class="current-price-value"></span>
+            <div class="form-group">
+              <label for="stop-loss-dollar">Stop Loss in Dollar:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="stop-loss-dollar"
+                placeholder="Enter the stop loss in dollar"
+                onkeyup="calculate()"
+              />
             </div>
+            <div class="form-group">
+              <label for="leverage">Leverage:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="leverage"
+                placeholder="Enter the leverage (e.g. 1x, 5x, 20x)"
+                onkeyup="calculate()"
+              />
+            </div>
+            <div class="form-group">
+              <!-- Reward to risk ratio slider (rr). Default is 3. -->
+              <!-- https://www.w3schools.com/howto/howto_js_rangeslider.asp -->
+              <label for="rr"
+                >Reward to Risk Ratio:
+                <span id="rr-value" class="mt-4">4</span>:1</label
+              >
+              <input
+                type="range"
+                step="0.1"
+                min="1"
+                max="30"
+                value="4"
+                class="form-control-range"
+                id="rr"
+                onchange="calculate()"
+              />
+            </div>
+            <div class="form-group">
+              <!-- Searchable dropdown component -->
+              <!-- https://www.w3schools.com/howto/howto_js_filter_dropdown.asp -->
+              <label for="ticker">Ticker:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="ticker"
+                placeholder="Enter the ticker"
+                onkeyup="filterFunction()"
+                onkeydown="calculate()"
+              />
+              <span class="fetching-text mt-4"
+                >Fetching data, please wait...</span
+              >
+              <!-- Progress bar -->
+              <!-- https://www.w3schools.com/howto/howto_css_progressbar.asp -->
+              <div class="progress">
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated mt-4"
+                  role="progressbar"
+                  aria-valuenow="75"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  style="width: 75%"
+                ></div>
+              </div>
+              <div id="tickerDropdown" class="dropdown-content">
+                <!-- <a href="#">BTCUSDT</a> -->
+              </div>
+              <div class="current-price">
+                <span class="current-price-text">Current price: </span>
+                <span class="current-price-value"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="button" class="btn btn-success buy">Buy</button>
+              <button type="button" class="btn btn-danger sell">Sell</button>
+              <!-- Send order -->
+              <button
+                type="button"
+                class="btn btn-primary send-order ml-2"
+                disabled
+              >
+                Send order
+              </button>
+              <!-- Close trade -->
+              <button
+                type="button"
+                class="btn btn-outline-danger close-trade ml-2"
+                disabled
+              >
+                Close trade
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-success ml-2"
+                id="add-trade-button"
+              >
+                Add Trade
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-dark"
+                id="clear-trades-button"
+              >
+                Clear Trades
+              </button>
+            </div>
+            <div class="form-group">
+              <label for="trade-text"
+                >Use the following text to open a trade:</label
+              >
+              <textarea
+                class="form-control"
+                id="trade-text"
+                rows="4"
+                readonly
+              ></textarea>
+              <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
+              <button
+                type="button"
+                class="btn btn-primary mt-4 copy-to-clipboard"
+                onclick="copyToClipboard()"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Copied!"
+                disabled
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+            <div class="form-group">
+              <label for="reduce-trade-amount"
+                >How much to reduce the trade for:</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="reduce-trade-amount"
+                placeholder="Enter the amount to reduce the trade for"
+                onkeyup="calculate()"
+              />
+              <label for="reduce-trade-text"
+                >Use the following text to reduce the trade above:</label
+              >
+              <textarea
+                class="form-control"
+                id="reduce-trade-text"
+                rows="4"
+                readonly
+              ></textarea>
+              <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
+              <button
+                type="button"
+                class="btn btn-primary mt-4 copy-reduce-to-clipboard"
+                onclick="copyReduceToClipboard()"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Copied!"
+                disabled
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+            <div class="form-group">
+              <label for="be-trade-text"
+                >Use the following text to set the trade breakeven:</label
+              >
+              <textarea
+                class="form-control"
+                id="be-trade-text"
+                rows="4"
+                readonly
+              ></textarea>
+              <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
+              <button
+                type="button"
+                class="btn btn-primary mt-4 copy-be-to-clipboard"
+                onclick="copyBeToClipboard()"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Copied!"
+                disabled
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="col col-4">
+          <div class="sidebar bg-light">
+            <h2>Trade History</h2>
+            <ul id="trade-history-list"></ul>
           </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-success buy">Buy</button>
-            <button type="button" class="btn btn-danger sell">Sell</button>
-            <!-- Send order -->
-            <button type="button" class="btn btn-primary send-order ml-2" disabled>Send order</button>
-            <!-- Close trade -->
-            <button type="button" class="btn btn-outline-danger close-trade ml-2" disabled>Close trade</button>
-            <button type="button" class="btn btn-outline-success ml-2" id="add-trade-button">Add Trade</button>
-            <button type="button" class="btn btn-outline-dark" id="clear-trades-button">Clear Trades</button>
-    
-          </div>
-          <!-- <div class="form-group"> -->
-            <!-- Collapsible component that shows a tradingview embed chart -->
-            <!-- https://www.w3schools.com/howto/howto_js_collapsible.asp -->
-            <!-- <button type="button" class="btn btn-primary collapse-toggle-btn" data-toggle="collapse" data-target="#chart">Show chart</button> -->
-            <!-- <div class="collapse"> -->
-              <!-- TradingView Widget BEGIN -->
-              <!-- <div id="chart" class="tradingview-widget-container">
-                <div id="tradingview_5e9ab"></div>
-              </div> -->
-              <!-- TradingView Widget END -->
-            <!-- </div> -->
-          <!-- </div> -->
-          <div class="form-group">
-            <label for="trade-text">Use the following text to open a trade:</label>
-            <textarea class="form-control" id="trade-text" rows="4" readonly></textarea>
-            <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
-            <button type="button" class="btn btn-primary mt-4 copy-to-clipboard" onclick="copyToClipboard()" data-toggle="tooltip"
-              data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
-          </div>
-          <div class="form-group">
-            <label for="reduce-trade-amount">How much to reduce the trade for:</label>
-            <input type="number" class="form-control" id="reduce-trade-amount" placeholder="Enter the amount to reduce the trade for"
-              onkeyup="calculate()">
-            <label for="reduce-trade-text">Use the following text to reduce the trade above:</label>
-            <textarea class="form-control" id="reduce-trade-text" rows="4" readonly></textarea>
-            <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
-            <button type="button" class="btn btn-primary mt-4 copy-reduce-to-clipboard" onclick="copyReduceToClipboard()" data-toggle="tooltip"
-              data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
-          </div>
-          <div class="form-group">
-            <label for="be-trade-text">Use the following text to set the trade breakeven:</label>
-            <textarea class="form-control" id="be-trade-text" rows="4" readonly></textarea>
-            <!-- Add copy to clipboard button which is enabled only when text is not empty. Also add a tooltip saying the text is copied when it's clicked. -->
-            <button type="button" class="btn btn-primary mt-4 copy-be-to-clipboard" onclick="copyBeToClipboard()" data-toggle="tooltip"
-              data-placement="top" title="Copied!" disabled>Copy to Clipboard</button>
-          </div>
-        </form>
-      </div>
-      <div class="col col-4">
-        <div class="sidebar bg-light">
-          <h2>Trade History</h2>
-          <ul id="trade-history-list"></ul>
         </div>
       </div>
+      <div id="error-message" class="text-danger" style="display: none"></div>
+      <div id="result" style="display: none"></div>
     </div>
-    <div id="error-message" class="text-danger" style="display: none;"></div>
-    <div id="result" style="display: none;"></div>
-  </div>
-</body>
-    
-
+  </body>
 </html>

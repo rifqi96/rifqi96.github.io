@@ -85,11 +85,12 @@ function registerEvents() {
 }
 
 function authenticate() {
-  let password = prompt("Please enter the password to access this page:");
-  while (password !== "satuduatiga") {
-    alert("Wrong password! Please try again.");
-    password = prompt("Please enter the password to access this page:");
-  }
+  // !READ: Uncomment the below code to enable password protection
+  // let password = prompt("Please enter the password to access this page:");
+  // while (password !== "satuduatiga") {
+  //   alert("Wrong password! Please try again.");
+  //   password = prompt("Please enter the password to access this page:");
+  // }
 
   // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
   // Else the app will use the api secret key and the slot that the user entered
