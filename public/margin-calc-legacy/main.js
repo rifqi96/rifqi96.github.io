@@ -184,7 +184,7 @@ function loadTradeHistory() {
 // Function to delete a specific trade
 function deleteTrade(index) {
   let trades = JSON.parse(localStorage.getItem("trades")) || [];
-  trades.splice(index, 1);
+  trades.splice(trades.length - 1 - index, 1);
   localStorage.setItem("trades", JSON.stringify(trades));
   loadTradeHistory();
 }
