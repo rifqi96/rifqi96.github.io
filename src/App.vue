@@ -1,21 +1,11 @@
-<template>
-  <div id="app">
-    <MarginCalc />
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent } from "vue";
-import MarginCalc from "./components/MarginCalc.vue";
-
-export default defineComponent({
-  name: "App",
-  components: {
-    MarginCalc,
-  },
-});
+<script setup lang="ts">
+//
 </script>
 
-<style>
-/* You can include global styles here */
-</style>
+<template>
+  <v-app>
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
+</template>
