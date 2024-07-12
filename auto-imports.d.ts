@@ -12,6 +12,10 @@ declare global {
   const defineAsyncComponent: (typeof import("vue"))["defineAsyncComponent"];
   const defineComponent: (typeof import("vue"))["defineComponent"];
   const effectScope: (typeof import("vue"))["effectScope"];
+  const generateBeCommand: (typeof import("./src/utils/commandGenerators"))["generateBeCommand"];
+  const generateCommand: (typeof import("./src/utils/commandGenerators"))["generateCommand"];
+  const generateReduceCommand: (typeof import("./src/utils/commandGenerators"))["generateReduceCommand"];
+  const generateSLCommand: (typeof import("./src/utils/commandGenerators"))["generateSLCommand"];
   const getCurrentInstance: (typeof import("vue"))["getCurrentInstance"];
   const getCurrentScope: (typeof import("vue"))["getCurrentScope"];
   const h: (typeof import("vue"))["h"];
@@ -58,6 +62,8 @@ declare global {
   const useRoute: (typeof import("vue-router"))["useRoute"];
   const useRouter: (typeof import("vue-router"))["useRouter"];
   const useSlots: (typeof import("vue"))["useSlots"];
+  const useTicker: (typeof import("./src/composables/useTicker"))["useTicker"];
+  const useTradeHistory: (typeof import("./src/composables/useTradeHistory"))["useTradeHistory"];
   const watch: (typeof import("vue"))["watch"];
   const watchEffect: (typeof import("vue"))["watchEffect"];
   const watchPostEffect: (typeof import("vue"))["watchPostEffect"];

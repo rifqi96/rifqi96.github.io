@@ -1,1226 +1,354 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-// import { useVuetify } from "vuetify";
-import { useFetch } from "@vueuse/core";
-import { ExchangeInfo } from "@/models/ExchangeInfo.model";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { useTicker } from "@/composables/useTicker";
+import { useTradeHistory } from "@/composables/useTradeHistory";
+import {
+  generateCommand,
+  generateReduceCommand,
+  generateBeCommand,
+  generateSLCommand,
+} from "@/utils/commandGenerators";
+import { watchPrice, getMinMaxLotSize } from "@/services/binanceApi";
+import type { Trade } from "@/types";
 
-// Define state using the Composition API
-const tradingMode = ref("hedge");
+// State
+const tradingMode = ref("One-way");
+const slotNumber = ref("7");
+const apiSecret = ref(
+  "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419",
+);
 const stopLossPercent = ref(0);
 const stopLossDollar = ref(0);
 const leverage = ref(1);
 const rr = ref(4);
-const ticker = ref("");
-const tradeText = ref("");
-const reduceTradeAmount = ref(0);
-const reduceTradeText = ref("");
-const beTradeText = ref("");
-const currentPrice = ref(0);
-const formReady = ref(false);
-const pair = ref("PAIR");
-const price = ref(0);
-const orders = ref([]);
-const slot = ref(import.meta.env.VITE_ALEEERT__SLOT as string); // default value
-const apiSecret = ref(import.meta.env.VITE_ALEEERT__API_SECRET as string); // default value
-const tickerFetch = ref<{
-  status: "loading" | "error" | "success";
-  progress: number;
-  data: ExchangeInfo | null;
-}>({
-  status: "loading",
-  progress: 0,
-  data: null,
+const pair = ref("");
+const position = ref("");
+const reduceAmount = ref(0);
+const slPrice = ref<number | null>(null);
+const currentPrice = ref<number | null>(null);
+
+// Composables
+const { ticker, isLoading: isTickerLoading, error: tickerError } = useTicker();
+const { trades, addTrade, clearTrades, loadTrade, deleteTrade } =
+  useTradeHistory();
+
+// Computed values
+const deployedCapital = computed(() => {
+  if (stopLossPercent.value && stopLossDollar.value && leverage.value) {
+    return (
+      stopLossDollar.value / (stopLossPercent.value / 100) / leverage.value
+    );
+  }
+  return 0;
 });
 
-// Refactor functions to use Vue's reactivity system
-function authenticate() {
-  let password = prompt("Please enter the password to access this page:");
-  while (password !== "satuduatiga") {
-    alert("Wrong password! Please try again.");
-    password = prompt("Please enter the password to access this page:");
+const rewardPercent = computed(() => stopLossPercent.value * rr.value);
+
+const positionCmd = computed(() => {
+  if (tradingMode.value === "Hedge") {
+    return position.value === "buy" ? "openlong" : "openshort";
   }
-}
+  return position.value;
+});
 
-async function fetchTickersList() {
-  tickerFetch.value.status = "loading";
-
-  const {
-    response,
-    error,
-    arrayBuffer,
-    data,
-    isFetching,
-    isFinished,
-    onFetchResponse,
-    onFetchError,
-    onFetchFinally,
-  } = await useFetch<ExchangeInfo>(
-    "https://fapi.binance.com/fapi/v1/exchangeInfo",
+const text = computed(() => {
+  if (!pair.value || !position.value) return "";
+  let command = generateCommand(
+    pair.value,
+    positionCmd.value,
+    deployedCapital.value,
+    rewardPercent.value,
+    stopLossPercent.value,
+    leverage.value,
+    !!slPrice.value,
   );
-
-  if (error) {
-    console.error(error);
-    tickerFetch.value.status = "error";
-    return;
+  if (slPrice.value) {
+    command += ";\n" + slText.value;
   }
-
-  if (isFetching) {
-    console.log("isFetching");
-    tickerFetch.value.status = "loading";
-    return;
-  }
-
-  if (isFinished) {
-    console.log("isFinished");
-    tickerFetch.value.status = "success";
-    tickerFetch.value.data = data.value;
-    return;
-  }
-}
-
-function filterTickers(e: Event) {
-  const input = e.target as HTMLInputElement;
-  const filter = input.value.toUpperCase();
-  const tickerDropdown = document.querySelector("#tickerDropdown");
-  if (!tickerDropdown) return;
-  const tickerDropdownItems = tickerDropdown.querySelectorAll(
-    ".ticker",
-  ) as NodeListOf<HTMLElement>;
-  for (let i = 0; i < tickerDropdownItems.length; i++) {
-    if (tickerDropdownItems[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
-      tickerDropdownItems[i].style.display = "";
-    } else {
-      tickerDropdownItems[i].style.display = "none";
-    }
-  }
-}
-
-function calculate() {
-  // ... calculation logic ...
-}
-
-function addTrade() {
-  // ... logic to add a trade ...
-}
-
-function clearTrades() {
-  // ... logic to clear trades ...
-}
-
-function saveTrade(tradeData: any) {
-  // ... logic to save a trade ...
-}
-
-function loadTradeHistory() {
-  // ... logic to load trade history ...
-}
-
-function copyToClipboard() {
-  // ... logic to copy to clipboard ...
-}
-
-function copyReduceToClipboard() {
-  // ... logic to copy reduce to clipboard ...
-}
-
-function copyBeToClipboard() {
-  // ... logic to copy be to clipboard ...
-}
-
-function sendOrder() {
-  // ... logic to send order ...
-}
-
-// Call bootstrap function on component mounted
-onMounted(() => {
-  authenticate();
-  fetchTickersList();
-  loadTradeHistory();
+  return command;
 });
 
-/**=========================================================
- * Start of the old code
- =========================================================*/
-
-// // Global variables
-// let slot = 0;
-// let apiSecret = "";
-// let text = "";
-// let reduceText = "";
-// let beText = "";
-// let position = "POSITION";
-// let positionCmd = "POSITION";
-// let positionReduce = "POSITION";
-// let positionH = "-";
-// let tpsl = "tpsl";
-// let rr = 4;
-// let formReady = false;
-// let pair = "PAIR";
-// let pairPrice = 0;
-// let socket;
-// let symbolsData;
-// let leverage;
-// let price;
-// let orders = [];
-// let mode = "hedge"; // one-way or hedge
-// let stopLossPercent = 0;
-// let stopLossDollar = 0;
-// let reduceAmount = 0;
-// const maxCommands = 3;
-
-// // On dom content loaded
-// document.addEventListener("DOMContentLoaded", bootstrap);
-
-// // Bootstrap the app
-// function bootstrap() {
-//   authenticate();
-
-//   fetchTickersList();
-
-//   tickersDropdownBootstrap();
-
-//   registerEvents();
-
-//   loadTradeHistory();
-// }
-
-// function registerEvents() {
-//   // Trading mode -- dropdown
-//   const tradingMode = document.querySelector("#mode");
-//   tradingMode.addEventListener("change", function () {
-//     mode = tradingMode.value;
-//     calculate();
-//   });
-
-//   // Reward to risk ratio slider
-//   const rrSlider = document.querySelector("#rr");
-//   rrSlider.addEventListener("input", function () {
-//     rr = rrSlider.value;
-//     document.querySelector("#rr-value").textContent = rr;
-//     calculate();
-//   });
-
-//   // .buy and .sell button event listeners
-//   const buyButton = document.querySelector(".buy");
-//   buyButton.addEventListener("click", calculate);
-//   const sellButton = document.querySelector(".sell");
-//   sellButton.addEventListener("click", calculate);
-
-//   // .send-order button event listener
-//   const sendOrderBtn = document.querySelector(".send-order");
-//   sendOrderBtn.addEventListener("click", sendOrder);
-
-//   // .close-trade button event listener
-//   const closeTradeBtn = document.querySelector(".close-trade");
-//   closeTradeBtn.addEventListener("click", closeTrade);
-
-//   // Event listener for the "Add Trade" button
-//   document
-//     .getElementById("add-trade-button")
-//     .addEventListener("click", addTrade);
-
-//   // Event listener for the "Clear Trades" button
-//   document
-//     .getElementById("clear-trades-button")
-//     .addEventListener("click", clearTrades);
-// }
-
-// function authenticate() {
-//   let password = prompt("Please enter the password to access this page:");
-//   while (password !== "satuduatiga") {
-//     alert("Wrong password! Please try again.");
-//     password = prompt("Please enter the password to access this page:");
-//   }
-
-//   // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
-//   // Else the app will use the api secret key and the slot that the user entered
-//   slot = prompt("Please enter your slot number (optional):");
-//   if (!slot) {
-//     slot = 7;
-//   }
-//   apiSecret = prompt("Please enter your API secret key (optional):");
-//   if (!apiSecret) {
-//     apiSecret =
-//       "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
-//   }
-// }
-
-// // Function to add a trade
-// function addTrade() {
-//   // Check if all fields are filled
-//   if (!formReady) {
-//     alert("Error: Please fill in all the fields.");
-//     return;
-//   }
-
-//   const tradeData = {
-//     datetime: new Date().toLocaleString(),
-//     pair: pair,
-//     leverage: leverage,
-//     price: price,
-//     position: position,
-//     positionCmd: positionCmd,
-//     positionReduce: positionReduce,
-//     positionH: positionH,
-//     tpsl: tpsl,
-//     rr: rr,
-//     slot: slot,
-//     apiSecret: apiSecret,
-//     text: text,
-//     reduceText: reduceText,
-//     beText: beText,
-//     orders: orders,
-//     mode: mode,
-//     stopLossDollar: stopLossDollar,
-//     stopLossPercent: stopLossPercent,
-//     reduceAmount: reduceAmount,
-//   };
-//   saveTrade(tradeData);
-//   loadTradeHistory();
-// }
-
-// // Function to clear trades
-// function clearTrades() {
-//   localStorage.removeItem("trades");
-//   loadTradeHistory();
-// }
-
-// // Function to save trade to local storage
-// function saveTrade(tradeData) {
-//   const trades = JSON.parse(localStorage.getItem("trades")) || [];
-//   trades.push(tradeData);
-//   localStorage.setItem("trades", JSON.stringify(trades));
-// }
-
-// // Function to load trade history
-// function loadTradeHistory() {
-//   console.log("loadTradeHistory");
-//   let trades = JSON.parse(localStorage.getItem("trades")) || [];
-
-//   // Sorting trades by datetime in descending order
-//   trades = trades.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
-
-//   const tradeHistoryList = document.getElementById("trade-history-list");
-//   tradeHistoryList.innerHTML = "";
-//   trades.forEach((trade, index) => {
-//     const li = document.createElement("li");
-//     li.textContent = `Trade ${trade.datetime}: ${trade.text}`;
-//     li.addEventListener("click", () => loadTrade(trade));
-
-//     // Adding delete button for each trade
-//     const deleteButton = document.createElement("button");
-//     deleteButton.className = "btn btn-danger btn-sm ml-2";
-//     deleteButton.textContent = "Delete";
-//     deleteButton.addEventListener("click", () => deleteTrade(index));
-//     li.appendChild(deleteButton);
-
-//     tradeHistoryList.appendChild(li);
-//   });
-// }
-
-// // Function to delete a specific trade
-// function deleteTrade(index) {
-//   let trades = JSON.parse(localStorage.getItem("trades")) || [];
-//   trades.splice(index, 1);
-//   localStorage.setItem("trades", JSON.stringify(trades));
-//   loadTradeHistory();
-// }
-
-// // Function to load a specific trade
-// function loadTrade(tradeData) {
-//   console.log("loadTrade");
-//   pair = tradeData.pair;
-//   leverage = tradeData.leverage;
-//   price = tradeData.price;
-//   position = tradeData.position;
-//   positionCmd = tradeData.positionCmd;
-//   positionReduce = tradeData.positionReduce;
-//   positionH = tradeData.positionH;
-//   tpsl = tradeData.tpsl;
-//   rr = tradeData.rr;
-//   slot = tradeData.slot;
-//   apiSecret = tradeData.apiSecret;
-//   text = tradeData.text;
-//   reduceText = tradeData.reduceText;
-//   beText = tradeData.beText;
-//   orders = tradeData.orders;
-//   mode = tradeData.mode;
-//   stopLossDollar = tradeData.stopLossDollar;
-//   stopLossPercent = tradeData.stopLossPercent;
-//   reduceAmount = tradeData.reduceAmount;
-//   formReady = true;
-
-//   // Update the UI
-//   document.querySelector("#mode").value = mode;
-//   document.querySelector("#stop-loss-percent").value = stopLossPercent;
-//   document.querySelector("#stop-loss-dollar").value = stopLossDollar;
-//   document.querySelector("#leverage").value = leverage;
-//   document.querySelector("#rr").value = rr;
-//   document.querySelector("#rr-value").textContent = rr;
-//   document.querySelector("#ticker").value = pair;
-//   document.querySelector("#reduce-trade-amount").value = reduceAmount;
-
-//   // Update the UI for the position
-//   if (position === "buy") {
-//     document.querySelector(".buy").click();
-//   } else if (position === "sell") {
-//     console.log("sell");
-//     document.querySelector(".sell").click();
-//   }
-// }
-
-// // List of crypto currencies from binance futures API
-// // https://fapi.binance.com/fapi/v1/exchangeInfo
-// // Use above API to fetch the data, use the "assets.symbol" property
-// // Put the list in the #tickerDropdown with following format <a href="#">{{symbol}}</a>
-// function fetchTickersList() {
-//   // Show the progress bar
-//   const progressBar = document.querySelector(".progress");
-//   progressBar.style.display = "block";
-//   progressBar.style.width = "0%";
-//   // aria-valuenow is used by screen readers
-//   progressBar.setAttribute("aria-valuenow", "0");
-
-//   // Create a new request
-//   const request = new XMLHttpRequest();
-//   // Open a new connection, using the GET request on the URL endpoint
-//   request.open("GET", "https://fapi.binance.com/fapi/v1/exchangeInfo", true);
-//   // Handle progress
-//   request.onprogress = handleOnProgress;
-//   // Handle successful request
-//   request.onload = handleOnLoad;
-//   // Handle network error
-//   request.onerror = handleError;
-
-//   function handleOnLoad(e) {
-//     const res = this;
-//     if (res.status >= 200 && res.status < 400) {
-//       // Successful request
-//       handleSuccess(res);
-//     } else {
-//       // We reached our target server, but it returned an error
-//       handleError(res);
-//     }
-//   }
-
-//   function handleOnProgress(e) {
-//     if (e.lengthComputable) {
-//       // Update the progress bar width percentage based on the loaded data
-//       const percentComplete = (e.loaded / e.total) * 100;
-//       progressBar.style.width = `${percentComplete}%`;
-//       progressBar.setAttribute("aria-valuenow", percentComplete);
-//     }
-//   }
-
-//   function handleSuccess(res) {
-//     // Hide the fetching text
-//     const fetchingText = document.querySelector(".fetching-text");
-//     fetchingText.style.display = "none";
-//     // Hide the progress bar
-//     progressBar.style.display = "none";
-//     const data = JSON.parse(res.response);
-//     symbolsData = data.symbols;
-//     const symbols = symbolsData.map((symbol) => symbol.symbol);
-
-//     const tickerDropdown = document.querySelector("#tickerDropdown");
-//     symbols.forEach((symbol) => {
-//       const option = document.createElement("a");
-//       option.className = "ticker";
-//       option.href = "#";
-//       option.text = symbol;
-//       tickerDropdown.appendChild(option);
-//     });
-//   }
-
-//   function handleError(error) {
-//     // Handle error
-//     console.log("Failed to load the data", error);
-//     // Change fetching text to error text
-//     const fetchingText = document.querySelector(".fetching-text");
-//     fetchingText.textContent = "Failed to load the data";
-//     // Give error text a bootstrap error class
-//     fetchingText.classList.add("text-danger");
-//   }
-
-//   request.send();
-// }
-
-// // Watch the price of the selected symbol
-// function watchPrice(symbol) {
-//   console.log("watchPrice", symbol);
-//   if (socket) {
-//     socket.close();
-//   }
-//   socket = new WebSocket(
-//     `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
-//   );
-//   console.log("socket", socket);
-
-//   socket.onclose = function (event) {
-//     console.log("event onclose", event);
-//   };
-
-//   socket.onerror = function (event) {
-//     console.log("event onerror", event);
-//   };
-
-//   socket.onopen = function (event) {
-//     console.log("event onopen", event);
-//   };
-
-//   socket.onmessage = function (event) {
-//     const data = JSON.parse(event.data);
-//     price = data.c;
-//     // Update .current-price-value
-//     const currentPriceValue = document.querySelector(".current-price-value");
-//     currentPriceValue.textContent = price;
-//   };
-// }
-
-// // Get min and max MARKET_LOT_SIZE of the symbol
-// // The MARKET_LOT_SIZE is from the tickers list
-// function getMinMaxLotSize(symbol) {
-//   try {
-//     const symbolData = symbolsData.find(
-//       (symbolData) => symbolData.symbol === symbol
-//     );
-//     if (!symbolData) {
-//       return { minQty: 0, maxQty: 0 };
-//     }
-//     const filters = symbolData.filters || [];
-//     const marketLotSize = filters.find(
-//       (filter) => filter.filterType === "MARKET_LOT_SIZE"
-//     );
-//     const minQty = marketLotSize.minQty;
-//     const maxQty = marketLotSize.maxQty;
-//     return { minQty, maxQty };
-//   } catch (error) {
-//     console.log("getMinMaxLotSize error", error);
-//     return { minQty: 0, maxQty: 0 };
-//   }
-// }
-
-// function getOrderLotSize(price, leverage) {
-//   const orderLotSize = price * leverage;
-//   return orderLotSize;
-// }
-
-// function isEligibleForMinLotSize(orderLotSize, minQty) {
-//   return orderLotSize >= minQty;
-// }
-
-// function isEligibleForMaxLotSize(orderLotSize, maxQty) {
-//   return orderLotSize <= maxQty;
-// }
-
-// // Bootstrap the tickers dropdown
-// function tickersDropdownBootstrap() {
-//   // Make the dropdown list appear when the input is clicked and type something
-//   const ticker = document.querySelector("#ticker");
-//   ticker.addEventListener("click", function () {
-//     tickerDropdown.style.display = "block";
-//   });
-//   ticker.addEventListener("keyup", function () {
-//     tickerDropdown.style.display = "block";
-//   });
-//   // Make the dropdown list disappear when the input is clicked and type something
-//   document.addEventListener("click", function (event) {
-//     if (event.target.id !== "ticker") {
-//       tickerDropdown.style.display = "none";
-//     }
-//   });
-
-//   // Make the dropdown list clickable and put the selected value in the input
-//   const tickerDropdown = document.querySelector("#tickerDropdown");
-//   tickerDropdown.addEventListener("click", function (event) {
-//     const ticker = event.target;
-//     if (ticker.classList.contains("ticker")) {
-//       document.getElementById("ticker").value = ticker.text;
-//       watchPrice(ticker.text);
-//       calculate();
-//     }
-//   });
-
-//   // Make the dropdown list selection keyboard accessible
-//   ticker.addEventListener("keydown", function (event) {
-//     const tickerDropdown = document.querySelector("#tickerDropdown");
-//     const tickerDropdownItems = tickerDropdown.querySelectorAll(".ticker");
-//     const activeItem = tickerDropdown.querySelector(".active");
-//     let activeItemIndex = 0;
-//     if (activeItem) {
-//       activeItemIndex = Array.from(tickerDropdownItems).indexOf(activeItem);
-//     }
-//     if (event.key === "ArrowDown") {
-//       if (activeItem) {
-//         activeItem.classList.remove("active");
-//       }
-//       if (activeItemIndex < tickerDropdownItems.length - 1) {
-//         tickerDropdownItems[activeItemIndex + 1].classList.add("active");
-//       } else {
-//         tickerDropdownItems[0].classList.add("active");
-//       }
-//     } else if (event.key === "ArrowUp") {
-//       if (activeItem) {
-//         activeItem.classList.remove("active");
-//       }
-//       if (activeItemIndex > 0) {
-//         tickerDropdownItems[activeItemIndex - 1].classList.add("active");
-//       } else {
-//         tickerDropdownItems[tickerDropdownItems.length - 1].classList.add(
-//           "active"
-//         );
-//       }
-//     } else if (event.key === "Enter") {
-//       if (activeItem) {
-//         document.getElementById("ticker").value = activeItem.text;
-//         watchPrice(activeItem.text);
-//         calculate();
-//       }
-//     }
-//   });
-// }
-
-// function sendOrder() {
-//   if (!formReady) return;
-
-//   const messages = [];
-
-//   // Send a post request to https://aleeert.com/api/v1/
-//   // with the message as the raw text body
-//   // and the Content-Type header set to text/plain
-//   // but before that, prompt the user to confirm the order with js dialog box
-//   // and if the user confirms, send the request
-//   // and if the user cancels, do nothing
-//   // Loop through the orders and add them to the messages array
-//   if (orders.length > 0) {
-//     // Put in slot and apiSecret to the string in the orders array
-//     for (let i = 0; i < orders.length; i++) {
-//       messages.push(orders[i]);
-
-//       for (let j = 0; j < orders[i].length; j++) {
-//         // Check if slot and apiSecret are already in the string
-//         // Combine slot and apiSecret with a comma and a space first before checking
-//         if (orders[i][j].indexOf(`${slot}, ${apiSecret}`) === -1) {
-//           // If slot and apiSecret are not in the string, add them
-//           messages[i][j] = `${orders[i][j]}, ${slot}, ${apiSecret}`;
-//         }
-//       }
-
-//       const question = `Order #${
-//         i + 1
-//       }: You are about to send the following order to the server: ${
-//         messages[i]
-//       }. Are you sure?`;
-//       if (confirm(question)) {
-//         const request = new XMLHttpRequest();
-//         request.open("POST", "https://aleeert.com/api/v1/", true);
-//         request.setRequestHeader("Content-Type", "text/plain");
-//         request.send(messages[i].join("\n"));
-//       }
-//     }
-//   }
-// }
-
-// function closeTrade() {
-//   if (!formReady) return;
-//   let closePercent = 100;
-
-//   // prompt the user to fill in the close percent
-//   // and if the user confirms, send the request
-//   // and if the user cancels, do nothing
-//   const question = "Please enter the close percent:";
-//   closePercent = prompt(question, closePercent);
-//   // Close percent must be a number between 0 and 100
-//   // Do nothing if the user cancels
-//   // Validate in one line
-//   if (
-//     closePercent === null ||
-//     closePercent === "" ||
-//     isNaN(closePercent) ||
-//     closePercent < 0 ||
-//     closePercent > 100
-//   )
-//     return;
-
-//   let closeCmd = "close";
-//   if (mode === "hedge") {
-//     closeCmd = "close_h";
-//   }
-
-//   const message = `${pair}, ${closeCmd}, ${closePercent}%, -, ${slot}, ${apiSecret}`;
-
-//   // Send a post request to https://aleeert.com/api/v1/
-//   // with the message as the raw text body
-//   // and the Content-Type header set to text/plain
-//   // but before that, prompt the user to confirm the order with js dialog box
-//   // and if the user confirms, send the request
-//   // and if the user cancels, do nothing
-//   const question2 = `You are about to send the following order to the server: ${message}. Are you sure?`;
-//   if (confirm(question2)) {
-//     const request = new XMLHttpRequest();
-//     request.open("POST", "https://aleeert.com/api/v1/", true);
-//     request.setRequestHeader("Content-Type", "text/plain");
-//     request.send(message);
-//   }
-// }
-
-// // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-// function copyToClipboard() {
-//   const generatedText = generateText(true);
-
-//   copyTextToClipboard(generatedText);
-// }
-
-// function copyReduceToClipboard() {
-//   const generatedText = generateReduceText(true);
-
-//   copyTextToClipboard(generatedText);
-// }
-
-// function copyBeToClipboard() {
-//   const generatedText = generateBeText(true);
-
-//   copyTextToClipboard(generatedText);
-// }
-
-// function generateText(showSecret = false) {
-//   // Check if orders array is not empty
-//   // Loop through and combine the slot and apiSecret with the orders
-//   // and copy the combined text to the clipboard
-//   let orderText = "";
-//   // Check if orders array is not empty
-//   if (orders.length > 0) {
-//     for (let i = 0; i < orders.length; i++) {
-//       for (let j = 0; j < orders[i].length; j++) {
-//         if (showSecret) {
-//           orderText += `${orders[i][j]}, ${slot}, ${apiSecret}\n`;
-//         } else {
-//           orderText += `${orders[i][j]}\n`;
-//         }
-//         if ((j + 1) % maxCommands === 0) {
-//           orderText += "\n";
-//         }
-//       }
-//     }
-//   }
-//   // If orders array is empty, use the text variable
-//   else {
-//     if (showSecret) {
-//       orderText = `${text}, ${slot}, ${apiSecret}`;
-//     } else {
-//       orderText = text;
-//     }
-//   }
-//   return orderText;
-// }
-
-// function generateReduceText(showSecret = false) {
-//   let orderText = reduceText;
-//   if (showSecret) {
-//     orderText += `, ${slot}, ${apiSecret}`;
-//   }
-//   return orderText;
-// }
-
-// function generateBeText(showSecret = false) {
-//   let orderText = beText;
-//   if (showSecret) {
-//     orderText += `, ${slot}, ${apiSecret}`;
-//   }
-//   return orderText;
-// }
-
-// // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-// function copyTextToClipboard(text) {
-//   var textArea = document.createElement("textarea");
-//   textArea.value = text;
-//   document.body.appendChild(textArea);
-//   textArea.focus();
-//   textArea.select();
-
-//   try {
-//     var successful = document.execCommand("copy");
-//     var msg = successful ? "successful" : "unsuccessful";
-//     console.log("Copying text command was " + msg);
-//   } catch (err) {
-//     console.log("Oops, unable to copy");
-//   }
-
-//   document.body.removeChild(textArea);
-// }
-
-// // https://www.w3schools.com/howto/howto_js_filter_lists.asp
-// function filterFunction() {
-//   var input, filter, ul, li, a, i;
-//   input = document.getElementById("ticker");
-//   filter = input.value.toUpperCase();
-//   div = document.getElementById("tickerDropdown");
-//   a = div.getElementsByTagName("a");
-//   for (i = 0; i < a.length; i++) {
-//     if (a[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
-//       a[i].style.display = "";
-//     } else {
-//       a[i].style.display = "none";
-//     }
-//   }
-// }
-
-// function generateCommand(
-//   pair,
-//   position,
-//   deployedCapital,
-//   rewardPercent,
-//   stopLossPercent,
-//   leverage
-// ) {
-//   console.log(
-//     "generateCommand",
-//     pair,
-//     position,
-//     deployedCapital,
-//     rewardPercent,
-//     stopLossPercent,
-//     leverage
-//   );
-//   // Round the reward and stop loss percent to 2 decimal places
-//   rewardPercent = Math.round(rewardPercent * 100) / 100;
-//   stopLossPercent = Math.round(stopLossPercent * 100) / 100;
-//   // Round the deployed capital to without decimal places
-//   deployedCapital = Math.round(deployedCapital);
-//   return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
-// }
-
-// function generateReduceCommand(pair, position, reduceAmount, leverage) {
-//   console.log("generateReduceCommand", pair, position, reduceAmount, leverage);
-//   return `${pair}(x${leverage}), ${position}, $${reduceAmount}, market`;
-// }
-
-// function generateBeCommand(pair, tpsl, positionH) {
-//   console.log("generateBeCommand", pair, tpsl, positionH);
-//   return `${pair}, ${tpsl}, ${positionH}, - | 0%(100%)`;
-// }
-
-// // The main calculate function
-// function calculate(event) {
-//   stopLossPercent = document.getElementById("stop-loss-percent").value;
-//   stopLossDollar = document.getElementById("stop-loss-dollar").value;
-//   reduceAmount = document.getElementById("reduce-trade-amount").value;
-//   leverage = document.getElementById("leverage").value;
-//   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
-//   // Change back to normal when the other button is clicked.
-//   if (event && event.target.innerHTML === "Buy") {
-//     event.target.innerHTML = "BUY";
-//     event.target.style.fontSize = "20px";
-//     event.target.style.fontWeight = "bold";
-//     document.querySelector("button.sell").innerHTML = "Sell";
-//     document.querySelector("button.sell").style.fontSize = "16px";
-//     document.querySelector("button.sell").style.fontWeight = "normal";
-//     position = "buy";
-//     // Check the hedge mode
-//     if (mode === "hedge") {
-//       positionCmd = "openlong";
-//       positionReduce = "closelong";
-//       positionH = "long";
-//       tpsl = "tpsl_h";
-//     } else {
-//       positionCmd = "buy";
-//       positionReduce = "sell";
-//       positionH = "-";
-//       tpsl = "tpsl";
-//     }
-//     document.getElementById("trade-text").value = text;
-//     document.getElementById("reduce-trade-text").value = reduceText;
-//     document.getElementById("be-trade-text").value = beText;
-//   } else if (event && event.target.innerHTML === "Sell") {
-//     event.target.innerHTML = "SELL";
-//     event.target.style.fontSize = "20px";
-//     event.target.style.fontWeight = "bold";
-//     document.querySelector("button.buy").innerHTML = "Buy";
-//     document.querySelector("button.buy").style.fontSize = "16px";
-//     document.querySelector("button.buy").style.fontWeight = "normal";
-//     position = "sell";
-//     // Check the hedge mode
-//     if (mode === "hedge") {
-//       positionCmd = "openshort";
-//       positionReduce = "closeshort";
-//       positionH = "short";
-//       tpsl = "tpsl_h";
-//     } else {
-//       positionCmd = "sell";
-//       positionReduce = "buy";
-//       positionH = "-";
-//       tpsl = "tpsl";
-//     }
-//     document.getElementById("trade-text").value = text;
-//     document.getElementById("reduce-trade-text").value = reduceText;
-//     document.getElementById("be-trade-text").value = beText;
-//   }
-
-//   if (
-//     !stopLossPercent ||
-//     !stopLossDollar ||
-//     !leverage ||
-//     isNaN(stopLossPercent) ||
-//     isNaN(stopLossDollar) ||
-//     isNaN(leverage) ||
-//     stopLossPercent === "" ||
-//     stopLossDollar === "" ||
-//     leverage === "" ||
-//     stopLossPercent <= 0 ||
-//     stopLossDollar <= 0 ||
-//     leverage <= 0
-//   ) {
-//     document.getElementById("error-message").innerHTML =
-//       "Error: Please fill in all the fields.";
-//     document.getElementById("error-message").style.display = "block";
-//     document.getElementById("result").style.display = "none";
-//     text = "";
-//     reduceText = "";
-//     beText = "";
-//     document.getElementById("trade-text").value = text;
-//     document.getElementById("reduce-trade-text").value = reduceText;
-//     document.getElementById("be-trade-text").value = beText;
-//     // Disable send order button when there's an error.
-//     document.querySelector("button.send-order").disabled = true;
-//     formReady = false;
-//     return;
-//   }
-//   const deployedCapital = stopLossDollar / (stopLossPercent / 100) / leverage;
-
-//   // If the deployed capital is lower than the stop loss dollar, show an error message.
-//   if (deployedCapital < stopLossDollar) {
-//     document.getElementById("error-message").innerHTML =
-//       "Error: The deployed capital is lower than the stop loss dollar.";
-//     document.getElementById("error-message").style.display = "block";
-//     document.getElementById("result").style.display = "none";
-//     text = "";
-//     reduceText = "";
-//     beText = "";
-//     document.getElementById("trade-text").value = text;
-//     document.getElementById("reduce-trade-text").value = reduceText;
-//     document.getElementById("be-trade-text").value = beText;
-//     // Disable copy to clipboard button when there's an error.
-//     document.querySelector("button.copy-to-clipboard").disabled = true;
-//     document.querySelector("button.copy-reduce-to-clipboard").disabled = true;
-//     document.querySelector("button.copy-be-to-clipboard").disabled = true;
-//     // Disable send order button when there's an error.
-//     document.querySelector("button.send-order").disabled = true;
-//     // Disable close trade button when there's an error.
-//     document.querySelector("button.close-trade").disabled = true;
-//     formReady = false;
-//   }
-//   // Show the result.
-//   else {
-//     // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-//     document.getElementById("result").innerHTML =
-//       "The capital to deploy for the trade with leverage " +
-//       leverage +
-//       " is: $" +
-//       deployedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-//     document.getElementById("result").style.display = "block";
-//     document.getElementById("error-message").style.display = "none";
-//     // Get pair from the ticker input.
-//     // Else if the ticker input is empty, use the word 'PAIR'
-//     pair = document.getElementById("ticker").value
-//       ? document.getElementById("ticker").value
-//       : "PAIR";
-//     const rewardPercent = stopLossPercent * rr;
-//     text = generateCommand(
-//       pair,
-//       positionCmd,
-//       deployedCapital,
-//       rewardPercent,
-//       stopLossPercent,
-//       leverage
-//     );
-//     reduceText = generateReduceCommand(
-//       pair,
-//       positionReduce,
-//       reduceAmount,
-//       leverage
-//     );
-//     beText = generateBeCommand(pair, tpsl, positionH);
-//     document.getElementById("trade-text").value = text;
-//     document.getElementById("reduce-trade-text").value = reduceText;
-//     document.getElementById("be-trade-text").value = beText;
-//     // Enable copy to clipboard button when there's no error.
-//     document.querySelector("button.copy-to-clipboard").disabled = false;
-//     document.querySelector("button.copy-reduce-to-clipboard").disabled = false;
-//     document.querySelector("button.copy-be-to-clipboard").disabled = false;
-//     // Enable send order button when there's no error.
-//     // But validate if the position is set to either buy or sell.
-//     if (position === "buy" || position === "sell") {
-//       // If the order size is less than minimum order size, disable the send order button.
-//       const minimumOrderSize = getMinMaxLotSize(pair, "min").minQty || 0;
-//       if (deployedCapital * leverage < minimumOrderSize) {
-//         document.querySelector("button.send-order").disabled = true;
-//       } else {
-//         document.querySelector("button.send-order").disabled = false;
-//       }
-//     }
-//     // Enable close position button when there's no error.
-//     // Validate if the pair is not 'PAIR'
-//     if (pair !== "PAIR") {
-//       document.querySelector("button.close-trade").disabled = false;
-//       // tradingviewChartBootstrap(pair);
-//     }
-
-//     // Enable the formReady flag when there's no error.
-//     // This is used to validate if the form is ready to be submitted to the server.
-//     // Pair and position are required fields.
-//     // Pair is validated by the ticker input and position is validated by the buy/sell button.
-//     // Pair can't be "PAIR" and position can't be "POSITION"
-//     if (pair !== "PAIR" && (position === "buy" || position === "sell")) {
-//       // TODO: Remove below code after one order implementation is stable
-//       // // The order size can't be greater than the maximum order size.
-//       // // If it is, it can be split into multiple orders.
-//       // // Split the order size into multiple orders if it's greater than the maximum order size.
-//       // const maximumOrderSize = getMinMaxLotSize(pair, "max").maxQty || 0;
-//       // // Split the deployedCapital size into multiple orders.
-//       // // The order size can't be greater than the maximum order size.
-//       // // Loop through the deployedCapital size and split it into multiple orders.
-//       // // Then push each order into the orders array.
-//       // // An order is a text using generateCommand()
-//       // let orderSize = deployedCapital * leverage;
-//       // let maximumOrderSizeInDollar = maximumOrderSize * price;
-//       // orders = [];
-//       // console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
-//       // if (maximumOrderSizeInDollar > 0 && orderSize > maximumOrderSizeInDollar) {
-//       //   console.log("orderSize: " + orderSize);
-//       //   while (orderSize > maximumOrderSizeInDollar) {
-//       //     orderSize -= maximumOrderSizeInDollar;
-//       //     const command = generateCommand(
-//       //       pair,
-//       //       positionCmd,
-//       //       maximumOrderSizeInDollar / leverage,
-//       //       rewardPercent,
-//       //       stopLossPercent,
-//       //       leverage
-//       //     );
-//       //     orders.push(command);
-//       //   }
-//       // }
-//       // // Push the remaining order size into the orders array.
-//       // // Check if n is lower than maxCommands const.
-//       // // If it is, push the order into the current array.
-//       // // Else, push the order into the next array.
-//       // if (orderSize > 0) {
-//       //   const command = generateCommand(
-//       //     pair,
-//       //     positionCmd,
-//       //     orderSize / leverage,
-//       //     rewardPercent,
-//       //     stopLossPercent,
-//       //     leverage
-//       //   );
-//       //   orders.push(command);
-//       // }
-
-//       // Loop through the deployedCapital size.
-//       // Then push each order into the orders array.
-//       // An order is a text using generateCommand()
-//       let orderSize = deployedCapital * leverage;
-//       orders = [];
-//       if (orderSize > 0) {
-//         const command = generateCommand(
-//           pair,
-//           positionCmd,
-//           orderSize / leverage,
-//           rewardPercent,
-//           stopLossPercent,
-//           leverage
-//         );
-//         orders.push(command);
-//       }
-
-//       // Change the orders array structure into 2D array.
-//       // Each array contains maxCommands items.
-//       const orders2D = [];
-//       let n = 0;
-//       let i = 0;
-//       orders.forEach((order) => {
-//         if (n === 0) {
-//           orders2D.push([]);
-//         }
-//         orders2D[i].push(order);
-//         n++;
-//         if (n === maxCommands) {
-//           n = 0;
-//           i++;
-//         }
-//       });
-//       orders = orders2D;
-
-//       // Print the orders array to the textarea.
-//       // The textarea is used to display the orders.
-//       // The textarea is also used to copy the orders to the clipboard.
-//       // The textarea is also used to send the orders to the server.
-//       // Each order is separated by a new line.
-//       // Max command per request is defined in maxCommands const.
-//       // Add more new lines per max commands.
-//       const orderText = generateText();
-//       const reduceOrderText = generateReduceText();
-//       const beOrderText = generateBeText();
-//       document.getElementById("trade-text").value = orderText;
-//       document.getElementById("reduce-trade-text").value = reduceOrderText;
-//       document.getElementById("be-trade-text").value = beOrderText;
-//       formReady = true;
-//     }
-//   }
-// }
-/**=========================================================
- * End of the old code
- =========================================================*/
+const reduceText = computed(() => {
+  if (!pair.value || !position.value) return "";
+  return generateReduceCommand(
+    pair.value,
+    position.value === "buy" ? "sell" : "buy",
+    reduceAmount.value,
+    leverage.value,
+  );
+});
+
+const beText = computed(() => {
+  if (!pair.value) return "";
+  return generateBeCommand(
+    pair.value,
+    tradingMode.value === "Hedge" ? "tpsl_h" : "tpsl",
+    position.value === "buy" ? "long" : "short",
+  );
+});
+
+const slText = computed(() => {
+  if (!pair.value || !slPrice.value || !currentPrice.value) return "";
+  const amountToBeLiquidated =
+    (stopLossDollar.value * leverage.value) / slPrice.value;
+  return generateSLCommand(
+    pair.value,
+    tradingMode.value === "Hedge" ? "tpsl_h" : "tpsl",
+    position.value === "buy" ? "long" : "short",
+    slPrice.value,
+    amountToBeLiquidated,
+    leverage.value,
+  );
+});
+
+// Methods
+const calculate = async () => {
+  if (!pair.value || !position.value) {
+    alert("Please select a pair and position");
+    return;
+  }
+
+  try {
+    const { minQty, maxQty } = await getMinMaxLotSize(pair.value);
+    if (deployedCapital.value < minQty || deployedCapital.value > maxQty) {
+      alert(`Deployed capital must be between ${minQty} and ${maxQty}`);
+      return;
+    }
+
+    const trade: Trade = {
+      datetime: new Date().toLocaleString(),
+      pair: pair.value,
+      leverage: leverage.value,
+      position: position.value,
+      stopLossPercent: stopLossPercent.value,
+      stopLossDollar: stopLossDollar.value,
+      slPrice: slPrice.value,
+      rr: rr.value,
+      text: text.value,
+      reduceText: reduceText.value,
+      beText: beText.value,
+      slText: slText.value,
+    };
+    addTrade(trade);
+  } catch (error) {
+    console.error("Error calculating trade:", error);
+    alert("An error occurred while calculating the trade. Please try again.");
+  }
+};
+
+const handleLoadTrade = (trade: Trade) => {
+  loadTrade(trade).updateParentState((loadedTrade) => {
+    tradingMode.value = loadedTrade.position === "buy" ? "One-way" : "Hedge";
+    pair.value = loadedTrade.pair;
+    leverage.value = loadedTrade.leverage;
+    position.value = loadedTrade.position;
+    stopLossPercent.value = loadedTrade.stopLossPercent;
+    stopLossDollar.value = loadedTrade.stopLossDollar;
+    slPrice.value = loadedTrade.slPrice;
+    rr.value = loadedTrade.rr;
+    // You might want to recalculate other values here if needed
+  });
+};
+
+const sendOrder = () => {
+  // Implement order sending logic here
+  console.log("Sending order:", text.value);
+  alert("Order sent (simulated)");
+};
+
+const closeTrade = () => {
+  const closePercent = prompt("Enter close percentage (1-100):", "100");
+  if (closePercent === null) return;
+  const percent = parseInt(closePercent, 10);
+  if (isNaN(percent) || percent < 1 || percent > 100) {
+    alert("Invalid percentage. Please enter a number between 1 and 100.");
+    return;
+  }
+  // Implement trade closing logic here
+  console.log(`Closing ${percent}% of the trade`);
+  alert(`Closing ${percent}% of the trade (simulated)`);
+};
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(
+    () => {
+      // Success message can be shown here
+    },
+    (err) => {
+      console.error("Error copying to clipboard:", err);
+      alert("An error occurred while copying to clipboard. Please try again.");
+    },
+  );
+};
+
+// Watchers
+let unwatchPrice: (() => void) | null = null;
+
+watch(pair, (newPair, oldPair) => {
+  if (unwatchPrice) {
+    unwatchPrice();
+    unwatchPrice = null;
+  }
+  if (newPair) {
+    unwatchPrice = watchPrice(newPair, (price) => {
+      currentPrice.value = price;
+    });
+  }
+});
+
+// Lifecycle hooks
+onMounted(() => {
+  // Any additional setup can go here
+});
+
+onUnmounted(() => {
+  if (unwatchPrice) {
+    unwatchPrice();
+  }
+});
 </script>
 
 <template>
-  <div class="TheCalculator">
-    <v-form>
-      <v-row>
-        <v-col cols="8">
-          <v-form>
-            <v-select
-              v-model="tradingMode"
-              :items="[
-                { text: 'One-way', value: 'one-way' },
-                { text: 'Hedge', value: 'hedge' },
-              ]"
-              item-title="text"
-              item-text="text"
-              item-value="value"
-              label="Trading Mode"
-              @change="calculate"
-            ></v-select>
-            <v-text-field
-              v-model="stopLossPercent"
-              label="Stop Loss Percentage"
-              type="number"
-              step="0.01"
-              @input="calculate"
-            ></v-text-field>
-            <v-text-field
-              v-model="stopLossDollar"
-              label="Stop Loss in Dollar"
-              type="number"
-              @input="calculate"
-            ></v-text-field>
-            <v-text-field
-              v-model="leverage"
-              label="Leverage"
-              type="number"
-              @input="calculate"
-            ></v-text-field>
-            <v-slider
-              v-model="rr"
-              :label="`Reward to Risk Ratio: ${rr}:1`"
-              min="1"
-              max="30"
-              step="0.1"
-              @change="calculate"
-            ></v-slider>
-            <div
-              v-if="tickerFetch.status === 'loading'"
-              class="loader-container"
+  <v-container>
+    <v-row>
+      <v-col cols="12" md="8">
+        <v-form @submit.prevent="calculate">
+          <v-select
+            v-model="tradingMode"
+            :items="['One-way', 'Hedge']"
+            label="Trading Mode"
+          ></v-select>
+          <v-text-field
+            v-model="slotNumber"
+            label="Slot Number"
+            type="number"
+          ></v-text-field>
+          <v-text-field
+            v-model="apiSecret"
+            label="API Secret"
+            type="password"
+          ></v-text-field>
+          <v-text-field
+            v-model.number="stopLossPercent"
+            label="Stop Loss Percentage"
+            type="number"
+            step="0.01"
+          ></v-text-field>
+          <v-text-field
+            v-model.number="stopLossDollar"
+            label="Stop Loss in Dollar"
+            type="number"
+            step="0.01"
+          ></v-text-field>
+          <v-text-field
+            v-model.number="slPrice"
+            label="SL Price"
+            type="number"
+            step="0.00000001"
+          ></v-text-field>
+          <v-text-field
+            v-model.number="leverage"
+            label="Leverage"
+            type="number"
+          ></v-text-field>
+          <v-slider
+            v-model="rr"
+            label="Reward to Risk Ratio"
+            min="1"
+            max="10"
+            step="1"
+            thumb-label
+          ></v-slider>
+          <v-autocomplete
+            v-model="pair"
+            :items="ticker"
+            label="Ticker"
+            :loading="isTickerLoading"
+            :error-messages="tickerError"
+          ></v-autocomplete>
+          <v-text-field
+            v-model="currentPrice"
+            label="Current Price"
+            readonly
+            class="mt-4"
+          ></v-text-field>
+          <v-btn-toggle v-model="position" mandatory>
+            <v-btn value="buy">Buy</v-btn>
+            <v-btn value="sell">Sell</v-btn>
+          </v-btn-toggle>
+          <v-btn type="submit" color="primary" class="mt-4">Add trade</v-btn>
+          <v-btn @click="sendOrder" color="success" class="mt-4 ml-2"
+            >Send Order</v-btn
+          >
+          <v-btn @click="closeTrade" color="error" class="mt-4 ml-2"
+            >Close Trade</v-btn
+          >
+        </v-form>
+        <v-textarea
+          v-model="text"
+          label="Trade Command"
+          readonly
+          rows="2"
+          class="mt-4"
+        ></v-textarea>
+        <v-btn @click="copyToClipboard(text)" color="primary" small
+          >Copy to clipboard</v-btn
+        >
+        <v-textarea
+          v-model="reduceText"
+          label="Reduce Command"
+          readonly
+          rows="2"
+          class="mt-4"
+        ></v-textarea>
+        <v-btn @click="copyToClipboard(reduceText)" color="primary" small
+          >Copy to clipboard</v-btn
+        >
+        <v-textarea
+          v-model="beText"
+          label="Breakeven Command"
+          readonly
+          rows="2"
+          class="mt-4"
+        ></v-textarea>
+        <v-btn @click="copyToClipboard(beText)" color="primary" small
+          >Copy to clipboard</v-btn
+        >
+        <v-textarea
+          v-model="slText"
+          label="Stop Loss Command"
+          readonly
+          rows="2"
+          class="mt-4"
+        ></v-textarea>
+        <v-btn @click="copyToClipboard(slText)" color="primary" small
+          >Copy to clipboard</v-btn
+        >
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card>
+          <v-card-title>Trade History</v-card-title>
+          <v-list>
+            <v-list-item
+              v-for="(trade, index) in trades"
+              :key="index"
+              @click="handleLoadTrade(trade)"
             >
-              <span class="fetching-text mt-4"
-                >Fetching data, please wait...</span
-              >
-              <v-progress-linear
-                class="mt-4"
-                color="primary"
-                height="4"
-                :indeterminate="true"
-              ></v-progress-linear>
-            </div>
-            <v-autocomplete
-              v-model="ticker"
-              :items="tickerFetch.data?.symbols"
-              item-text="symbol"
-              item-title="symbol"
-              item-value="symbol"
-              label="Ticker"
-              @update:model-value="calculate"
-            ></v-autocomplete>
-            <v-text-field
-              v-model="currentPrice"
-              label="Current price"
-              readonly
-            ></v-text-field>
-            <v-btn-group wrap divided rounded>
-              <v-btn color="success">Buy</v-btn>
-              <v-btn color="danger">Sell</v-btn>
-              <v-btn color="primary" disabled>Send order</v-btn>
-              <v-btn color="outline-danger" disabled>Close trade</v-btn>
-              <v-btn color="outline-success">Add Trade</v-btn>
-              <v-btn color="outline-dark">Clear Trades</v-btn>
-            </v-btn-group>
-            <v-textarea
-              v-model="tradeText"
-              class="mt-8"
-              label="Use the following text to open a trade"
-              rows="4"
-              readonly
-            ></v-textarea>
-            <v-btn
-              color="primary"
-              @click="copyToClipboard"
-              :disabled="tradeText === ''"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Copied!"
-            >
-              Copy to Clipboard
-            </v-btn>
-            <v-text-field
-              v-model="reduceTradeAmount"
-              class="mt-8"
-              label="How much to reduce the trade for"
-              type="number"
-              @input="calculate"
-            ></v-text-field>
-            <v-textarea
-              v-model="reduceTradeText"
-              class="mt-4"
-              label="Use the following text to reduce the trade above"
-              rows="4"
-              readonly
-            ></v-textarea>
-            <v-btn
-              color="primary"
-              @click="copyReduceToClipboard"
-              :disabled="reduceTradeText === ''"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Copied!"
-            >
-              Copy to Clipboard
-            </v-btn>
-            <v-textarea
-              v-model="beTradeText"
-              class="mt-8"
-              label="Use the following text to set the trade breakeven"
-              rows="4"
-              readonly
-            ></v-textarea>
-            <v-btn
-              color="primary"
-              @click="copyBeToClipboard"
-              :disabled="beTradeText === ''"
-              data-toggle="tooltip"
-              data-placement="top"
-              title="Copied!"
-            >
-              Copy to Clipboard
-            </v-btn>
-          </v-form>
-        </v-col>
-        <v-col cols="4">
-          <div class="sidebar bg-light">
-            <h2>Trade History</h2>
-            <ul id="trade-history-list"></ul>
-          </div>
-        </v-col>
-      </v-row>
-    </v-form>
-  </div>
+              <v-list-item-content>
+                {{ trade.datetime }} - {{ trade.pair }}
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn icon small @click.stop="deleteTrade(index)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
+          <v-btn @click="clearTrades" color="warning" class="mt-2"
+            >Clear History</v-btn
+          >
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
