@@ -809,7 +809,7 @@ function calculate(event) {
       : "PAIR";
     const rewardPercent = stopLossPercent * rr;
     if (slPrice) {
-      const amountToBeLiquidated = (stopLossDollar * leverage) / slPrice;
+      const amountToBeLiquidated = (deployedCapital * leverage) / slPrice;
       text = generateCommand(
         pair,
         positionCmd,
@@ -929,7 +929,7 @@ function calculate(event) {
       orders = [];
       if (orderSize > 0) {
         if (slPrice) {
-          const amountToBeLiquidated = (stopLossDollar * leverage) / slPrice;
+          const amountToBeLiquidated = (deployedCapital * leverage) / slPrice;
           const firstCommand = generateCommand(
             pair,
             positionCmd,

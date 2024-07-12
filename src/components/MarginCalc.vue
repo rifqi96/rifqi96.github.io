@@ -90,7 +90,7 @@ const beText = computed(() => {
 const slText = computed(() => {
   if (!pair.value || !slPrice.value || !currentPrice.value) return "";
   const amountToBeLiquidated =
-    (stopLossDollar.value * leverage.value) / slPrice.value;
+    (deployedCapital.value * leverage.value) / slPrice.value;
   return generateSLCommand(
     pair.value,
     tradingMode.value === "Hedge" ? "tpsl_h" : "tpsl",
