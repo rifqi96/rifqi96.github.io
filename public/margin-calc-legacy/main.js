@@ -7,6 +7,7 @@ let apiSecret = "";
 let text = "";
 let reduceText = "";
 let beText = "";
+let slText = "";
 let position = "POSITION";
 let positionCmd = "POSITION";
 let positionReduce = "POSITION";
@@ -25,6 +26,7 @@ let mode = "hedge"; // one-way or hedge
 let stopLossPercent = 0;
 let stopLossDollar = 0;
 let reduceAmount = 0;
+let slPrice = null;
 const maxCommands = 3;
 
 // On dom content loaded
@@ -133,6 +135,7 @@ function addTrade() {
     mode: mode,
     stopLossDollar: stopLossDollar,
     stopLossPercent: stopLossPercent,
+    slPrice: slPrice,
     reduceAmount: reduceAmount,
   };
   saveTrade(tradeData);
@@ -207,6 +210,7 @@ function loadTrade(tradeData) {
   mode = tradeData.mode;
   stopLossDollar = tradeData.stopLossDollar;
   stopLossPercent = tradeData.stopLossPercent;
+  slPrice = tradeData.slPrice;
   reduceAmount = tradeData.reduceAmount;
   formReady = true;
 
@@ -214,6 +218,7 @@ function loadTrade(tradeData) {
   document.querySelector("#mode").value = mode;
   document.querySelector("#stop-loss-percent").value = stopLossPercent;
   document.querySelector("#stop-loss-dollar").value = stopLossDollar;
+  document.querySelector("#sl-price").value = slPrice;
   document.querySelector("#leverage").value = leverage;
   document.querySelector("#rr").value = rr;
   document.querySelector("#rr-value").textContent = rr;
@@ -553,7 +558,7 @@ function generateText(showSecret = false) {
     for (let i = 0; i < orders.length; i++) {
       for (let j = 0; j < orders[i].length; j++) {
         if (showSecret) {
-          orderText += `${orders[i][j]}, ${slot}, ${apiSecret}\n`;
+          orderText += `${orders[i][j]}, ${slot}, ${apiSecret};\n`;
         } else {
           orderText += `${orders[i][j]}\n`;
         }
@@ -643,11 +648,13 @@ function generateCommand(
     leverage,
   );
   // Round the reward and stop loss percent to 2 decimal places
-  rewardPercent = Math.round(rewardPercent * 100) / 100;
-  stopLossPercent = Math.round(stopLossPercent * 100) / 100;
+  rewardPercent = `${Math.round(rewardPercent * 100) / 100}%`;
+  if (stopLossPercent !== "-") {
+    stopLossPercent = `${Math.round(stopLossPercent * 100) / 100}%`;
+  }
   // Round the deployed capital to without decimal places
   deployedCapital = Math.round(deployedCapital);
-  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}%|${stopLossPercent}%`;
+  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}|${stopLossPercent}`;
 }
 
 function generateReduceCommand(pair, position, reduceAmount, leverage) {
@@ -660,12 +667,33 @@ function generateBeCommand(pair, tpsl, positionH) {
   return `${pair}, ${tpsl}, ${positionH}, - | 0%(100%)`;
 }
 
+function generateSLCommand(
+  pair,
+  tpsl,
+  positionH,
+  slPrice,
+  amountToBeLiquidated,
+) {
+  console.log(
+    "generateSLCommand",
+    pair,
+    tpsl,
+    positionH,
+    slPrice,
+    amountToBeLiquidated,
+  );
+  const amountString = amountToBeLiquidated.toFixed(10);
+  return `${pair}(x${leverage}), ${tpsl}, ${positionH}, - | ${slPrice}(${amountString})`;
+}
+
 // The main calculate function
 function calculate(event) {
   stopLossPercent = document.getElementById("stop-loss-percent").value;
   stopLossDollar = document.getElementById("stop-loss-dollar").value;
   reduceAmount = document.getElementById("reduce-trade-amount").value;
   leverage = document.getElementById("leverage").value;
+  slPrice = document.getElementById("sl-price").value;
+
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
   if (event && event.target.innerHTML === "Buy") {
@@ -785,14 +813,33 @@ function calculate(event) {
       ? document.getElementById("ticker").value
       : "PAIR";
     const rewardPercent = stopLossPercent * rr;
-    text = generateCommand(
-      pair,
-      positionCmd,
-      deployedCapital,
-      rewardPercent,
-      stopLossPercent,
-      leverage,
-    );
+    if (slPrice) {
+      const amountToBeLiquidated = (stopLossDollar * leverage) / slPrice;
+      text = generateCommand(
+        pair,
+        positionCmd,
+        deployedCapital,
+        rewardPercent,
+        "-",
+        leverage,
+      );
+      slText = generateSLCommand(
+        pair,
+        tpsl,
+        positionH,
+        slPrice,
+        amountToBeLiquidated,
+      );
+    } else {
+      text = generateCommand(
+        pair,
+        positionCmd,
+        deployedCapital,
+        rewardPercent,
+        stopLossPercent,
+        leverage,
+      );
+    }
     reduceText = generateReduceCommand(
       pair,
       positionReduce,
@@ -800,7 +847,11 @@ function calculate(event) {
       leverage,
     );
     beText = generateBeCommand(pair, tpsl, positionH);
-    document.getElementById("trade-text").value = text;
+    if (slPrice) {
+      document.getElementById("trade-text").value = text + ";\n" + slText;
+    } else {
+      document.getElementById("trade-text").value = text;
+    }
     document.getElementById("reduce-trade-text").value = reduceText;
     document.getElementById("be-trade-text").value = beText;
     // Enable copy to clipboard button when there's no error.
@@ -882,15 +933,36 @@ function calculate(event) {
       let orderSize = deployedCapital * leverage;
       orders = [];
       if (orderSize > 0) {
-        const command = generateCommand(
-          pair,
-          positionCmd,
-          orderSize / leverage,
-          rewardPercent,
-          stopLossPercent,
-          leverage,
-        );
-        orders.push(command);
+        if (slPrice) {
+          const amountToBeLiquidated = (stopLossDollar * leverage) / slPrice;
+          const firstCommand = generateCommand(
+            pair,
+            positionCmd,
+            deployedCapital,
+            rewardPercent,
+            "-",
+            leverage,
+          );
+          const secondCommand = generateSLCommand(
+            pair,
+            tpsl,
+            positionH,
+            slPrice,
+            amountToBeLiquidated,
+          );
+          orders.push(firstCommand);
+          orders.push(secondCommand);
+        } else {
+          const command = generateCommand(
+            pair,
+            positionCmd,
+            orderSize / leverage,
+            rewardPercent,
+            stopLossPercent,
+            leverage,
+          );
+          orders.push(command);
+        }
       }
 
       // Change the orders array structure into 2D array.
