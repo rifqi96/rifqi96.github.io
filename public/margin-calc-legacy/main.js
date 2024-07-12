@@ -467,7 +467,7 @@ function sendOrder() {
         // Combine slot and apiSecret with a comma and a space first before checking
         if (orders[i][j].indexOf(`${slot}, ${apiSecret}`) === -1) {
           // If slot and apiSecret are not in the string, add them
-          messages[i][j] = `${orders[i][j]}, ${slot}, ${apiSecret}`;
+          messages[i][j] = `${orders[i][j]}, ${slot}, ${apiSecret};`;
         }
       }
 
