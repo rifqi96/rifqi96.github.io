@@ -34,8 +34,6 @@ document.addEventListener("DOMContentLoaded", bootstrap);
 
 // Bootstrap the app
 function bootstrap() {
-  authenticate();
-
   fetchTickersList();
 
   tickersDropdownBootstrap();
@@ -86,25 +84,14 @@ function registerEvents() {
     .addEventListener("click", clearTrades);
 }
 
-function authenticate() {
-  // !READ: Uncomment the below code to enable password protection
-  // let password = prompt("Please enter the password to access this page:");
-  // while (password !== "satuduatiga") {
-  //   alert("Wrong password! Please try again.");
-  //   password = prompt("Please enter the password to access this page:");
-  // }
+function getAuthInfo() {
+  const slotInput = document.getElementById("slot");
+  const apiSecretInput = document.getElementById("apiSecret");
 
-  // Prompt api secret key and slot dialog box. If the user clicks cancel or closes the dialog box or leaves the input empty, the app will use the default api secret key
-  // Else the app will use the api secret key and the slot that the user entered
-  slot = prompt("Please enter your slot number (optional):");
-  if (!slot) {
-    slot = 7;
-  }
-  apiSecret = prompt("Please enter your API secret key (optional):");
-  if (!apiSecret) {
-    apiSecret =
-      "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
-  }
+  slot = slotInput.value || "7";
+  apiSecret =
+    apiSecretInput.value ||
+    "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
 }
 
 // Function to add a trade
@@ -448,6 +435,8 @@ function tickersDropdownBootstrap() {
 function sendOrder() {
   if (!formReady) return;
 
+  getAuthInfo();
+
   const messages = [];
 
   // Send a post request to https://aleeert.com/api/v1/
@@ -488,6 +477,7 @@ function sendOrder() {
 
 function closeTrade() {
   if (!formReady) return;
+  getAuthInfo();
   let closePercent = 100;
 
   // prompt the user to fill in the close percent
@@ -531,18 +521,21 @@ function closeTrade() {
 
 // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function copyToClipboard() {
+  getAuthInfo();
   const generatedText = generateText(true);
 
   copyTextToClipboard(generatedText);
 }
 
 function copyReduceToClipboard() {
+  getAuthInfo();
   const generatedText = generateReduceText(true);
 
   copyTextToClipboard(generatedText);
 }
 
 function copyBeToClipboard() {
+  getAuthInfo();
   const generatedText = generateBeText(true);
 
   copyTextToClipboard(generatedText);
@@ -693,6 +686,8 @@ function calculate(event) {
   reduceAmount = document.getElementById("reduce-trade-amount").value;
   leverage = document.getElementById("leverage").value;
   slPrice = document.getElementById("sl-price").value;
+
+  getAuthInfo();
 
   // Change the buy/sell button text to have biggger font size and bold when it's clicked.
   // Change back to normal when the other button is clicked.
