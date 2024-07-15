@@ -16,7 +16,6 @@ let tpsl = "tpsl";
 let rr = 8;
 let formReady = false;
 let pair = "PAIR";
-let pairPrice = 0;
 let socket;
 let symbolsData;
 let leverage;
@@ -27,6 +26,7 @@ let stopLossPercent = 0;
 let stopLossDollar = 0;
 let reduceAmount = 0;
 let slPrice = null;
+let smPrice = null;
 const maxCommands = 3;
 
 // On dom content loaded
@@ -43,6 +43,11 @@ function bootstrap() {
   loadTradeHistory();
 }
 
+// Event Listenders
+/**
+ * Sets up event listeners for various UI elements.
+ * Includes listeners for trading mode changes, reward-to-risk ratio updates, and button clicks.
+ */
 function registerEvents() {
   // Trading mode -- dropdown
   const tradingMode = document.querySelector("#mode");
@@ -94,7 +99,10 @@ function getAuthInfo() {
     "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
 }
 
-// Function to add a trade
+/**
+ * Adds the current trade to the trade history and updates the UI.
+ * Validates that all required fields are filled before adding the trade.
+ */
 function addTrade() {
   // Check if all fields are filled
   if (!formReady) {
@@ -123,6 +131,7 @@ function addTrade() {
     stopLossDollar: stopLossDollar,
     stopLossPercent: stopLossPercent,
     slPrice: slPrice,
+    smPrice: smPrice || null,
     reduceAmount: reduceAmount,
   };
   saveTrade(tradeData);
@@ -142,7 +151,10 @@ function saveTrade(tradeData) {
   localStorage.setItem("trades", JSON.stringify(trades));
 }
 
-// Function to load trade history
+/**
+ * Loads and displays the trade history in the UI.
+ * Sorts trades by datetime in descending order.
+ */
 function loadTradeHistory() {
   console.log("loadTradeHistory");
   let trades = JSON.parse(localStorage.getItem("trades")) || [];
@@ -154,7 +166,8 @@ function loadTradeHistory() {
   tradeHistoryList.innerHTML = "";
   trades.forEach((trade, index) => {
     const li = document.createElement("li");
-    li.textContent = `Trade ${trade.datetime}: ${trade.text}`;
+    const smPriceText = trade.smPrice ? ` ${trade.smPrice}(SM)` : "";
+    li.textContent = `Trade ${trade.datetime}: ${trade.text}${smPriceText}`;
     li.addEventListener("click", () => loadTrade(trade));
 
     // Adding delete button for each trade
@@ -176,7 +189,11 @@ function deleteTrade(index) {
   loadTradeHistory();
 }
 
-// Function to load a specific trade
+/**
+ * Loads a previously saved trade and populates the UI with its details.
+ *
+ * @param {Object} tradeData - The data of the trade to be loaded
+ */
 function loadTrade(tradeData) {
   console.log("loadTrade");
   pair = tradeData.pair;
@@ -198,6 +215,7 @@ function loadTrade(tradeData) {
   stopLossDollar = tradeData.stopLossDollar;
   stopLossPercent = tradeData.stopLossPercent;
   slPrice = tradeData.slPrice;
+  smPrice = tradeData.smPrice || null;
   reduceAmount = tradeData.reduceAmount;
   formReady = true;
 
@@ -206,6 +224,7 @@ function loadTrade(tradeData) {
   document.querySelector("#stop-loss-percent").value = stopLossPercent;
   document.querySelector("#stop-loss-dollar").value = stopLossDollar;
   document.querySelector("#sl-price").value = slPrice;
+  document.getElementById("sm-price").value = smPrice || "";
   document.querySelector("#leverage").value = leverage;
   document.querySelector("#rr").value = rr;
   document.querySelector("#rr-value").textContent = rr;
@@ -221,10 +240,13 @@ function loadTrade(tradeData) {
   }
 }
 
-// List of crypto currencies from binance futures API
-// https://fapi.binance.com/fapi/v1/exchangeInfo
-// Use above API to fetch the data, use the "assets.symbol" property
-// Put the list in the #tickerDropdown with following format <a href="#">{{symbol}}</a>
+/**
+ * Fetches the list of available cryptocurrency tickers from the Binance API.
+ * Updates the UI with the fetched tickers and handles any errors that occur during the process.
+ * https://fapi.binance.com/fapi/v1/exchangeInfo
+ * Use above API to fetch the data, use the "assets.symbol" property
+ * Put the list in the #tickerDropdown with following format <a href="#">{{symbol}}</a>
+ */
 function fetchTickersList() {
   // Show the progress bar
   const progressBar = document.querySelector(".progress");
@@ -297,7 +319,12 @@ function fetchTickersList() {
   request.send();
 }
 
-// Watch the price of the selected symbol
+/**
+ * Establishes a WebSocket connection to watch the real-time price of a given symbol.
+ * Updates the UI with the current price as it changes.
+ *
+ * @param {string} symbol - The trading pair symbol to watch (e.g., "BTCUSDT")
+ */
 function watchPrice(symbol) {
   console.log("watchPrice", symbol);
   if (socket) {
@@ -329,8 +356,15 @@ function watchPrice(symbol) {
   };
 }
 
-// Get min and max MARKET_LOT_SIZE of the symbol
-// The MARKET_LOT_SIZE is from the tickers list
+/**
+ * Retrieves the minimum and maximum lot size for a given symbol from the cached symbol data.
+ * Get min and max MARKET_LOT_SIZE of the symbol
+ * The MARKET_LOT_SIZE is from the tickers list
+ *
+ * @param {string} symbol - The trading pair symbol
+ * @returns {Object} An object containing minQty and maxQty
+ */
+//
 function getMinMaxLotSize(symbol) {
   try {
     const symbolData = symbolsData.find(
@@ -432,6 +466,11 @@ function tickersDropdownBootstrap() {
   });
 }
 
+// API Interactions
+/**
+ * Sends the generated order to the trading server.
+ * Prompts the user for confirmation before sending each order.
+ */
 function sendOrder() {
   if (!formReady) return;
 
@@ -519,7 +558,13 @@ function closeTrade() {
   }
 }
 
-// https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+// Utility functions
+/**
+ * Copies the given text to the clipboard.
+ *
+ * @see https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+ * @param {string} text - The text to be copied to the clipboard
+ */
 function copyToClipboard() {
   getAuthInfo();
   const generatedText = generateText(true);
@@ -541,6 +586,12 @@ function copyBeToClipboard() {
   copyTextToClipboard(generatedText);
 }
 
+/**
+ * Generates the text representation of the current trade or orders.
+ *
+ * @param {boolean} showSecret - Whether to include the slot and API secret in the generated text
+ * @returns {string} The generated text representation of the trade(s)
+ */
 function generateText(showSecret = false) {
   // Check if orders array is not empty
   // Loop through and combine the slot and apiSecret with the orders
@@ -623,6 +674,18 @@ function filterFunction() {
   }
 }
 
+/**
+ * Generates a aleeert command string based on the provided parameters.
+ *
+ * @param {string} pair - The trading pair
+ * @param {string} position - The position type (e.g., "buy", "sell")
+ * @param {number} deployedCapital - The amount of capital to deploy
+ * @param {number} rewardPercent - The reward percentage
+ * @param {number|string} stopLossPercent - The stop loss percentage or "-" if not applicable
+ * @param {number} leverage - The leverage to be used
+ * @param {number|null} smPrice - The stop market price (if applicable)
+ * @returns {string} The generated trading command
+ */
 function generateCommand(
   pair,
   position,
@@ -630,6 +693,7 @@ function generateCommand(
   rewardPercent,
   stopLossPercent,
   leverage,
+  stopMarketPrice = smPrice, // Default value is the global variable smPrice
 ) {
   console.log(
     "generateCommand",
@@ -647,7 +711,10 @@ function generateCommand(
   }
   // Round the deployed capital to without decimal places
   deployedCapital = Math.round(deployedCapital);
-  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, market|${rewardPercent}|${stopLossPercent}`;
+
+  const priceCommand = stopMarketPrice ? `${stopMarketPrice}(SM)` : "market";
+
+  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, ${priceCommand}|${rewardPercent}|${stopLossPercent}`;
 }
 
 function generateReduceCommand(pair, position, reduceAmount, leverage) {
@@ -679,13 +746,19 @@ function generateSLCommand(
   return `${pair}(x${leverage}), ${tpsl}, ${positionH}, - | ${slPrice}(${amountString})`;
 }
 
-// The main calculate function
+/**
+ * Performs the main calculation based on user inputs and updates the UI accordingly.
+ * Generates trading commands and updates the trade history.
+ *
+ * @param {Event} [event] - The event that triggered the calculation (optional)
+ */
 function calculate(event) {
   stopLossPercent = document.getElementById("stop-loss-percent").value;
   stopLossDollar = document.getElementById("stop-loss-dollar").value;
   reduceAmount = document.getElementById("reduce-trade-amount").value;
   leverage = document.getElementById("leverage").value;
   slPrice = document.getElementById("sl-price").value;
+  smPrice = document.getElementById("sm-price").value || null;
 
   getAuthInfo();
 
@@ -877,51 +950,6 @@ function calculate(event) {
     // Pair is validated by the ticker input and position is validated by the buy/sell button.
     // Pair can't be "PAIR" and position can't be "POSITION"
     if (pair !== "PAIR" && (position === "buy" || position === "sell")) {
-      // TODO: Remove below code after one order implementation is stable
-      // // The order size can't be greater than the maximum order size.
-      // // If it is, it can be split into multiple orders.
-      // // Split the order size into multiple orders if it's greater than the maximum order size.
-      // const maximumOrderSize = getMinMaxLotSize(pair, "max").maxQty || 0;
-      // // Split the deployedCapital size into multiple orders.
-      // // The order size can't be greater than the maximum order size.
-      // // Loop through the deployedCapital size and split it into multiple orders.
-      // // Then push each order into the orders array.
-      // // An order is a text using generateCommand()
-      // let orderSize = deployedCapital * leverage;
-      // let maximumOrderSizeInDollar = maximumOrderSize * price;
-      // orders = [];
-      // console.log("maximumOrderSizeInDollar: " + maximumOrderSizeInDollar);
-      // if (maximumOrderSizeInDollar > 0 && orderSize > maximumOrderSizeInDollar) {
-      //   console.log("orderSize: " + orderSize);
-      //   while (orderSize > maximumOrderSizeInDollar) {
-      //     orderSize -= maximumOrderSizeInDollar;
-      //     const command = generateCommand(
-      //       pair,
-      //       positionCmd,
-      //       maximumOrderSizeInDollar / leverage,
-      //       rewardPercent,
-      //       stopLossPercent,
-      //       leverage
-      //     );
-      //     orders.push(command);
-      //   }
-      // }
-      // // Push the remaining order size into the orders array.
-      // // Check if n is lower than maxCommands const.
-      // // If it is, push the order into the current array.
-      // // Else, push the order into the next array.
-      // if (orderSize > 0) {
-      //   const command = generateCommand(
-      //     pair,
-      //     positionCmd,
-      //     orderSize / leverage,
-      //     rewardPercent,
-      //     stopLossPercent,
-      //     leverage
-      //   );
-      //   orders.push(command);
-      // }
-
       // Loop through the deployedCapital size.
       // Then push each order into the orders array.
       // An order is a text using generateCommand()
@@ -937,6 +965,7 @@ function calculate(event) {
             rewardPercent,
             "-",
             leverage,
+            smPrice || null,
           );
           const secondCommand = generateSLCommand(
             pair,
@@ -955,6 +984,7 @@ function calculate(event) {
             rewardPercent,
             stopLossPercent,
             leverage,
+            smPrice || null,
           );
           orders.push(command);
         }
