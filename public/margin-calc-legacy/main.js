@@ -110,6 +110,10 @@ function addTrade() {
     return;
   }
 
+  const openPrice = slPrice
+    ? calculateOpenPrice(slPrice, stopLossPercent, position)
+    : null;
+
   const tradeData = {
     datetime: new Date().toLocaleString(),
     pair: pair,
@@ -131,6 +135,11 @@ function addTrade() {
     stopLossDollar: stopLossDollar,
     stopLossPercent: stopLossPercent,
     slPrice: slPrice,
+    openPrice: openPrice,
+    tpPrice:
+      slPrice && openPrice
+        ? calculateTpPrice(openPrice, parseFloat(slPrice), rr, position)
+        : null,
     smPrice: smPrice || null,
     reduceAmount: reduceAmount,
   };
@@ -167,7 +176,17 @@ function loadTradeHistory() {
   trades.forEach((trade, index) => {
     const li = document.createElement("li");
     const smPriceText = trade.smPrice ? ` ${trade.smPrice}(SM)` : "";
-    li.textContent = `Trade ${trade.datetime}: ${trade.text}${smPriceText}`;
+    let tradeText = `Trade ${trade.datetime}: ${trade.text}${smPriceText}`;
+
+    if (trade.slPrice) {
+      const openPriceText = trade.openPrice
+        ? `Open: ${trade.openPrice.toFixed(2)}, `
+        : "";
+      const tpPriceText = trade.tpPrice ? `${trade.tpPrice.toFixed(2)}/` : "";
+      tradeText += `\n${openPriceText}TP/SL: ${tpPriceText}${trade.slPrice}`;
+    }
+
+    li.textContent = tradeText;
     li.addEventListener("click", () => loadTrade(trade));
 
     // Adding delete button for each trade
@@ -367,6 +386,9 @@ function watchPrice(symbol) {
 //
 function getMinMaxLotSize(symbol) {
   try {
+    if (!symbolsData) {
+      return { minQty: 0, maxQty: 0 };
+    }
     const symbolData = symbolsData.find(
       (symbolData) => symbolData.symbol === symbol,
     );
@@ -703,18 +725,26 @@ function generateCommand(
     rewardPercent,
     stopLossPercent,
     leverage,
+    stopMarketPrice,
   );
-  // Round the reward and stop loss percent to 2 decimal places
-  rewardPercent = `${Math.round(rewardPercent * 100) / 100}%`;
   if (stopLossPercent !== "-") {
     stopLossPercent = `${Math.round(stopLossPercent * 100) / 100}%`;
   }
+
   // Round the deployed capital to without decimal places
   deployedCapital = Math.round(deployedCapital);
 
-  const priceCommand = stopMarketPrice ? `${stopMarketPrice}(SM)` : "market";
+  // Determine the price part of the command
+  let priceCommand = stopMarketPrice ? `${stopMarketPrice}(SM)` : "market";
 
-  return `${pair}(x${leverage}), ${position}, $${deployedCapital}, ${priceCommand}|${rewardPercent}|${stopLossPercent}`;
+  // If slPrice is present, omit rewardPercent and stopLossPercent
+  if (slPrice) {
+    return `${pair}(x${leverage}), ${position}, $${deployedCapital}, ${priceCommand}`;
+  } else {
+    // Round the reward and stop loss percent to 2 decimal places
+    rewardPercent = `${Math.round(rewardPercent * 100) / 100}%`;
+    return `${pair}(x${leverage}), ${position}, $${deployedCapital}, ${priceCommand}|${rewardPercent}|${stopLossPercent}`;
+  }
 }
 
 function generateReduceCommand(pair, position, reduceAmount, leverage) {
@@ -732,7 +762,8 @@ function generateSLCommand(
   tpsl,
   positionH,
   slPrice,
-  amountToBeLiquidated,
+  tpPrice,
+  contractsAmount,
 ) {
   console.log(
     "generateSLCommand",
@@ -740,10 +771,50 @@ function generateSLCommand(
     tpsl,
     positionH,
     slPrice,
-    amountToBeLiquidated,
+    tpPrice,
+    contractsAmount,
   );
-  const amountString = amountToBeLiquidated.toFixed(10);
-  return `${pair}(x${leverage}), ${tpsl}, ${positionH}, - | ${slPrice}(${amountString})`;
+  const amountString = contractsAmount.toFixed(10);
+  const command = `${pair}(x${leverage}), ${tpsl}, ${positionH}, ${tpPrice}(${amountString}) | ${slPrice}(${amountString})`;
+
+  return command;
+}
+
+/**
+ * Calculates the open price based on the stop loss price and percentage.
+ *
+ * @param {number} slPrice - The stop loss price
+ * @param {number} slPercentage - The stop loss percentage
+ * @param {string} position - The position type (e.g., "buy", "sell")
+ * @returns {number} The calculated open price
+ */
+function calculateOpenPrice(slPrice, slPercentage, position) {
+  const slPriceValue = parseFloat(slPrice);
+  const slPercentageValue = parseFloat(slPercentage) / 100;
+
+  if (position === "buy" || position === "openlong") {
+    return slPriceValue / (1 - slPercentageValue);
+  } else {
+    return slPriceValue / (1 + slPercentageValue);
+  }
+}
+
+/**
+ * Calculates the take profit price based on the open price, stop loss price, and reward-to-risk ratio.
+ *
+ * @param {number} openPrice - The open price
+ * @param {number} slPrice - The stop loss price
+ * @param {number} rrRatio - The reward-to-risk ratio
+ * @param {string} position - The position type (e.g., "buy", "sell")
+ * @returns {number} The calculated take profit price
+ */
+function calculateTpPrice(openPrice, slPrice, rrRatio, position) {
+  const slPercentage = Math.abs(openPrice - slPrice) / openPrice;
+  if (position === "buy" || position === "openlong") {
+    return openPrice * (1 + slPercentage * rrRatio);
+  } else {
+    return openPrice * (1 - slPercentage * rrRatio);
+  }
 }
 
 /**
@@ -881,24 +952,45 @@ function calculate(event) {
       ? document.getElementById("ticker").value
       : "PAIR";
     const rewardPercent = stopLossPercent * rr;
+    const slPercent = parseFloat(stopLossPercent) / 100;
+    const rrRatio = parseFloat(rr);
+    const slPriceValue = parseFloat(slPrice);
+    const openPrice = calculateOpenPrice(
+      slPriceValue,
+      stopLossPercent,
+      position,
+    );
+    let tpPrice;
+    let contractsAmount;
+
     if (slPrice) {
-      const amountToBeLiquidated = (deployedCapital * leverage) / slPrice;
+      if (position === "buy" || positionCmd === "openlong") {
+        tpPrice = openPrice * (1 + slPercent * rrRatio);
+      } else {
+        tpPrice = openPrice * (1 - slPercent * rrRatio);
+      }
+
+      contractsAmount = (deployedCapital * leverage) / openPrice;
+
       text = generateCommand(
         pair,
         positionCmd,
         deployedCapital,
-        rewardPercent,
+        "-",
         "-",
         leverage,
+        smPrice,
       );
       slText = generateSLCommand(
         pair,
         tpsl,
         positionH,
-        slPrice,
-        amountToBeLiquidated,
+        slPriceValue,
+        tpPrice.toFixed(2),
+        contractsAmount,
       );
     } else {
+      const rewardPercent = slPercent * rrRatio * 100;
       text = generateCommand(
         pair,
         positionCmd,
@@ -906,6 +998,7 @@ function calculate(event) {
         rewardPercent,
         stopLossPercent,
         leverage,
+        smPrice,
       );
     }
     reduceText = generateReduceCommand(
@@ -957,12 +1050,11 @@ function calculate(event) {
       orders = [];
       if (orderSize > 0) {
         if (slPrice) {
-          const amountToBeLiquidated = (deployedCapital * leverage) / slPrice;
           const firstCommand = generateCommand(
             pair,
             positionCmd,
-            deployedCapital,
-            rewardPercent,
+            orderSize / leverage,
+            "-",
             "-",
             leverage,
             smPrice || null,
@@ -971,8 +1063,9 @@ function calculate(event) {
             pair,
             tpsl,
             positionH,
-            slPrice,
-            amountToBeLiquidated,
+            slPriceValue,
+            tpPrice.toFixed(2),
+            contractsAmount,
           );
           orders.push(firstCommand);
           orders.push(secondCommand);
