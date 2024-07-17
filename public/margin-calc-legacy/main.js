@@ -110,9 +110,11 @@ function addTrade() {
     return;
   }
 
-  const openPrice = slPrice
-    ? calculateOpenPrice(slPrice, stopLossPercent, position)
-    : null;
+  const openPrice = smPrice
+    ? parseFloat(smPrice)
+    : slPrice
+      ? calculateOpenPrice(slPrice, stopLossPercent, position)
+      : null;
 
   const tradeData = {
     datetime: new Date().toLocaleString(),
@@ -955,11 +957,10 @@ function calculate(event) {
     const slPercent = parseFloat(stopLossPercent) / 100;
     const rrRatio = parseFloat(rr);
     const slPriceValue = parseFloat(slPrice);
-    const openPrice = calculateOpenPrice(
-      slPriceValue,
-      stopLossPercent,
-      position,
-    );
+    // Use smPrice as openPrice if it's available, otherwise calculate it
+    const openPrice = smPrice
+      ? parseFloat(smPrice)
+      : calculateOpenPrice(slPrice, stopLossPercent, position);
     let tpPrice;
     let contractsAmount;
 
