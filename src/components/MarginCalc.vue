@@ -13,7 +13,7 @@ import type { Trade } from "@/types";
 
 // State
 const tradingMode = ref("One-way");
-const slotNumber = ref("7");
+const slotNumber = ref("13");
 const apiSecret = ref(
   "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419",
 );
