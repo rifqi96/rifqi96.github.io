@@ -93,7 +93,7 @@ function getAuthInfo() {
   const slotInput = document.getElementById("slot");
   const apiSecretInput = document.getElementById("apiSecret");
 
-  slot = slotInput.value || "13";
+  slot = slotInput.value || "15";
   apiSecret =
     apiSecretInput.value ||
     "3fa7c1ec483bcc7112ccf94552194fe21576d5b8259f49891ef6e5a5aaia2419";
