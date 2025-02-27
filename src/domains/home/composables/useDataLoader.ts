@@ -8,6 +8,7 @@ import { useCSVParser } from "./useCSVParser";
 // Interface definitions
 export interface WorkExperience {
   company: string;
+  location: string;
   role: string;
   startDate: string;
   endDate: string;

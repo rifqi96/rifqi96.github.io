@@ -35,7 +35,10 @@ onMounted(async () => {
             </div>
             <div class="timeline-card">
               <h3 class="timeline-title">{{ job.role }}</h3>
-              <h4 class="timeline-company">{{ job.company }}</h4>
+              <h4 class="timeline-company">
+                {{ job.company }}
+                <span class="timeline-location">{{ job.location }}</span>
+              </h4>
               <p class="timeline-description">
                 {{ job.description }}
               </p>
@@ -186,6 +189,12 @@ onMounted(async () => {
   font-size: 1.1rem;
   color: #666;
   margin-bottom: 12px;
+}
+
+.timeline-location {
+  font-size: 0.9rem;
+  color: #888;
+  font-style: italic;
 }
 
 .timeline-description {
