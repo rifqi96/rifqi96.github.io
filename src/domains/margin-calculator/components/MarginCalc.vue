@@ -9,6 +9,8 @@ const showCopySuccess = ref(false);
 
 const {
   // State
+  slot,
+  apiSecret,
   mode,
   stopLossPercent,
   stopLossDollar,
@@ -116,6 +118,32 @@ onMounted(() => {
       <v-col cols="12" md="8">
         <v-card class="pa-3">
           <v-form @submit.prevent class="mt-n2">
+            <!-- Add these fields at the top of the form -->
+            <v-row dense class="my-1">
+              <v-col cols="12" md="6" class="py-1">
+                <v-text-field
+                  v-model="slot"
+                  label="Slot Number (Optional)"
+                  placeholder="Enter your slot number"
+                  variant="outlined"
+                  density="comfortable"
+                  hint="Leave empty to use default"
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="6" class="py-1">
+                <v-text-field
+                  v-model="apiSecret"
+                  label="API Secret (Optional)"
+                  placeholder="Enter your API secret"
+                  variant="outlined"
+                  density="comfortable"
+                  hint="Leave empty to use default"
+                  type="password"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-select

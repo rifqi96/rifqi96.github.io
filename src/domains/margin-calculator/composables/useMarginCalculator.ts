@@ -68,18 +68,6 @@ export function useMarginCalculator() {
       alert("Wrong password! Please try again.");
       password = prompt("Please enter the password to access this page:");
     }
-
-    const promptedSlot = prompt("Please enter your slot number (optional):");
-    if (promptedSlot) {
-      slot.value = promptedSlot;
-    }
-
-    const promptedApiSecret = prompt(
-      "Please enter your API secret key (optional):",
-    );
-    if (promptedApiSecret) {
-      apiSecret.value = promptedApiSecret;
-    }
   };
 
   const fetchTickers = async () => {
