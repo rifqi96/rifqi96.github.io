@@ -1,0 +1,10 @@
+id,title,description,image,link,technologies,isAvailable
+"margin-calculator","Margin Calculator","Tool for crypto traders to calculate margins, stop-loss, and take-profit levels.","/projects/margin-calculator/hero.png","/margin-calculator","Vue 3,TypeScript,Vuetify",1
+"konti-lapis","Lapis","[Kontinentalist] Platform enabling users to craft and share data-driven stories without coding.","/projects/konti/lapis/hero.png","https://lapis-story.com/","Vue 3, Nuxt 3, Laravel, AWS, Docker",1
+"konti-kura-kura","Kontinentalist 2.0 - Kura-Kura","[Kontinentalist] Major upgrade with enhanced CMS and separated frontend.","/projects/konti/kura-kura/hero.png","https://medium.com/kontinentalist/why-we-abandoned-wordpress-to-build-our-own-cms-d6569d3540db","Laravel, Nuxt.js, Vuex, Vue 3, AWS, Docker, nginx, Redis, Beanstalkd, Algolia",1
+"konti-legacy","Kontinentalist (Legacy)","[Kontinentalist] Original app with Wordpress Rest API backend and Nuxt.js frontend.","/projects/konti/legacy/hero.png","https://kontinentalist.com","Wordpress Rest API, Nuxt.js, Vue 2, AWS, Docker, nginx",1
+"konti-bri","Kontinentalist - BRI Hardcoded Story","[Kontinentalist] Interactive story visualizing China's Belt and Road Initiative.","/projects/konti/bri/hero.png","https://bri.kontinentalist.com","Vue 2, Vuex, D3.js, Mapbox",1
+"ervill","Ervill - Logistics Management System","[Ervill] Internal tool for logistics reporting and delivery tracking.","/projects/ervill/hero.png","https://ervill.net","Laravel, REST APIs, CMS",1
+"tiaravib","Tiaravib - Project Management System","[Dantech.id] Timesheet management system for internal use.","/projects/dantech/tiaravib/hero.png","https://timesheet.tiaravib.com","CodeIgniter, CMS",1
+"project-management-app","Project Management App","Full-stack app with real-time updates and team collaboration.","https://cdn.vuetifyjs.com/images/cards/sunshine.jpg","","Nuxt.js,Laravel,PostgreSQL",0
+"ai-content-generator","AI Content Generator","Tool leveraging AI to create and optimize content for various platforms.","https://cdn.vuetifyjs.com/images/cards/house.jpg","","Vue.js,Python,AWS",0

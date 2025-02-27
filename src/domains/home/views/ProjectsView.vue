@@ -74,7 +74,7 @@ const parseCSV = <T,>(text: string): T[] => {
 // Load data from CSV file
 const loadCSVData = async () => {
   try {
-    const projectsResponse = await axios.get("/projects.csv");
+    const projectsResponse = await axios.get("/data/projects.csv");
     projects.value = parseCSV<Project>(projectsResponse.data);
 
     if (projects.value.length === 0) {

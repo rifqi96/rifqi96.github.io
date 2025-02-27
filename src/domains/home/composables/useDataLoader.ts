@@ -51,11 +51,11 @@ export function useDataLoader() {
 
     try {
       // Load work experience data
-      const workExpResponse = await axios.get("/work-experience.csv");
+      const workExpResponse = await axios.get("/data/work-experience.csv");
       workExperience.value = parseCSV<WorkExperience>(workExpResponse.data);
 
       // Load projects data
-      const projectsResponse = await axios.get("/projects.csv");
+      const projectsResponse = await axios.get("/data/projects.csv");
       projects.value = parseCSV<Project>(projectsResponse.data);
     } catch (err) {
       console.error("Error loading data:", err);

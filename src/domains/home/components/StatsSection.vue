@@ -50,7 +50,7 @@ onMounted(() => {
           <p class="stat-label">Projects Completed</p>
         </v-col>
         <v-col cols="6" md="3" class="stat-item text-center">
-          <h3 class="stat-number">12</h3>
+          <h3 class="stat-number">12+</h3>
           <p class="stat-label">Technologies Mastered</p>
         </v-col>
         <v-col cols="6" md="3" class="stat-item text-center">
