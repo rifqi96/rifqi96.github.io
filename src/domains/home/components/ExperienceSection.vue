@@ -74,7 +74,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-text-fill-color: #6200ea;
 }
 
 .section-divider {
