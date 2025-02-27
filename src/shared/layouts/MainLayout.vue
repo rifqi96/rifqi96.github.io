@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
 const drawer = ref(false);
 const scrollPosition = ref(0);
 const isScrolled = ref(false);
 const isMobile = ref(false);
+const isLoading = ref(false);
+const loadingProgress = ref(0);
+const loadingTimer = ref<number | null>(null);
 
 // Check if we're in a section that should have a transparent navbar
 const transparentNavbar = computed<boolean>(() => {
@@ -24,6 +28,40 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth < 960;
 };
 
+// Start loading progress animation
+const startLoading = () => {
+  isLoading.value = true;
+  loadingProgress.value = 0;
+
+  // Simulate progress with randomized increments
+  const simulateProgress = () => {
+    if (loadingProgress.value < 90) {
+      // Random progress between 5-15%
+      const increment = Math.random() * 10 + 5;
+      loadingProgress.value = Math.min(loadingProgress.value + increment, 90);
+      loadingTimer.value = window.setTimeout(simulateProgress, 200);
+    }
+  };
+
+  simulateProgress();
+};
+
+// Complete loading progress
+const completeLoading = () => {
+  if (loadingTimer.value) {
+    clearTimeout(loadingTimer.value);
+    loadingTimer.value = null;
+  }
+
+  loadingProgress.value = 100;
+
+  // Fade out the loader after completion
+  setTimeout(() => {
+    isLoading.value = false;
+    loadingProgress.value = 0;
+  }, 300);
+};
+
 // Close drawer when route changes
 watch(
   () => route.path,
@@ -32,17 +70,35 @@ watch(
   },
 );
 
-// Watch for scroll events
+// Watch for router events
 onMounted(() => {
   updateScroll();
   checkMobile();
   window.addEventListener("scroll", updateScroll);
   window.addEventListener("resize", checkMobile);
+
+  // Track router navigation events
+  router.beforeEach((to, from, next) => {
+    // Only show loader for internal navigation, not on first page load
+    if (from.name) {
+      startLoading();
+    }
+    next();
+  });
+
+  router.afterEach(() => {
+    completeLoading();
+  });
 });
 </script>
 
 <template>
   <v-app>
+    <!-- Loading Bar -->
+    <div v-if="isLoading" class="loading-bar-container">
+      <div class="loading-bar" :style="{ width: `${loadingProgress}%` }"></div>
+    </div>
+
     <!-- App Bar with glass effect when scrolled -->
     <v-app-bar
       :elevation="isScrolled ? 1 : 0"
@@ -218,6 +274,29 @@ onMounted(() => {
 
 .scrolled {
   box-shadow: 0 1px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading Bar */
+.loading-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(200, 200, 200, 0.2);
+  overflow: hidden;
+  z-index: 2000;
+}
+
+.loading-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--v-primary-base),
+    var(--v-primary-lighten1)
+  );
+  transition: width 0.2s ease-out;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Logo */

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
+import { handleLinkNavigation } from "@/shared/utils/navigation";
+
+const router = useRouter();
 
 // Update page title when the component is mounted
 onMounted(async () => {
@@ -115,6 +119,7 @@ const loadCSVData = async () => {
               <a
                 v-if="project.link && project.isAvailable"
                 :href="project.link"
+                @click="(e) => handleLinkNavigation(project.link, e, router)"
               >
                 <v-btn color="primary" variant="elevated"> View Project </v-btn>
               </a>

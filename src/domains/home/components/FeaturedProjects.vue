@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useDataLoader } from "@/domains/home/composables/useDataLoader";
+import { handleLinkNavigation } from "@/shared/utils/navigation";
 
+const router = useRouter();
 const { getFeaturedProjects, loadData } = useDataLoader();
 
 // Load projects data on component mount
@@ -39,7 +42,11 @@ onMounted(async () => {
                 class="rounded-lg"
               ></v-img>
               <div class="project-overlay">
-                <a v-if="project.link" :href="project.link">
+                <a
+                  v-if="project.link"
+                  :href="project.link"
+                  @click="(e) => handleLinkNavigation(project.link, e, router)"
+                >
                   <v-btn color="primary" variant="elevated">
                     View Project
                   </v-btn>
