@@ -50,14 +50,9 @@ onMounted(async () => {
               </v-chip-group>
             </v-card-text>
             <v-card-actions>
-              <v-btn
-                v-if="project.link"
-                :to="project.link"
-                color="primary"
-                variant="tonal"
-              >
-                View Project
-              </v-btn>
+              <a v-if="project.link" :href="project.link">
+                <v-btn color="primary" variant="tonal"> View Project </v-btn>
+              </a>
               <v-btn v-else disabled color="primary" variant="tonal">
                 Coming Soon
               </v-btn>

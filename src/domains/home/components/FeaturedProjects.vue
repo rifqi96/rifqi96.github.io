@@ -2,7 +2,7 @@
 import { onMounted } from "vue";
 import { useDataLoader } from "@/domains/home/composables/useDataLoader";
 
-const { projects, loadData } = useDataLoader();
+const { getFeaturedProjects, loadData } = useDataLoader();
 
 // Load projects data on component mount
 onMounted(async () => {
@@ -24,7 +24,7 @@ onMounted(async () => {
       <v-row class="mt-8">
         <!-- Dynamic Project Cards from CSV -->
         <v-col
-          v-for="(project, index) in projects"
+          v-for="(project, index) in getFeaturedProjects"
           :key="index"
           cols="12"
           md="6"
@@ -39,14 +39,11 @@ onMounted(async () => {
                 class="rounded-lg"
               ></v-img>
               <div class="project-overlay">
-                <v-btn
-                  v-if="project.link"
-                  :to="project.link"
-                  color="primary"
-                  variant="elevated"
-                >
-                  View Project
-                </v-btn>
+                <a v-if="project.link" :href="project.link">
+                  <v-btn color="primary" variant="elevated">
+                    View Project
+                  </v-btn>
+                </a>
                 <v-btn v-else disabled color="primary" variant="elevated"
                   >Coming Soon</v-btn
                 >

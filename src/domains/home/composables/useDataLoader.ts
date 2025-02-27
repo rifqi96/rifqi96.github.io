@@ -1,7 +1,7 @@
 /**
  * A composable for loading data from CSV files or API endpoints
  */
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 import { useCSVParser } from "./useCSVParser";
 
@@ -34,6 +34,15 @@ export function useDataLoader() {
   const error = ref<string | null>(null);
 
   /**
+   * Gets the first 3 available projects
+   */
+  const getFeaturedProjects = computed(() => {
+    return projects.value
+      .filter((project) => project.isAvailable === true)
+      .slice(0, 3);
+  });
+
+  /**
    * Loads data from CSV files
    */
   const loadData = async () => {
@@ -62,5 +71,6 @@ export function useDataLoader() {
     isLoading,
     error,
     loadData,
+    getFeaturedProjects,
   };
 }

@@ -112,14 +112,12 @@ const loadCSVData = async () => {
               class="rounded-lg"
             ></v-img>
             <div class="project-overlay">
-              <v-btn
+              <a
                 v-if="project.link && project.isAvailable"
-                :to="project.link"
-                color="primary"
-                variant="elevated"
+                :href="project.link"
               >
-                View Project
-              </v-btn>
+                <v-btn color="primary" variant="elevated"> View Project </v-btn>
+              </a>
               <v-btn
                 v-else-if="!project.isAvailable"
                 disabled

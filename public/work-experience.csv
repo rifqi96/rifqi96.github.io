@@ -1,4 +1,6 @@
 company,role,startDate,endDate,description,technologies
-"Tech Innovations Inc.","Senior Software Engineer","January 2022","Present","Leading development of scalable web applications serving millions of users. Architecting solutions with microservices and implementing CI/CD pipelines.","Vue.js,TypeScript,Node.js,AWS"
-"WebSolutions Lab","Full Stack Developer","March 2020","December 2021","Developed e-commerce platforms and enterprise applications. Implemented secure payment integrations and optimized database performance.","Laravel,Vue.js,PostgreSQL,Redis"
-"Digital Creatives Co.","Frontend Developer","June 2018","February 2020","Built responsive web interfaces and interactive data visualizations. Collaborated with UX designers to implement pixel-perfect designs.","JavaScript,React,CSS/SASS,D3.js"
+Kontinentalist Pte Ltd,Full Stack Developer,April 2018,Present,"Developing REST API services, Developing public-facing frontend apps, Developing CMS frontend apps, Developing design system, Handling DevOps","PHP, Javascript, Laravel, Nuxt.js, VueJS, Wordpress, AWS (EC2, EB, S3, RDS), Docker, nginx"
+Apple Developer Academy,IT Internship and Scholarship,March 2018,March 2018,"World Class iOS Developer Training Certification, iOS Developer","Swift, XCode"
+Dantech.id,PHP Programmer,August 2017,March 2018,"Developing REST APIs, Developing ERP/CMS (Full Stack)","PHP, CodeIgniter"
+ERVILL,Web Application Developer,September 2017,February 2018,"Developing company internal application (Logistic Reporting and Delivery Tracking System), Developing company landing page","PHP, Javascript, Laravel, AngularJS"
+8Commerce,PHP Programmer,December 2016,February 2017,Developing company internal application (Order Management System),"PHP, Yii"
