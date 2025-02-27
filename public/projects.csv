@@ -1,0 +1,4 @@
+title,description,image,link,technologies,isAvailable
+"Margin Calculator","A sophisticated tool for cryptocurrency traders to calculate margin positions, stop-loss, and take-profit levels with precision.","https://cdn.vuetifyjs.com/images/cards/docks.jpg","/margin-calculator","Vue.js,TypeScript,Vuetify",1
+"Project Management App","A full-stack project management application with real-time updates and team collaboration features.","https://cdn.vuetifyjs.com/images/cards/sunshine.jpg","","Nuxt.js,Laravel,PostgreSQL",0
+"AI Content Generator","A tool that uses AI to generate and optimize content for various platforms and audiences.","https://cdn.vuetifyjs.com/images/cards/house.jpg","","Vue.js,Python,AWS",0

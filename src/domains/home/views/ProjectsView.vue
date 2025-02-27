@@ -1,24 +1,85 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
 // Update page title when the component is mounted
-onMounted(() => {
+onMounted(async () => {
   document.title = "Projects | Rifqi Ruhyattamam";
+  await loadCSVData();
 });
 
-// Project data
-const projects = [
-  {
-    id: "margin-calculator",
-    title: "Margin Calculator",
-    description:
-      "A tool for cryptocurrency traders to calculate margin, stop-loss, and take-profit levels for their trades.",
-    technologies: ["Vue.js", "TypeScript", "Vuetify", "Binance API"],
-    image: "https://cdn.vuetifyjs.com/images/cards/docks.jpg",
-    path: "/margin-calculator",
-  },
-  // More projects can be added here
-];
+// Project interface
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  technologies: string[];
+  image: string;
+  link: string;
+  isAvailable: boolean;
+}
+
+// Projects data
+const projects = ref<Project[]>([]);
+
+// Function to parse CSV data
+const parseCSV = <T,>(text: string): T[] => {
+  const lines = text.split("\n");
+  const headers = lines[0].split(",").map((header) => header.replace(/"/g, ""));
+
+  return lines
+    .slice(1)
+    .filter((line) => line.trim())
+    .map((line) => {
+      // Handle commas within quotes correctly
+      const values: string[] = [];
+      let inQuotes = false;
+      let currentValue = "";
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          values.push(currentValue.replace(/"/g, ""));
+          currentValue = "";
+        } else {
+          currentValue += char;
+        }
+      }
+      values.push(currentValue.replace(/"/g, ""));
+
+      // Create object from headers and values
+      const entry = {} as any;
+      headers.forEach((header, index) => {
+        if (header === "technologies") {
+          entry[header] = values[index] ? values[index].split(",") : [];
+        } else {
+          // Try to convert string to number if possible
+          const value = values[index] || "";
+          const numberValue = Number(value);
+          entry[header] =
+            !isNaN(numberValue) && value !== "" ? numberValue : value;
+        }
+      });
+
+      return entry as T;
+    });
+};
+
+// Load data from CSV file
+const loadCSVData = async () => {
+  try {
+    const projectsResponse = await axios.get("/projects.csv");
+    projects.value = parseCSV<Project>(projectsResponse.data);
+
+    if (projects.value.length === 0) {
+      console.warn("No projects data found.");
+    }
+  } catch (error) {
+    console.error("Error loading projects data:", error);
+  }
+};
 </script>
 
 <template>
@@ -42,36 +103,113 @@ const projects = [
         lg="4"
         class="mb-4"
       >
-        <v-card class="h-100">
-          <v-img :src="project.image" height="200" cover></v-img>
-          <v-card-title>{{ project.title }}</v-card-title>
-          <v-card-text>
-            <p>{{ project.description }}</p>
-            <v-chip-group class="mt-3">
+        <div class="project-card">
+          <div class="project-image">
+            <v-img
+              :src="project.image"
+              height="200"
+              cover
+              class="rounded-lg"
+            ></v-img>
+            <div class="project-overlay">
+              <v-btn
+                v-if="project.link && project.isAvailable"
+                :to="project.link"
+                color="primary"
+                variant="elevated"
+              >
+                View Project
+              </v-btn>
+              <v-btn
+                v-else-if="!project.isAvailable"
+                disabled
+                color="primary"
+                variant="elevated"
+              >
+                Coming Soon
+              </v-btn>
+            </div>
+          </div>
+          <div class="project-content">
+            <h3 class="project-title">{{ project.title }}</h3>
+            <p class="project-description">{{ project.description }}</p>
+            <div class="project-tags">
               <v-chip
                 v-for="tech in project.technologies"
                 :key="tech"
                 size="small"
                 color="primary"
                 variant="outlined"
+                class="mr-1 mb-1"
               >
                 {{ tech }}
               </v-chip>
-            </v-chip-group>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn :to="project.path" color="primary" variant="tonal">
-              View Project
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+            </div>
+          </div>
+        </div>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <style scoped>
-.h-100 {
+.project-card {
   height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  background: white;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.project-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.project-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.project-card:hover .project-overlay {
+  opacity: 1;
+}
+
+.project-content {
+  padding: 24px;
+}
+
+.project-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.project-description {
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>

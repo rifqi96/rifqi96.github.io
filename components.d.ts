@@ -7,7 +7,6 @@ export {}
 
 declare module "vue" {
   export interface GlobalComponents {
-    MarginCalc: (typeof import("./src/components/MarginCalc.vue"))["default"];
     RouterLink: (typeof import("vue-router"))["RouterLink"];
     RouterView: (typeof import("vue-router"))["RouterView"];
   }
