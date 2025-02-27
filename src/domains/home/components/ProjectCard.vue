@@ -22,13 +22,15 @@ const router = useRouter();
     <div class="project-image">
       <v-img :src="project.image" height="200" cover class="rounded-lg"></v-img>
       <div class="project-overlay">
-        <a
+        <v-btn
           v-if="project.link && project.isAvailable !== false"
           :href="project.link"
-          @click="(e) => handleLinkNavigation(project.link!, e, router)"
+          @click="(e: Event) => handleLinkNavigation(project.link!, e, router)"
+          color="primary"
+          variant="elevated"
         >
-          <v-btn color="primary" variant="elevated"> View Project </v-btn>
-        </a>
+          View Project
+        </v-btn>
         <v-btn v-else disabled color="primary" variant="elevated">
           Coming Soon
         </v-btn>
