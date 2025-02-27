@@ -283,8 +283,8 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 6px;
-  /* background-color: rgba(50, 50, 50, 0.5); */
-  background-color: rgba(98, 0, 234, 0.5);
+  background-color: rgba(50, 50, 50, 0.5);
+  /* background-color: rgba(98, 0, 234, 0.5); */
   overflow: hidden;
   z-index: 2000;
 }
