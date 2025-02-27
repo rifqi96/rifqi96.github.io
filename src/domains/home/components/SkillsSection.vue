@@ -17,7 +17,7 @@ const technologies = [
 </script>
 
 <template>
-  <section class="skills-section section-animation">
+  <section class="skills-section">
     <v-container>
       <div class="section-header">
         <h2 class="section-title">Technical Expertise</h2>

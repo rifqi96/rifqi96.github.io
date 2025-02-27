@@ -4,11 +4,9 @@
 import { ref, onMounted, onUnmounted } from "vue";
 
 export function useVisibilityObserver() {
-  // Keep track of observed elements
   const observedElements = ref<HTMLElement[]>([]);
   let observer: IntersectionObserver | null = null;
 
-  // Initialize observer with options
   const initObserver = () => {
     const options = {
       threshold: 0.2,
@@ -17,8 +15,20 @@ export function useVisibilityObserver() {
 
     observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
+        // Add debugging
+        // console.log("Intersection detected:", {
+        //   target: entry.target,
+        //   isIntersecting: entry.isIntersecting,
+        //   intersectionRatio: entry.intersectionRatio,
+        // });
+
         if (entry.isIntersecting) {
+          // Force a reflow before adding the class
+          (entry.target as HTMLElement).style.opacity;
           entry.target.classList.add("section-visible");
+
+          // Once visible, stop observing this element
+          observer?.unobserve(entry.target);
         }
       });
     }, options);

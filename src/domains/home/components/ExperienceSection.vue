@@ -11,7 +11,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="experience-section section-animation">
+  <section class="experience-section">
     <v-container>
       <div class="section-header">
         <h2 class="section-title">Work Experience</h2>

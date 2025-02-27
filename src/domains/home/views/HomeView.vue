@@ -50,13 +50,13 @@ onMounted(async () => {
   // Wait for DOM to update before setting up visibility
   await nextTick();
 
-  // Immediately make sections visible for initial render
-  const sections = document.querySelectorAll(".section-animation");
-  sections.forEach((section) => {
-    section.classList.add("section-visible");
-  });
+  // Remove the section that immediately makes sections visible
+  // const sections = document.querySelectorAll(".section-animation");
+  // sections.forEach((section) => {
+  //   section.classList.add("section-visible");
+  // });
 
-  // Also set up observer for scroll animations
+  // Set up observers for scroll animations
   observe(heroSectionRef.value);
   observe(statsSectionRef.value);
   observe(projectsSectionRef.value);
@@ -76,37 +76,37 @@ onUnmounted(() => {
   <!-- Main Content -->
   <div class="home-content">
     <!-- Hero Section with Parallax -->
-    <div ref="heroSectionRef">
+    <div ref="heroSectionRef" class="section-animation">
       <HeroSection :scroll-position="scrollPosition" />
     </div>
 
     <!-- Stats Section -->
-    <div ref="statsSectionRef">
+    <div ref="statsSectionRef" class="section-animation">
       <StatsSection />
     </div>
 
     <!-- Projects Section -->
-    <div ref="projectsSectionRef">
+    <div ref="projectsSectionRef" class="section-animation">
       <FeaturedProjects />
     </div>
 
     <!-- About Section -->
-    <div ref="aboutSectionRef">
+    <div ref="aboutSectionRef" class="section-animation">
       <AboutSection :scroll-position="scrollPosition" />
     </div>
 
     <!-- Skills Section -->
-    <div ref="skillsSectionRef">
+    <div ref="skillsSectionRef" class="section-animation">
       <SkillsSection />
     </div>
 
     <!-- Experience Section -->
-    <div ref="experienceSectionRef">
+    <div ref="experienceSectionRef" class="section-animation">
       <ExperienceSection />
     </div>
 
     <!-- Contact Section -->
-    <div ref="contactSectionRef">
+    <div ref="contactSectionRef" class="section-animation">
       <ContactSection />
     </div>
   </div>
@@ -117,10 +117,18 @@ onUnmounted(() => {
 .home-content {
   overflow-x: hidden;
   height: auto;
+  overflow-y: hidden;
 }
 
-/* Make all sections visible initially */
-:deep(.section-animation) {
+.section-animation {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.section-visible {
   opacity: 1;
   transform: translateY(0);
 }

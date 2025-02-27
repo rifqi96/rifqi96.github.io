@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <section class="hero-section section-animation">
+  <section class="hero-section">
     <div
       class="hero-content"
       :style="{ transform: `translateY(${scrollPosition * 0.4}px)` }"
@@ -28,7 +28,7 @@ defineProps<{
           variant="outlined"
           color="white"
           class="hero-btn"
-          >Contact Me</v-btn
+          >Get In Touch</v-btn
         >
       </div>
     </div>

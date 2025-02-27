@@ -12,7 +12,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="projects-section section-animation">
+  <section class="projects-section">
     <v-container>
       <div class="section-header">
         <h2 class="section-title">Featured Projects</h2>

@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <section class="about-section section-animation">
+  <section class="about-section">
     <v-container>
       <div class="section-header">
         <h2 class="section-title">About Me</h2>

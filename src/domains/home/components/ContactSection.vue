@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section class="contact-section section-animation">
+  <section class="contact-section">
     <v-container>
       <div class="contact-content">
         <h2 class="contact-title">Ready to bring your ideas to life?</h2>

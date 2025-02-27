@@ -38,7 +38,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="stats-section section-animation">
+  <section class="stats-section">
     <v-container>
       <v-row justify="center">
         <v-col cols="6" md="3" class="stat-item text-center">
