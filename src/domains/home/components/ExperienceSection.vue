@@ -146,23 +146,26 @@ onMounted(async () => {
 
 .timeline-date {
   position: absolute;
-  top: 0;
+  top: -18px;
   width: max-content;
   padding: 8px 16px;
   background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
-  color: white;
+  color: #6200ea;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
+  z-index: 2; /* Add this to ensure date appears above other elements */
 }
 
 .timeline-item .timeline-date {
   left: -120px;
+  transform: translateY(-50%); /* Add this to vertically center the date */
 }
 
 .timeline-item:nth-child(even) .timeline-date {
   right: -120px;
   left: auto;
+  transform: translateY(-50%); /* Add this to vertically center the date */
 }
 
 .timeline-card {
