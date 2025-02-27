@@ -1,36 +1,32 @@
-import { ref, onMounted } from "vue";
-import { getTicker } from "@/services/binanceApi";
+import { ref, onMounted, onUnmounted } from "vue";
+import { fetchTickersList } from "@/services/binanceApi";
 
 export function useTicker() {
   const ticker = ref<string[]>([]);
-  const isLoading = ref(true);
+  const isLoading = ref(false);
   const error = ref<string | null>(null);
 
-  const fetchTicker = async () => {
+  const fetchTickers = async () => {
     isLoading.value = true;
     error.value = null;
     try {
-      const tickers = await getTicker();
+      const tickers = await fetchTickersList();
       ticker.value = tickers;
-    } catch (e) {
+    } catch (err) {
       error.value =
-        e instanceof Error ? e.message : "An error occurred fetching tickers";
+        err instanceof Error ? err.message : "Failed to fetch tickers";
+      console.error(error.value);
     } finally {
       isLoading.value = false;
     }
   };
 
-  const setTicker = (newTicker: string[]) => {
-    ticker.value = newTicker;
-  };
-
-  onMounted(fetchTicker);
+  onMounted(fetchTickers);
 
   return {
     ticker,
     isLoading,
     error,
-    fetchTicker,
-    setTicker,
+    fetchTickers,
   };
 }

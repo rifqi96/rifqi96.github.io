@@ -1,13 +1,24 @@
-const BASE_URL = "https://fapi.binance.com/fapi/v1";
+import axios, { AxiosResponse } from "axios";
 
-export async function getTicker(): Promise<string[]> {
+const BINANCE_FUTURES_EXCHANGE_INFO_URL =
+  "https://fapi.binance.com/fapi/v1/exchangeInfo";
+const BINANCE_FUTURES_TICKER_URL = "wss://fstream.binance.com/ws";
+
+interface SymbolData {
+  symbol: string;
+  filters: Array<{
+    filterType: string;
+    minQty?: string;
+    maxQty?: string;
+  }>;
+}
+
+export async function fetchTickersList(): Promise<string[]> {
   try {
-    const response = await fetch(`${BASE_URL}/exchangeInfo`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const data = await response.json();
-    return data.symbols.map((symbol: { symbol: string }) => symbol.symbol);
+    const response: AxiosResponse<{ symbols: SymbolData[] }> = await axios.get(
+      BINANCE_FUTURES_EXCHANGE_INFO_URL,
+    );
+    return response.data.symbols.map((symbol) => symbol.symbol);
   } catch (error) {
     console.error("Error fetching tickers:", error);
     throw error;
@@ -15,25 +26,24 @@ export async function getTicker(): Promise<string[]> {
 }
 
 export function watchPrice(
-  pair: string,
+  symbol: string,
   callback: (price: number) => void,
 ): () => void {
-  const ws = new WebSocket(
-    `wss://fstream.binance.com/ws/${pair.toLowerCase()}@ticker`,
+  const socket = new WebSocket(
+    `${BINANCE_FUTURES_TICKER_URL}/${symbol.toLowerCase()}@ticker`,
   );
 
-  ws.onmessage = (event) => {
+  socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    callback(parseFloat(data.c)); // 'c' is the current price in the ticker data
+    callback(parseFloat(data.c)); // 'c' is the close price
   };
 
-  ws.onerror = (error) => {
+  socket.onerror = (error) => {
     console.error("WebSocket error:", error);
   };
 
-  // Return a function to close the WebSocket connection
   return () => {
-    ws.close();
+    socket.close();
   };
 }
 
@@ -41,29 +51,25 @@ export async function getMinMaxLotSize(
   symbol: string,
 ): Promise<{ minQty: number; maxQty: number }> {
   try {
-    const response = await fetch(`${BASE_URL}/exchangeInfo`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const data = await response.json();
-    const symbolInfo = data.symbols.find(
-      (s: { symbol: string }) => s.symbol === symbol,
+    const response: AxiosResponse<{ symbols: SymbolData[] }> = await axios.get(
+      BINANCE_FUTURES_EXCHANGE_INFO_URL,
     );
-    if (!symbolInfo) {
+    const symbolData = response.data.symbols.find((s) => s.symbol === symbol);
+
+    if (!symbolData) {
       throw new Error(`Symbol ${symbol} not found`);
     }
-    const lotSizeFilter = symbolInfo.filters.find(
-      (f: { filterType: string }) => f.filterType === "LOT_SIZE",
+
+    const marketLotSizeFilter = symbolData.filters.find(
+      (filter) => filter.filterType === "MARKET_LOT_SIZE",
     );
-    if (!lotSizeFilter) {
-      throw new Error(`LOT_SIZE filter not found for symbol ${symbol}`);
-    }
+
     return {
-      minQty: parseFloat(lotSizeFilter.minQty),
-      maxQty: parseFloat(lotSizeFilter.maxQty),
+      minQty: parseFloat(marketLotSizeFilter?.minQty || "0"),
+      maxQty: parseFloat(marketLotSizeFilter?.maxQty || "0"),
     };
   } catch (error) {
-    console.error("Error fetching lot size:", error);
+    console.error("Error getting lot size:", error);
     throw error;
   }
 }

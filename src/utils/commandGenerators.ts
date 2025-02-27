@@ -5,15 +5,30 @@ export function generateCommand(
   rewardPercent: number,
   stopLossPercent: number,
   leverage: number,
-  hasSLPrice: boolean,
+  options: {
+    hasSlPrice?: boolean;
+    stopMarketPrice?: string | null;
+  } = {},
 ): string {
+  // Round the deployed capital without decimal places
   const roundedCapital = Math.round(deployedCapital);
-  const roundedReward = Math.round(rewardPercent * 100) / 100;
-  const roundedStopLoss = Math.round(stopLossPercent * 100) / 100;
-  const stopLoss = hasSLPrice
-    ? "-"
-    : `${Math.round(stopLossPercent * 100) / 100}`;
-  return `${pair}(x${leverage}), ${position}, $${roundedCapital}, market|${roundedReward}%|${stopLoss}`;
+
+  // Determine the price part of the command
+  const priceCommand = options.stopMarketPrice
+    ? `${options.stopMarketPrice}(SM)`
+    : "market";
+
+  // If slPrice is present, omit rewardPercent and stopLossPercent
+  if (options.hasSlPrice) {
+    return `${pair}(x${leverage}), ${position}, $${roundedCapital}, ${priceCommand}`;
+  } else {
+    // Round the reward and stop loss percent to 2 decimal places
+    const formattedRewardPercent = `${Math.round(rewardPercent * 100) / 100}%`;
+    const formattedStopLossPercent = `${
+      Math.round(stopLossPercent * 100) / 100
+    }%`;
+    return `${pair}(x${leverage}), ${position}, $${roundedCapital}, ${priceCommand}|${formattedRewardPercent}|${formattedStopLossPercent}`;
+  }
 }
 
 export function generateReduceCommand(
@@ -22,8 +37,9 @@ export function generateReduceCommand(
   reduceAmount: number,
   leverage: number,
 ): string {
-  const roundedAmount = Math.round(reduceAmount);
-  return `${pair}(x${leverage}), ${position}, $${roundedAmount}, market`;
+  return `${pair}(x${leverage}), ${position}, $${Math.round(
+    reduceAmount,
+  )}, market`;
 }
 
 export function generateBeCommand(
@@ -39,10 +55,12 @@ export function generateSLCommand(
   tpsl: string,
   positionH: string,
   slPrice: number,
-  amountToBeLiquidated: number,
+  tpPrice: number,
+  contractsAmount: number,
   leverage: number,
 ): string {
-  const roundedSLPrice = slPrice.toFixed(8);
-  const roundedAmount = amountToBeLiquidated.toFixed(10);
-  return `${pair}(x${leverage}), ${tpsl}, ${positionH}, - | ${roundedSLPrice}(${roundedAmount})`;
+  const amountString = contractsAmount.toFixed(10);
+  return `${pair}(x${leverage}), ${tpsl}, ${positionH}, ${tpPrice.toFixed(
+    2,
+  )}(${amountString}) | ${slPrice}(${amountString})`;
 }

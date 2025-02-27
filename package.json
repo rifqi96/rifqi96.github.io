@@ -16,8 +16,10 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@types/axios": "^0.14.4",
     "@types/node": "^20.10.4",
     "@vueuse/core": "^10.7.0",
+    "axios": "^1.7.9",
     "unplugin-auto-import": "^0.17.2",
     "unplugin-vue-components": "^0.26.0",
     "vue": "^3.3.8",
