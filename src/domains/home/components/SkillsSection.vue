@@ -2,10 +2,10 @@
 // Skills list
 const technologies = [
   { name: "Vue.js", level: 95, icon: "mdi-vuejs" },
-  { name: "Nuxt.js", level: 90, icon: "mdi-nuxt" },
-  { name: "TypeScript", level: 85, icon: "mdi-language-typescript" },
+  { name: "Nuxt.js", level: 95, icon: "mdi-nuxt" },
+  { name: "TypeScript", level: 90, icon: "mdi-language-typescript" },
   { name: "JavaScript", level: 90, icon: "mdi-language-javascript" },
-  { name: "Laravel", level: 85, icon: "mdi-laravel" },
+  { name: "Laravel", level: 95, icon: "mdi-laravel" },
   { name: "Python", level: 80, icon: "mdi-language-python" },
   { name: "PostgreSQL", level: 80, icon: "mdi-database" },
   { name: "Redis", level: 75, icon: "mdi-database" },
@@ -147,9 +147,10 @@ const technologies = [
   background: linear-gradient(to right, #7c4dff, #6200ea);
   border-radius: 5px;
   position: relative;
-  width: 0 !important; /* Start at 0 for animation */
+  width: var(
+    --progress-width
+  ) !important; /* Remove width: 0 and use the variable directly */
   transition: width 1.5s ease;
-  animation: progress-fill 1.5s forwards; /* Add animation */
 }
 
 @keyframes progress-fill {
