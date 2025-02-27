@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // About Me section component
-const experienceYears = new Date().getFullYear() - 2018;
+const experienceYears = new Date().getFullYear() - 2016;
 
 defineProps<{
   scrollPosition: number;
