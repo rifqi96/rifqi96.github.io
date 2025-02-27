@@ -25,7 +25,7 @@ defineProps<{
         >
           <div class="about-image">
             <v-img
-              src="https://images.unsplash.com/photo-1555952517-2e8e729e0b44?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1064&q=80"
+              src="/avatar.png"
               height="400"
               width="100%"
               class="rounded-lg elevation-5"
