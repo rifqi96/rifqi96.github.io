@@ -111,7 +111,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-container fluid class="px-1 py-1 fill-height" style="max-width: none">
+  <v-container class="px-1 py-1 fill-height" style="max-width: none">
     <v-row no-gutters>
       <v-col cols="12" md="8">
         <v-card class="pa-3">
@@ -431,7 +431,7 @@ onMounted(() => {
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="4" class="pl-0 pr-1">
+      <v-col cols="12" md="4" class="pl-md-4 pl-0 pr-1">
         <v-card class="trade-history-card" flat>
           <v-card-title class="text-h6 bg-grey-lighten-3 py-1 px-2">
             Trade History
@@ -448,7 +448,7 @@ onMounted(() => {
                 v-for="(trade, index) in trades"
                 :key="index"
                 @click="loadTrade(trade)"
-                class="trade-history-item"
+                class="trade-history-item position-relative"
                 :class="{ 'bg-grey-lighten-5': index % 2 === 0 }"
                 rounded="0"
               >
@@ -456,15 +456,21 @@ onMounted(() => {
                   {{ formatDate(trade.datetime) }}
                 </v-list-item-title>
                 <v-list-item-subtitle class="text-body-2">
-                  {{ trade.pair }} - {{ trade.position.toUpperCase() }}
+                  {{ trade.pair }} - {{ trade.position.toUpperCase()
+                  }}{{ trade.mode === "hedge" ? " (H)" : "" }}
+                </v-list-item-subtitle>
+                <v-list-item-subtitle class="text-caption">
+                  Leverage: {{ trade.leverage }}x
                 </v-list-item-subtitle>
                 <template v-if="trade.slPrice">
                   <v-list-item-subtitle class="text-caption">
                     {{
                       trade.openPrice
-                        ? `Open: ${Number(trade.openPrice).toFixed(2)},`
+                        ? `Open: ${Number(trade.openPrice).toFixed(2)}`
                         : ""
                     }}
+                  </v-list-item-subtitle>
+                  <v-list-item-subtitle class="text-caption">
                     TP/SL:
                     {{
                       trade.tpPrice
@@ -473,15 +479,24 @@ onMounted(() => {
                     }}{{ trade.slPrice }}
                   </v-list-item-subtitle>
                 </template>
+                <template v-else>
+                  <v-list-item-subtitle class="text-caption">
+                    TP/SL: {{ trade.stopLossPercent * trade.rr }}%/{{
+                      trade.stopLossPercent
+                    }}%
+                  </v-list-item-subtitle>
+                </template>
                 <template v-slot:append>
                   <v-btn
-                    icon="mdi-delete"
-                    variant="text"
+                    icon
+                    variant="tonal"
                     color="error"
-                    size="x-small"
-                    density="compact"
+                    size="small"
                     @click.stop="deleteTrade(index)"
-                  ></v-btn>
+                    class="delete-btn"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
                 </template>
               </v-list-item>
             </v-list>
@@ -530,6 +545,17 @@ onMounted(() => {
 .trade-history-item:hover {
   background-color: rgb(var(--v-theme-surface-variant));
   border-left-color: rgb(var(--v-theme-primary));
+}
+
+.delete-btn {
+  margin-left: 5px;
+  min-width: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
 }
 
 .trade-history-card {

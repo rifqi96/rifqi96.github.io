@@ -347,8 +347,9 @@ export function useMarginCalculator() {
       contractsAmount = (deployedCapital * leverage.value) / openPrice;
     }
 
-    // Generate trade text
+    // Generate command based on whether slPrice is present
     if (slPrice.value !== null) {
+      // If slPrice is present, generate command without TP/SL percentages
       text.value = generateCommand(
         pair.value,
         positionCmd.value,
@@ -359,6 +360,7 @@ export function useMarginCalculator() {
         smPrice.value,
       );
 
+      // Add SL command if we have TP price and contracts amount
       if (tpPrice !== null && contractsAmount !== null) {
         slText.value = generateSlCommand(
           pair.value,
@@ -371,6 +373,7 @@ export function useMarginCalculator() {
         text.value += ";\n" + slText.value;
       }
     } else {
+      // If slPrice is not present, include TP/SL percentages
       text.value = generateCommand(
         pair.value,
         positionCmd.value,
@@ -561,7 +564,7 @@ export function useMarginCalculator() {
 
     // Save to local storage
     const storedTrades = JSON.parse(localStorage.getItem("trades") || "[]");
-    storedTrades.push(tradeData);
+    storedTrades.unshift(tradeData); // Add to beginning of array instead of pushing to end
     localStorage.setItem("trades", JSON.stringify(storedTrades));
 
     // Update local state
@@ -611,10 +614,12 @@ export function useMarginCalculator() {
 
   // Delete a trade
   const deleteTrade = (index: number): void => {
-    const storedTrades = JSON.parse(localStorage.getItem("trades") || "[]");
-    storedTrades.splice(index, 1);
-    localStorage.setItem("trades", JSON.stringify(storedTrades));
-    trades.value = storedTrades;
+    if (confirm("Are you sure you want to delete this trade?")) {
+      const storedTrades = JSON.parse(localStorage.getItem("trades") || "[]");
+      storedTrades.splice(index, 1);
+      localStorage.setItem("trades", JSON.stringify(storedTrades));
+      trades.value = storedTrades;
+    }
   };
 
   // Send order to the server
@@ -631,8 +636,7 @@ export function useMarginCalculator() {
         for (let j = 0; j < orders.value[i].length; j++) {
           // Check if slot and apiSecret are already in the string
           if (
-            orders.value[i][j].indexOf(`${slot.value}, ${apiSecret.value}`) ===
-            -1
+            !orders.value[i][j].includes(`${slot.value}, ${apiSecret.value}`)
           ) {
             // If not, add them
             messages[i][j] =
@@ -730,6 +734,18 @@ export function useMarginCalculator() {
       calculate();
     }
   });
+
+  // Watch for changes to slPrice and handle empty case
+  watch(
+    () => slPrice.value,
+    (newVal) => {
+      // If slPrice is cleared, recalculate everything
+      if (newVal === null || newVal === 0 || String(newVal) === "") {
+        slPrice.value = null; // Ensure it's null for consistency
+        calculate();
+      }
+    },
+  );
 
   // Initialize
   onMounted(() => {

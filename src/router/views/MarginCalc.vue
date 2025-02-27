@@ -4,7 +4,7 @@ import MarginCalc from "@/components/MarginCalc.vue";
 
 <template>
   <v-layout row wrap>
-    <v-container fluid>
+    <v-container fluid class="px-0 px-sm-16 desktop-padding">
       <v-row>
         <v-col cols="12" sm="12" md="12">
           <h1>Margin Calculator</h1>
@@ -18,3 +18,12 @@ import MarginCalc from "@/components/MarginCalc.vue";
     </v-container>
   </v-layout>
 </template>
+
+<style scoped>
+@media (min-width: 1280px) {
+  .desktop-padding {
+    padding-left: 128px !important;
+    padding-right: 128px !important;
+  }
+}
+</style>
