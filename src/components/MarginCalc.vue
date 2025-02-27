@@ -71,6 +71,20 @@ const selectTicker = (ticker: string) => {
   watchPrice(ticker);
 };
 
+// Date formatting function
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
+  } catch (e) {
+    return dateString;
+  }
+};
+
 // Copy functions
 const copyTradeText = () => {
   copyToClipboard(generateText(true));
@@ -97,13 +111,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12" md="9">
-        <v-card class="pa-4">
-          <v-form @submit.prevent>
-            <v-row>
-              <v-col cols="12" md="6">
+  <v-container fluid class="px-1 py-1 fill-height" style="max-width: none">
+    <v-row no-gutters>
+      <v-col cols="12" md="8">
+        <v-card class="pa-3">
+          <v-form @submit.prevent class="mt-n2">
+            <v-row dense class="my-1">
+              <v-col cols="12" md="6" class="py-1">
                 <v-select
                   v-model="mode"
                   :items="[
@@ -117,7 +131,7 @@ onMounted(() => {
                 ></v-select>
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" class="py-1">
                 <!-- Ticker input with autocomplete suggestions -->
                 <v-text-field
                   v-model="pair"
@@ -176,8 +190,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12" md="6">
+            <v-row dense class="my-1">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="stopLossPercent"
                   type="number"
@@ -193,7 +207,7 @@ onMounted(() => {
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="stopLossDollar"
                   type="number"
@@ -209,8 +223,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12" md="6">
+            <v-row dense class="my-1">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="smPrice"
                   type="number"
@@ -222,7 +236,7 @@ onMounted(() => {
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="slPrice"
                   type="number"
@@ -234,8 +248,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12" md="6">
+            <v-row dense class="my-1">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="leverage"
                   type="number"
@@ -250,7 +264,7 @@ onMounted(() => {
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" class="py-1">
                 <v-text-field
                   v-model="rr"
                   type="number"
@@ -274,8 +288,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row class="mt-2">
-              <v-col cols="6" md="3">
+            <v-row dense class="mt-0 mb-0">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="success"
                   :class="{ 'v-btn--active': position === 'buy' }"
@@ -285,7 +299,7 @@ onMounted(() => {
                   Buy
                 </v-btn>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="error"
                   :class="{ 'v-btn--active': position === 'sell' }"
@@ -295,7 +309,7 @@ onMounted(() => {
                   Sell
                 </v-btn>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="primary"
                   :disabled="!formReady"
@@ -305,7 +319,7 @@ onMounted(() => {
                   Send Order
                 </v-btn>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="grey-darken-1"
                   :disabled="!formReady"
@@ -317,8 +331,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row class="mt-2">
-              <v-col cols="6" md="3">
+            <v-row dense class="mt-0 mb-0">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="primary-darken-1"
                   variant="outlined"
@@ -328,7 +342,7 @@ onMounted(() => {
                   Add Trade
                 </v-btn>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="grey-darken-2"
                   variant="outlined"
@@ -340,8 +354,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row class="mt-4">
-              <v-col cols="12">
+            <v-row dense class="mt-1">
+              <v-col cols="12" class="py-1">
                 <v-textarea
                   v-model="text"
                   label="Use the following text to open a trade"
@@ -361,8 +375,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12">
+            <v-row dense class="my-0">
+              <v-col cols="12" class="py-1">
                 <v-text-field
                   v-model="reduceAmount"
                   type="number"
@@ -374,8 +388,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12">
+            <v-row dense class="my-0">
+              <v-col cols="12" class="py-1">
                 <v-textarea
                   v-model="reduceText"
                   label="Use the following text to reduce the trade above"
@@ -394,8 +408,8 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12">
+            <v-row dense class="my-0">
+              <v-col cols="12" class="py-1">
                 <v-textarea
                   v-model="beText"
                   label="Use the following text to set the trade breakeven"
@@ -417,32 +431,35 @@ onMounted(() => {
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="trade-history-card">
-          <v-card-title class="text-h6 bg-grey-lighten-3 pa-4">
+      <v-col cols="12" md="4" class="pl-0 pr-1">
+        <v-card class="trade-history-card" flat>
+          <v-card-title class="text-h6 bg-grey-lighten-3 py-1 px-2">
             Trade History
           </v-card-title>
-          <v-card-text class="pa-2">
+          <v-card-text class="pa-0">
             <v-list
               id="trade-history-list"
               class="overflow-y-auto"
               max-height="600"
+              density="compact"
               v-if="trades.length > 0"
             >
               <v-list-item
                 v-for="(trade, index) in trades"
                 :key="index"
                 @click="loadTrade(trade)"
-                class="mb-2 trade-history-item rounded-lg"
+                class="trade-history-item"
+                :class="{ 'bg-grey-lighten-5': index % 2 === 0 }"
+                rounded="0"
               >
-                <v-list-item-title>
-                  {{ trade.datetime }}
+                <v-list-item-title class="text-subtitle-2 font-weight-medium">
+                  {{ formatDate(trade.datetime) }}
                 </v-list-item-title>
-                <v-list-item-subtitle>
+                <v-list-item-subtitle class="text-body-2">
                   {{ trade.pair }} - {{ trade.position.toUpperCase() }}
                 </v-list-item-subtitle>
                 <template v-if="trade.slPrice">
-                  <v-list-item-subtitle>
+                  <v-list-item-subtitle class="text-caption">
                     {{
                       trade.openPrice
                         ? `Open: ${Number(trade.openPrice).toFixed(2)},`
@@ -461,7 +478,8 @@ onMounted(() => {
                     icon="mdi-delete"
                     variant="text"
                     color="error"
-                    size="small"
+                    size="x-small"
+                    density="compact"
                     @click.stop="deleteTrade(index)"
                   ></v-btn>
                 </template>
@@ -504,8 +522,9 @@ onMounted(() => {
 
 .trade-history-item {
   cursor: pointer;
-  border-left: 4px solid transparent;
+  border-left: 3px solid transparent;
   transition: all 0.2s ease;
+  padding: 8px 12px;
 }
 
 .trade-history-item:hover {
@@ -517,5 +536,9 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.v-list-item-subtitle {
+  margin-bottom: 2px;
 }
 </style>

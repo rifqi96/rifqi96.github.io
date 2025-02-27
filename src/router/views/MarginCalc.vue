@@ -4,7 +4,7 @@ import MarginCalc from "@/components/MarginCalc.vue";
 
 <template>
   <v-layout row wrap>
-    <v-container>
+    <v-container fluid>
       <v-row>
         <v-col cols="12" sm="12" md="12">
           <h1>Margin Calculator</h1>
