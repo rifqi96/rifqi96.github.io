@@ -1,5 +1,7 @@
 <script setup lang="ts">
 // About Me section component
+const experienceYears = new Date().getFullYear() - 2018;
+
 defineProps<{
   scrollPosition: number;
 }>();
@@ -33,7 +35,7 @@ defineProps<{
             ></v-img>
 
             <div class="about-experience">
-              <h3>8+</h3>
+              <h3>{{ experienceYears }}+</h3>
               <p>Years of Experience</p>
             </div>
           </div>

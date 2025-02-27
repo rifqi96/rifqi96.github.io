@@ -4,7 +4,7 @@ import { ref, onMounted } from "vue";
 // Stats data
 const yearsCount = ref<number>(0);
 const projectsCount = ref<number>(0);
-const experienceYears = 8; // Adjust based on your experience
+const experienceYears = new Date().getFullYear() - 2018; // Calculate years since 2016
 const completedProjects = 35; // Adjust based on your portfolio
 
 // For animated counting
