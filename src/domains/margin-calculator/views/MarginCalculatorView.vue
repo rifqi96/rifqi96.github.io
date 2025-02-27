@@ -11,7 +11,7 @@ onMounted(() => {
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="text-center">
         <h1 class="text-h3 mb-4">Margin Calculator</h1>
         <p class="text-subtitle-1 mb-6">
           A powerful tool for cryptocurrency traders to calculate margin,

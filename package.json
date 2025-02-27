@@ -16,6 +16,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "@types/axios": "^0.14.4",
     "@types/node": "^20.10.4",
     "@vueuse/core": "^10.7.0",

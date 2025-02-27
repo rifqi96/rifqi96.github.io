@@ -56,8 +56,10 @@ declare global {
   const triggerRef: (typeof import("vue"))["triggerRef"];
   const unref: (typeof import("vue"))["unref"];
   const useAttrs: (typeof import("vue"))["useAttrs"];
+  const useCSVParser: (typeof import("./src/composables/useCSVParser"))["useCSVParser"];
   const useCssModule: (typeof import("vue"))["useCssModule"];
   const useCssVars: (typeof import("vue"))["useCssVars"];
+  const useDataLoader: (typeof import("./src/composables/useDataLoader"))["useDataLoader"];
   const useLink: (typeof import("vue-router"))["useLink"];
   const useMarginCalculator: (typeof import("./src/composables/useMarginCalculator"))["useMarginCalculator"];
   const useRoute: (typeof import("vue-router"))["useRoute"];
@@ -65,6 +67,7 @@ declare global {
   const useSlots: (typeof import("vue"))["useSlots"];
   const useTicker: (typeof import("./src/composables/useTicker"))["useTicker"];
   const useTradeHistory: (typeof import("./src/composables/useTradeHistory"))["useTradeHistory"];
+  const useVisibilityObserver: (typeof import("./src/composables/useVisibilityObserver"))["useVisibilityObserver"];
   const watch: (typeof import("vue"))["watch"];
   const watchEffect: (typeof import("vue"))["watchEffect"];
   const watchPostEffect: (typeof import("vue"))["watchPostEffect"];

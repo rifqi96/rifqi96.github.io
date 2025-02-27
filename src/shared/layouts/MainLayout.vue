@@ -155,7 +155,7 @@ onMounted(() => {
 
           <v-col cols="12" md="4">
             <h3 class="text-subtitle-1 mb-3">Connect</h3>
-            <div class="d-flex justify-center footer-social">
+            <div class="d-flex footer-social">
               <v-btn
                 icon
                 href="https://github.com/rifqi96"
