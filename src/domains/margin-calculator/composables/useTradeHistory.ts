@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import type { Trade } from "@/types";
+import type { Trade } from "@/domains/margin-calculator/types";
 
 const STORAGE_KEY = "trade_history";
 

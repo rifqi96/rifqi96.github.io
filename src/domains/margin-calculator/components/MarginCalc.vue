@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useMarginCalculator } from "../composables/useMarginCalculator";
-import { Trade } from "@/types";
+import { useMarginCalculator } from "@/domains/margin-calculator/composables/useMarginCalculator";
+import { Trade } from "@/domains/margin-calculator/types";
 
 const showError = ref(false);
 const errorMessage = ref("");
@@ -568,3 +568,4 @@ onMounted(() => {
   margin-bottom: 2px;
 }
 </style>
+@/domains/margin-calculator/types

@@ -1,17 +1,17 @@
 // composables/useMarginCalculator.ts
 import { ref, computed, onMounted, watch } from "vue";
-import { SymbolData, Trade } from "@/types";
+import { SymbolData, Trade } from "@/domains/margin-calculator/types";
 import {
   fetchTickersList,
   watchPrice as watchPriceApi,
   getMinMaxLotSize as getLotSize,
-} from "@/services/binanceApi";
+} from "@/domains/margin-calculator/services/binanceApi";
 import {
   generateCommand as generateCommandUtil,
   generateReduceCommand as generateReduceCommandUtil,
   generateBeCommand as generateBeCommandUtil,
   generateSLCommand,
-} from "@/utils/commandGenerators";
+} from "@/domains/margin-calculator/utils/commandGenerators";
 
 export function useMarginCalculator() {
   // Core state

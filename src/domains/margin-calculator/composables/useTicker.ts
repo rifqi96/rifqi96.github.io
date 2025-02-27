@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from "vue";
-import { fetchTickersList } from "@/services/binanceApi";
+import { fetchTickersList } from "@/domains/margin-calculator/services/binanceApi";
 
 export function useTicker() {
   const ticker = ref<string[]>([]);

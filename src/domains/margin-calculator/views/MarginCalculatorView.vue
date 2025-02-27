@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
-import MarginCalc from "../components/MarginCalc.vue";
+import MarginCalc from "@/domains/margin-calculator/components/MarginCalc.vue";
 
 // Update page title when the component is mounted
 onMounted(() => {
