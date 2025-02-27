@@ -74,7 +74,7 @@ onUnmounted(() => {
 
 <template>
   <!-- Main Content -->
-  <div class="home-content">
+  <div class="home-content home-view">
     <!-- Hero Section with Parallax -->
     <div ref="heroSectionRef" class="section-animation">
       <HeroSection :scroll-position="scrollPosition" />
@@ -131,5 +131,12 @@ onUnmounted(() => {
 .section-visible {
   opacity: 1;
   transform: translateY(0);
+}
+</style>
+
+<!-- Add this global style to override Vuetify's default -->
+<style>
+.home-view {
+  margin-top: calc(-1 * var(--v-layout-top));
 }
 </style>
