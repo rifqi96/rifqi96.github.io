@@ -75,14 +75,16 @@ target/
 *.tmp
 *.swp
 
-# Images
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.ico
-*.svg
-*.webp
+# Images (except project images)
+# *.jpg
+# *.jpeg
+# *.png
+# # Exclude project images from being ignored
+# !public/projects/**/*.png
+# *.gif
+# *.ico
+# *.svg
+# *.webp
 
 # Videos
 *.avi
