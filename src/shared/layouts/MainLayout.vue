@@ -175,7 +175,7 @@ onMounted(() => {
 
       <template v-slot:append>
         <div class="pa-4">
-          <v-btn block color="primary" href="mailto:rifqi96@gmail.com">
+          <v-btn block color="primary" href="mailto:mail@rifqi.dev">
             Get In Touch
           </v-btn>
         </div>

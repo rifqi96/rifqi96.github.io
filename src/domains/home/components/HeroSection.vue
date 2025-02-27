@@ -23,7 +23,7 @@ defineProps<{
           >View My Work</v-btn
         >
         <v-btn
-          href="mailto:rifqi96@gmail.com"
+          href="mailto:mail@rifqi.dev"
           size="large"
           variant="outlined"
           color="white"

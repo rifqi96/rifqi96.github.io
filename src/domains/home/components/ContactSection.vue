@@ -11,7 +11,7 @@
           Let's work together to build something amazing.
         </p>
         <v-btn
-          href="mailto:rifqi96@gmail.com"
+          href="mailto:mail@rifqi.dev"
           color="primary"
           size="x-large"
           class="mt-6"
