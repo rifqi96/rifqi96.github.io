@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { handleLinkNavigation } from "@/utils/navigation";
+
 interface Props {
   project: {
     title: string;

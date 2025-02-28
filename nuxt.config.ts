@@ -141,8 +141,10 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-02-28",
 
   devtools: {
-    timeline: {
-      enabled: true,
-    },
+    // Temporarily disable devtools to avoid spawn EBADF error
+    enabled: false,
+    // timeline: {
+    //   enabled: true,
+    // },
   },
 });
