@@ -22,6 +22,9 @@ export function useWorkExperience(): {
 } {
   const { parseCSV } = useCSVParser();
   const config = useRuntimeConfig();
+  const baseURL = import.meta.server
+    ? config.public.baseURL
+    : window.location.origin;
 
   const {
     data: workExperience,
@@ -29,15 +32,8 @@ export function useWorkExperience(): {
     error,
     refresh,
   } = useAsyncData<WorkExperience[]>("work-experience", async () => {
-    try {
-      const csvData = await $fetch(
-        `${config.public.baseURL}/data/work-experience.csv`,
-      );
-      return parseCSV<WorkExperience>(String(csvData));
-    } catch (err) {
-      console.error("Error fetching work experience:", err);
-      throw err;
-    }
+    const csvData = await $fetch(`${baseURL}/data/work-experience.csv`);
+    return parseCSV<WorkExperience>(String(csvData));
   });
 
   return {

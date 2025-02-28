@@ -17,6 +17,10 @@
     "typecheck": "nuxi typecheck",
     "prepare": "husky install"
   },
+  "overrides": {
+    "esbuild": "0.15.15",
+    "chokidar": "^3.6.0"
+  },
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@types/axios": "^0.14.4",
