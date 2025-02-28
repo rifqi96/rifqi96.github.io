@@ -23,9 +23,6 @@ export function useProject(): {
 } {
   const { parseCSV } = useCSVParser();
   const config = useRuntimeConfig();
-  const baseURL = import.meta.server
-    ? config.public.baseURL
-    : window.location.origin;
 
   const {
     data: projects,
@@ -33,8 +30,15 @@ export function useProject(): {
     error,
     refresh,
   } = useAsyncData("projects", async () => {
-    const csvData = await $fetch<string>(`${baseURL}/data/projects.csv`);
-    return parseCSV<Project>(csvData);
+    try {
+      const csvData = await $fetch(
+        `${config.public.baseURL}/data/projects.csv`,
+      );
+      return parseCSV<Project>(String(csvData));
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+      throw err;
+    }
   });
 
   const featuredProjects = computed(() => {
