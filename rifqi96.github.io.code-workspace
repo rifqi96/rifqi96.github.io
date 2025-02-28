@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../rifqi-dev-nuxt/server"
+    }
+  ],
+  "settings": {
+    "vue.server.maxFileSize": 30971520,
+    "typescript.tsdk": "node_modules/typescript/lib"
+  }
+}
