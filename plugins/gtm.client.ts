@@ -1,6 +1,6 @@
 // @ts-nocheck
 export default defineNuxtPlugin((nuxtApp) => {
-  if (import.meta.env.NODE_ENV === "production") {
+  if (import.meta.env.PROD) {
     (function (w, d, s, l, i) {
       w[l] = w[l] || [];
       w[l].push({
