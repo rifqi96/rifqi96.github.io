@@ -8,6 +8,11 @@ const isLoading = ref(false);
 const loadingProgress = ref(0);
 const loadingTimer = ref<number | null>(null);
 
+const config = useRuntimeConfig();
+const baseURL = import.meta.server
+  ? config.public.baseURL
+  : window.location.origin;
+
 // Check if we're in a section that should have a transparent navbar
 const transparentNavbar = computed<boolean>(() => {
   return route.path === "/" && !isScrolled.value;
@@ -120,17 +125,24 @@ onMounted(() => {
             color: transparentNavbar ? 'white' : 'var(--v-primary-base)',
           }"
         >
-          Rifqi Ruhyattamam
+          <img
+            :src="`${baseURL}/initials-logo.svg`"
+            alt="RR"
+            class="initials-logo"
+            :style="{
+              filter: transparentNavbar ? 'brightness(0) invert(1)' : 'none',
+            }"
+          />
         </NuxtLink>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
 
       <!-- Desktop only: Navigation links -->
-      <div v-if="!isMobile" class="desktop-nav">
+      <div v-if="!isMobile" class="desktop-nav px-6">
         <v-btn
           to="/"
-          class="nav-btn"
+          class="nav-btn mr-2"
           :class="{ 'white--text': transparentNavbar }"
           >Home</v-btn
         >
@@ -146,7 +158,11 @@ onMounted(() => {
     <!-- Mobile Navigation Drawer -->
     <v-navigation-drawer v-model="drawer" app temporary>
       <div class="drawer-header py-6 px-4">
-        <h3 class="text-h5">Rifqi Ruhyattamam</h3>
+        <img
+          :src="`${baseURL}/logo.svg`"
+          alt="Rifqi Ruhyattamam"
+          class="full-logo mb-2"
+        />
         <p class="text-subtitle-2">Software Engineer</p>
       </div>
 
@@ -187,7 +203,13 @@ onMounted(() => {
       <v-container>
         <v-row>
           <v-col cols="12" md="4" class="mb-4 mb-md-0">
-            <h3 class="text-h6 mb-3">Rifqi Ruhyattamam</h3>
+            <h3 class="text-h6 mb-3">
+              <img
+                :src="`${baseURL}/logo.svg`"
+                alt="Rifqi Ruhyattamam"
+                class="full-logo mb-2"
+              />
+            </h3>
             <p class="text-body-2">
               Software Engineer focused on building elegant, performant
               applications using modern web technologies.
@@ -358,5 +380,16 @@ onMounted(() => {
 
 .footer-social {
   gap: 8px;
+}
+.initials-logo {
+  height: 64px;
+  width: auto;
+  vertical-align: middle;
+}
+
+.full-logo {
+  height: 64px;
+  width: auto;
+  display: block;
 }
 </style>

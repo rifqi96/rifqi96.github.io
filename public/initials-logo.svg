@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80">
+  <!-- Version 1: Clean & Geometric RR Monogram -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;display=swap');
+    
+    .logo-text {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 42px;
+      letter-spacing: -2px;
+    }
+    
+    .light-mode {
+      fill: #333333;
+    }
+    
+    .dark-mode {
+      fill: #f5f5f5;
+    }
+    
+    .accent-line {
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    
+    .light-mode-line {
+      stroke: #333333;
+    }
+    
+    .dark-mode-line {
+      stroke: #f5f5f5;
+    }
+  </style>
+
+  <!-- Light Mode Version -->
+  <g id="light-mode-logo" transform="translate(0, 0)">
+    <text x="22" y="50" class="logo-text light-mode">RR</text>
+    <line x1="24" y1="58" x2="95" y2="58" class="accent-line light-mode-line" />
+  </g>
+
+  <!-- Dark Mode Version -->
+  <g id="dark-mode-logo" transform="translate(150, 0)" style="display: none;">
+    <text x="22" y="50" class="logo-text dark-mode">RR</text>
+    <line x1="24" y1="58" x2="95" y2="58" class="accent-line dark-mode-line" />
+  </g>
+</svg>

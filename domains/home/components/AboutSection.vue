@@ -23,12 +23,12 @@ defineProps<{
           cols="12"
           md="6"
           class="about-image-col"
-          :style="{ transform: `translateY(${scrollPosition * 0.05}px)` }"
+          :style="{ transform: `translateY(${scrollPosition * 0.02}px)` }"
         >
           <div class="about-image">
             <v-img
               src="/avatar.png"
-              height="400"
+              height="350"
               width="100%"
               class="rounded-lg elevation-5"
               cover
@@ -206,6 +206,20 @@ defineProps<{
   .section-title {
     font-size: 2rem;
   }
+
+  .about-image-col {
+    margin-bottom: 60px;
+  }
+
+  .about-image {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* Disable transform on tablet to prevent overlap */
+  .about-image-col {
+    transform: none !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -214,7 +228,9 @@ defineProps<{
   }
 
   .about-experience {
-    position: relative;
+    position: absolute;
+    z-index: 100;
+    top: 220px;
     right: auto;
     bottom: auto;
     margin-top: 20px;

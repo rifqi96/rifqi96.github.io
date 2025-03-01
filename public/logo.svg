@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 120">
+  <!-- Version 1: Purely Typographic Hero Logo -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&amp;display=swap');
+    
+    .hero-bold {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: 1px;
+    }
+    
+    .hero-light {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 38px;
+      letter-spacing: 1px;
+    }
+    
+    .black {
+      fill: #333333;
+    }
+    
+    .white {
+      fill: #f5f5f5;
+    }
+    
+    .accent-line {
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    
+    .black-line {
+      stroke: #555555;
+    }
+    
+    .white-line {
+      stroke: #f5f5f5;
+    }
+  </style>
+
+  <!-- Black Version on White Background -->
+  <g id="black-on-white">
+    <text x="20" y="70" class="hero-bold black">RIFQI</text>
+    <text x="142" y="70" class="hero-light black">RUHYATTAMAM</text>
+    <line x1="20" y1="85" x2="430" y2="85" class="accent-line black-line" />
+  </g>
+
+  <!-- White Version on Dark Background -->
+  <g id="white-on-black" transform="translate(0, 0)" style="display: none;">
+    <text x="20" y="70" class="hero-bold white">RIFQI</text>
+    <text x="142" y="70" class="hero-light white">RUHYATTAMAM</text>
+    <line x1="20" y1="85" x2="430" y2="85" class="accent-line white-line" />
+  </g>
+</svg>

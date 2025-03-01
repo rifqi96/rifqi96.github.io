@@ -1,5 +1,11 @@
 <script setup lang="ts">
 // Hero section component for the home page
+
+const config = useRuntimeConfig();
+const baseURL = import.meta.server
+  ? config.public.baseURL
+  : window.location.origin;
+
 defineProps<{
   scrollPosition: number;
 }>();
@@ -12,9 +18,13 @@ defineProps<{
       :style="{ transform: `translateY(${scrollPosition * 0.4}px)` }"
     >
       <h1 class="hero-title">
-        Rifqi <span class="accent-text">Ruhyattamam</span>
+        <img
+          :src="`${baseURL}/logo.svg`"
+          alt="Rifqi Ruhyattamam"
+          class="full-logo mb-2"
+        />
       </h1>
-      <h2 class="hero-subtitle">Software Engineer</h2>
+      <!-- <h2 class="hero-subtitle">Software Engineer</h2> -->
       <p class="hero-description">
         Creating elegant solutions through clean code and modern technologies
       </p>
@@ -173,5 +183,10 @@ defineProps<{
     flex-direction: column;
     gap: 16px;
   }
+}
+.full-logo {
+  filter: brightness(0) invert(1);
+  width: 100%;
+  height: 160px;
 }
 </style>
