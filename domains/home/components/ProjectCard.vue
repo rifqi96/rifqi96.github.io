@@ -115,3 +115,4 @@ const router = useRouter();
   flex-wrap: wrap;
 }
 </style>
+@/utils/navigation.util

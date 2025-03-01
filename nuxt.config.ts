@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import path from "path";
+import { parseBoolean } from "./utils/input.util";
 export default defineNuxtConfig({
   // Enable SSR for better SEO
   ssr: true,
@@ -7,7 +8,14 @@ export default defineNuxtConfig({
   // Runtime config
   runtimeConfig: {
     public: {
-      baseURL: process.env.BASE_URL || "http://localhost:3000",
+      baseURL: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      buildEnv: process.env.NODE_ENV,
+      mcRequiresPassword: parseBoolean(
+        process.env.NUXT_PUBLIC_MC_SHOULD_USE_PASSWORD,
+      ),
+      mcAleeertDefaultSlot: process.env.NUXT_PUBLIC_MC_ALEEERT_DEFAULT_SLOT,
+      mcAleeertDefaultSecret:
+        process.env.NUXT_PUBLIC_MC_ALEEERT_DEFAULT_API_SECRET,
     },
   },
 

@@ -1,6 +1,6 @@
 // @ts-nocheck
 export default defineNuxtPlugin((nuxtApp) => {
-  if (import.meta.env.PROD) {
+  if (import.meta.env.NODE_ENV === "production") {
     (function (w, d, s, l, i) {
       w[l] = w[l] || [];
       w[l].push({
@@ -13,6 +13,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       j.async = true;
       j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
       f.parentNode.insertBefore(j, f);
-    })(window, document, "script", "dataLayer", import.meta.env.VITE_GTM_KEY);
+    })(
+      window,
+      document,
+      "script",
+      "dataLayer",
+      import.meta.env.NUXT_PUBLIC_GTM_KEY,
+    );
   }
 });

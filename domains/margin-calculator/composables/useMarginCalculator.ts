@@ -13,11 +13,11 @@ import {
 } from "@/domains/margin-calculator/utils/commandGenerators";
 
 export function useMarginCalculator() {
+  const config = useRuntimeConfig();
+
   // Core state
-  const slot = ref<string>(import.meta.env.VITE_ALEEERT_DEFAULT_SLOT || "");
-  const apiSecret = ref<string>(
-    import.meta.env.VITE_ALEEERT_DEFAULT_API_SECRET || "",
-  );
+  const slot = ref<string>(config.public.mcAleeertDefaultSlot || "");
+  const apiSecret = ref<string>(config.public.mcAleeertDefaultSecret || "");
   const text = ref<string>("");
   const reduceText = ref<string>("");
   const beText = ref<string>("");
@@ -50,15 +50,11 @@ export function useMarginCalculator() {
   const trades = ref<Trade[]>([]);
 
   // Function to check if we should require a password
-  const shouldRequirePassword = (): boolean => {
-    // Check if the REQUIRE_PASSWORD environment variable is set to 'true'
-    // In Vite, environment variables must be prefixed with VITE_
-    return import.meta.env.VITE_REQUIRE_PASSWORD === "true";
-  };
+  const shouldUsePassword = config.public.mcRequiresPassword;
 
   const authenticate = () => {
     // Skip authentication if not required
-    if (!shouldRequirePassword()) {
+    if (!shouldUsePassword) {
       return;
     }
 
