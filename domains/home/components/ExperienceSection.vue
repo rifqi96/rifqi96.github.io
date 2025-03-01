@@ -81,16 +81,16 @@ const isLoading = computed(
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: #6200ea;
+  -webkit-text-fill-color: #4a4a4a;
 }
 
 .section-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(to right, var(--v-primary-base), #6200ea);
+  background: linear-gradient(to right, var(--v-primary-base), #4a4a4a);
   margin: 0 auto 16px;
   border-radius: 4px;
 }
@@ -121,7 +121,7 @@ const isLoading = computed(
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(to bottom, var(--v-primary-base), #6200ea);
+  background: linear-gradient(to bottom, var(--v-primary-base), #4a4a4a);
   transform: translateX(-50%);
 }
 
@@ -137,10 +137,10 @@ const isLoading = computed(
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
   transform: translateX(-50%);
   z-index: 1;
-  box-shadow: 0 0 0 4px rgba(98, 0, 234, 0.2);
+  box-shadow: 0 0 0 4px rgba(106, 99, 255, 0.2);
 }
 
 .timeline-content {
@@ -159,8 +159,8 @@ const isLoading = computed(
   top: -18px;
   width: max-content;
   padding: 8px 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
-  color: #6200ea;
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  color: #4a4a4a;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;

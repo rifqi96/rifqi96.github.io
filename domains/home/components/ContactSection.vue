@@ -26,7 +26,7 @@
 /* Contact Section */
 .contact-section {
   padding: 100px 0;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
   color: white;
   text-align: center;
 }

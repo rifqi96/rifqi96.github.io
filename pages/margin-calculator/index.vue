@@ -8,7 +8,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: "Margin Calculator | Rifqi Ruhyattamam",
+  title: "Margin Calculator",
   meta: [
     {
       name: "description",

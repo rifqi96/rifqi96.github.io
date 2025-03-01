@@ -104,16 +104,16 @@ defineProps<{
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: #6200ea;
+  -webkit-text-fill-color: #4a4a4a;
 }
 
 .section-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(to right, var(--v-primary-base), #6200ea);
+  background: linear-gradient(to right, var(--v-primary-base), #4a4a4a);
   margin: 0 auto 16px;
   border-radius: 4px;
 }
@@ -139,7 +139,7 @@ defineProps<{
   position: absolute;
   right: -20px;
   bottom: -20px;
-  background: linear-gradient(135deg, var(--v-primary-base), #6200ea);
+  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
   color: white;
   padding: 20px;
   border-radius: 12px;

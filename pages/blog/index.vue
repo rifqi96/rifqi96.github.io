@@ -6,7 +6,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: "Blog | Rifqi Ruhyattamam",
+  title: "Blog",
   meta: [
     {
       name: "description",

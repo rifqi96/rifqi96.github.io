@@ -15,7 +15,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: "Rifqi Ruhyattamam | Software Engineer",
+  title: "Home",
   meta: [
     {
       name: "description",

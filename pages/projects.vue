@@ -8,7 +8,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: "Projects | Rifqi Ruhyattamam",
+  title: "Projects",
   meta: [
     {
       name: "description",

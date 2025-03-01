@@ -78,8 +78,8 @@ onMounted(() => {
   font-weight: 700 !important;
   margin-bottom: 8px !important;
   display: block !important;
-  color: #6200ea !important; /* Fallback for browsers that don't support gradient text */
-  background: linear-gradient(135deg, #7c4dff, #6200ea) !important;
+  color: #4a4a4a !important; /* Fallback for browsers that don't support gradient text */
+  background: linear-gradient(135deg, #4a4a4a 0%, #5a54ff 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
