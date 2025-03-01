@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { handleLinkNavigation } from "@/utils/navigation";
-
 interface Props {
   project: {
     title: string;
@@ -115,4 +113,3 @@ const router = useRouter();
   flex-wrap: wrap;
 }
 </style>
-@/utils/navigation.util
