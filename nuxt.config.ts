@@ -67,6 +67,13 @@ export default defineNuxtConfig({
           },
         },
       },
+      defaults: {
+        global: {
+          font: {
+            family: "Poppins, system-ui, Avenir, Helvetica, Arial, sans-serif",
+          },
+        },
+      },
     },
 
     moduleOptions: {

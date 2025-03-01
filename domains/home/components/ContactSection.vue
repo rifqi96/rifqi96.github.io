@@ -40,12 +40,14 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
+  color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
 }
 
 .contact-text {
   font-size: 1.2rem;
   opacity: 0.9;
   margin-bottom: 24px;
+  color: #666;
 }
 
 /* Animation for section */

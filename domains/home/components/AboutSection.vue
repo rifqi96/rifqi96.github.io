@@ -228,7 +228,7 @@ defineProps<{
   }
 
   .about-experience {
-    position: absolute;
+    position: relative;
     z-index: 100;
     top: 220px;
     right: auto;
