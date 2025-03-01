@@ -124,7 +124,15 @@ export default defineNuxtConfig({
 
   // Configure sitemap
   sitemap: {
-    urls: ["https://rifqi.dev"],
+    // Sitemap configuration
+    urls: async () => {
+      const baseURL = process.env.NUXT_UBLIC_SITE_URL || "https://rifqi.dev";
+      // Default URLs
+      const urls = ["/", "/projects", "/blog"].map((url) => `${baseURL}${url}`);
+      return urls;
+    },
+    // Enable sitemap.xml generation
+    enabled: true,
   },
 
   // Configure robots.txt
