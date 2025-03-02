@@ -76,6 +76,27 @@ const selectTicker = (ticker: string) => {
 const formatDate = (dateString: string) => {
   try {
     const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // For trades less than 1 hour old
+    if (diffHours < 1) {
+      return "Just now";
+    }
+
+    // For trades between 1 and 24 hours old
+    if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+
+    // For trades between 1 and 7 days old
+    if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    }
+
+    // For older dates, use the original format DD/MM/YYYY
     return `${date.getDate().toString().padStart(2, "0")}/${(
       date.getMonth() + 1
     )
