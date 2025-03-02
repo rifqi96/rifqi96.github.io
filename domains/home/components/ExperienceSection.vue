@@ -81,23 +81,31 @@ const isLoading = computed(
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: #4a4a4a;
+  -webkit-text-fill-color: rgb(var(--v-theme-primary));
 }
 
 .section-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(to right, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    to right,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   margin: 0 auto 16px;
   border-radius: 4px;
 }
 
 .section-description {
   font-size: 1.1rem;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
   max-width: 600px;
   margin: 0 auto;
 }
@@ -121,7 +129,11 @@ const isLoading = computed(
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(to bottom, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    to bottom,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   transform: translateX(-50%);
 }
 
@@ -137,7 +149,11 @@ const isLoading = computed(
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   transform: translateX(-50%);
   z-index: 1;
   box-shadow: 0 0 0 4px rgba(106, 99, 255, 0.2);
@@ -159,8 +175,12 @@ const isLoading = computed(
   top: -18px;
   width: max-content;
   padding: 8px 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
-  color: #4a4a4a;
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
+  color: rgb(var(--v-theme-primary));
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
@@ -194,20 +214,20 @@ const isLoading = computed(
 
 .timeline-company {
   font-size: 1.1rem;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
   margin-bottom: 12px;
 }
 
 .timeline-location {
   font-size: 0.9rem;
-  color: #888;
+  color: rgb(var(--v-theme-neutral-light));
   font-style: italic;
 }
 
 .timeline-description {
   margin-bottom: 16px;
   line-height: 1.6;
-  color: #444;
+  color: rgb(var(--v-theme-neutral-dark));
 }
 
 .timeline-tech {

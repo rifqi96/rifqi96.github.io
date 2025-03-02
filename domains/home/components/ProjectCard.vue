@@ -103,7 +103,7 @@ const router = useRouter();
 }
 
 .project-description {
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
   margin-bottom: 16px;
   line-height: 1.6;
 }

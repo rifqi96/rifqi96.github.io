@@ -135,7 +135,7 @@ const formatDate = (dateString) => {
 }
 
 .content-container pre {
-  background-color: #f5f5f5;
+  background-color: rgb(var(--v-theme-bg-alt));
   padding: 1rem;
   border-radius: 4px;
   overflow-x: auto;
@@ -144,7 +144,7 @@ const formatDate = (dateString) => {
 
 .content-container code {
   font-family: monospace;
-  background-color: #f0f0f0;
+  background-color: rgb(var(--v-theme-bg-alt));
   padding: 0.2rem 0.4rem;
   border-radius: 3px;
 }

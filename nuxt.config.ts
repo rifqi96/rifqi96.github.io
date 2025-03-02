@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import path from "path";
+import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import { parseBoolean } from "./utils/input.util";
 export default defineNuxtConfig({
   // Enable SSR for better SEO
@@ -40,51 +41,22 @@ export default defineNuxtConfig({
     "@nuxt/image",
 
     // UI modules
-    "@invictus.codes/nuxt-vuetify",
+    (_options, nuxt) => {
+      nuxt.hooks.hook("vite:extendConfig", (config) => {
+        // @ts-expect-error
+        config.plugins.push(vuetify({ autoImport: true }));
+      });
+    },
 
     // Content modules (for CMS functionality)
     "@nuxt/content",
   ],
 
-  vuetify: {
-    /* vuetify options */
-    vuetifyOptions: {
-      // @TODO: list all vuetify options
-      theme: {
-        defaultTheme: "light",
-        themes: {
-          light: {
-            dark: false,
-            colors: {
-              primary: "#4A4A4A",
-              secondary: "#1E1E1E",
-              accent: "#6C63FF",
-              error: "#E63946",
-              info: "#3A86FF",
-              success: "#00B488",
-              warning: "#F4A261",
-            },
-          },
-        },
+  vite: {
+    vue: {
+      template: {
+        transformAssetUrls,
       },
-      defaults: {
-        global: {
-          font: {
-            family: "Poppins, system-ui, Avenir, Helvetica, Arial, sans-serif",
-          },
-        },
-      },
-    },
-
-    moduleOptions: {
-      /* nuxt-vuetify module options */
-      treeshaking: true,
-      useIconCDN: true,
-
-      /* vite-plugin-vuetify options */
-      styles: true,
-      autoImport: true,
-      useVuetifyLabs: false,
     },
   },
 

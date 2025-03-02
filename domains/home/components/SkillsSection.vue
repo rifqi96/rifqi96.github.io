@@ -71,23 +71,31 @@ const technologies = [
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: #4a4a4a;
+  -webkit-text-fill-color: rgb(var(--v-theme-primary));
 }
 
 .section-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(to right, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    to right,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   margin: 0 auto 16px;
   border-radius: 4px;
 }
 
 .section-description {
   font-size: 1.1rem;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
   max-width: 600px;
   margin: 0 auto;
 }
@@ -95,7 +103,7 @@ const technologies = [
 /* Skills Section */
 .skills-section {
   padding: 120px 0;
-  background-color: #f9f9f9;
+  background-color: rgb(var(--v-theme-surface-light));
 }
 
 .skill-item {
@@ -137,14 +145,18 @@ const technologies = [
 
 .skill-progress-bg {
   height: 10px;
-  background-color: #eee;
+  background-color: rgb(var(--v-theme-bg-alt));
   border-radius: 5px;
   overflow: hidden;
 }
 
 .skill-progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #4a4a4a 0%, #5a54ff 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-primary)) 0%,
+    rgb(var(--v-theme-link-alt)) 100%
+  );
   border-radius: 5px;
   position: relative;
   width: var(
@@ -165,7 +177,7 @@ const technologies = [
   top: -20px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #4a4a4a;
+  color: rgb(var(--v-theme-primary));
 }
 
 /* Animation for section */

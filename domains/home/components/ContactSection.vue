@@ -26,7 +26,11 @@
 /* Contact Section */
 .contact-section {
   padding: 100px 0;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   color: white;
   text-align: center;
 }
@@ -47,7 +51,7 @@
   font-size: 1.2rem;
   opacity: 0.9;
   margin-bottom: 24px;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
 }
 
 /* Animation for section */

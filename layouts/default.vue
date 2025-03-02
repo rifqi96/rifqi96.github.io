@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useTheme } from "vuetify";
+
 const route = useRoute();
 const drawer = ref(false);
 const scrollPosition = ref(0);
@@ -12,6 +14,14 @@ const config = useRuntimeConfig();
 const baseURL = import.meta.server
   ? config.public.baseURL
   : window.location.origin;
+
+// Theme toggle functionality
+const theme = useTheme();
+
+// Toggle between light and dark themes
+function toggleTheme() {
+  theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+}
 
 // Check if we're in a section that should have a transparent navbar
 const transparentNavbar = computed<boolean>(() => {
@@ -138,6 +148,21 @@ onMounted(() => {
 
       <v-spacer></v-spacer>
 
+      <!-- Mobile only: Theme toggle in navbar -->
+      <!-- <v-btn
+        v-if="isMobile"
+        icon
+        @click="toggleTheme"
+        :color="transparentNavbar ? 'white' : 'primary'"
+        class="mr-2"
+      >
+        <v-icon>{{
+          theme.global.current.value.dark
+            ? "mdi-weather-sunny"
+            : "mdi-weather-night"
+        }}</v-icon>
+      </v-btn> -->
+
       <!-- Desktop only: Navigation links -->
       <div v-if="!isMobile" class="desktop-nav px-6">
         <v-btn
@@ -229,6 +254,20 @@ onMounted(() => {
           <v-col cols="12" md="4">
             <h3 class="text-subtitle-1 mb-3">Connect</h3>
             <div class="d-flex footer-social">
+              <!-- Desktop only: Theme toggle in footer -->
+              <!-- <v-btn
+                v-if="!isMobile"
+                icon
+                @click="toggleTheme"
+                class="mr-2"
+                aria-label="Toggle theme"
+              >
+                <v-icon>{{
+                  theme.global.current.value.dark
+                    ? "mdi-weather-sunny"
+                    : "mdi-weather-night"
+                }}</v-icon>
+              </v-btn> -->
               <v-btn
                 icon
                 href="https://github.com/rifqi96"
@@ -278,10 +317,10 @@ onMounted(() => {
 }
 
 .glass-navbar {
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: var(--v-surface-base, rgba(255, 255, 255, 0.85)) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(234, 234, 234, 0.8);
+  border-bottom: 1px solid var(--v-surface-variant, rgba(234, 234, 234, 0.8));
 }
 
 .bg-transparent {
@@ -364,12 +403,12 @@ onMounted(() => {
 
 /* Footer */
 .footer {
-  background-color: #f8f9fa !important;
-  color: #212529;
+  background-color: rgb(var(--v-theme-surface-light)) !important;
+  color: rgb(var(--v-theme-surface-dark));
 }
 
 .footer-link {
-  color: #495057;
+  color: rgb(var(--v-theme-text-primary));
   text-decoration: none;
   transition: color 0.2s ease;
 }

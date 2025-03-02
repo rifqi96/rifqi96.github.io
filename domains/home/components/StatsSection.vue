@@ -78,8 +78,14 @@ onMounted(() => {
   font-weight: 700 !important;
   margin-bottom: 8px !important;
   display: block !important;
-  color: #4a4a4a !important; /* Fallback for browsers that don't support gradient text */
-  background: linear-gradient(135deg, #4a4a4a 0%, #5a54ff 100%) !important;
+  color: rgb(
+    var(--v-theme-primary)
+  ) !important; /* Fallback for browsers that don't support gradient text */
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-primary)) 0%,
+    rgb(var(--v-theme-link-alt)) 100%
+  ) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -87,7 +93,7 @@ onMounted(() => {
 
 .stat-label {
   font-size: 1.1rem;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
 }
 
 /* Animation for section */

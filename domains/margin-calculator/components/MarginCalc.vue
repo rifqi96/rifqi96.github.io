@@ -2,9 +2,15 @@
 import { useMarginCalculator } from "@/domains/margin-calculator/composables/useMarginCalculator";
 import type { Trade } from "@/domains/margin-calculator/types";
 
-const showError = ref(false);
-const errorMessage = ref("");
-const showCopySuccess = ref(false);
+// Create writable refs for UI state
+const showError = ref<boolean>(false);
+const errorMessage = ref<string>("");
+const showCopySuccess = ref<boolean>(false);
+
+// Function to update showError state
+const setShowError = (value: boolean) => {
+  showError.value = value;
+};
 
 const {
   // State
@@ -49,8 +55,53 @@ const {
 } = useMarginCalculator();
 
 // Ticker search and autocomplete
-const searchTerm = ref("");
-const showTickerSuggestions = ref(false);
+const searchTerm = ref<string>("");
+const showTickerSuggestions = ref<boolean>(false);
+
+// Create string versions of numeric inputs for v-model binding
+const stopLossPercentStr = ref<string>(stopLossPercent.value.toString());
+const stopLossDollarStr = ref<string>(stopLossDollar.value.toString());
+const leverageStr = ref<string>(leverage.value.toString());
+const rrStr = ref<string>(rr.value.toString());
+const smPriceStr = ref<string>(smPrice.value?.toString() || "");
+const slPriceStr = ref<string>(slPrice.value?.toString() || "");
+const reduceAmountStr = ref<string>(reduceAmount.value.toString());
+
+// Watch for changes in string inputs and update numeric values
+watch(stopLossPercentStr, (newVal) => {
+  stopLossPercent.value = parseFloat(newVal) || 0;
+  calculate();
+});
+
+watch(stopLossDollarStr, (newVal) => {
+  stopLossDollar.value = parseFloat(newVal) || 0;
+  calculate();
+});
+
+watch(leverageStr, (newVal) => {
+  leverage.value = parseFloat(newVal) || 0;
+  calculate();
+});
+
+watch(rrStr, (newVal) => {
+  rr.value = parseFloat(newVal) || 0;
+  calculate();
+});
+
+watch(smPriceStr, (newVal) => {
+  smPrice.value = newVal ? parseFloat(newVal) : null;
+  calculate();
+});
+
+watch(slPriceStr, (newVal) => {
+  slPrice.value = newVal ? parseFloat(newVal) : null;
+  calculate();
+});
+
+watch(reduceAmountStr, (newVal) => {
+  reduceAmount.value = parseFloat(newVal) || 0;
+  calculate();
+});
 
 const filteredTickers = computed(() => {
   if (!searchTerm.value) return [];
@@ -220,32 +271,30 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="stopLossPercent"
+                  v-model="stopLossPercentStr"
                   type="number"
                   step="0.01"
                   label="Stop Loss Percentage"
-                  @input="calculate"
-                  :rules="[
-                    (v: boolean) => !!v || 'Required',
-                    (v: number) => v > 0 || 'Must be greater than 0',
-                  ]"
                   variant="outlined"
                   density="comfortable"
+                  :rules="[
+                    (v) => !!v || 'Required',
+                    (v) => parseFloat(v) > 0 || 'Must be greater than 0',
+                  ]"
                 ></v-text-field>
               </v-col>
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="stopLossDollar"
+                  v-model="stopLossDollarStr"
                   type="number"
                   label="Stop Loss in Dollar"
-                  @input="calculate"
-                  :rules="[
-                    (v: boolean) => !!v || 'Required',
-                    (v: number) => v > 0 || 'Must be greater than 0',
-                  ]"
                   variant="outlined"
                   density="comfortable"
+                  :rules="[
+                    (v) => !!v || 'Required',
+                    (v) => parseFloat(v) > 0 || 'Must be greater than 0',
+                  ]"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -253,11 +302,10 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="smPrice"
+                  v-model="smPriceStr"
                   type="number"
                   step="0.01"
                   label="Stop Market Price (optional)"
-                  @input="calculate"
                   variant="outlined"
                   density="comfortable"
                 ></v-text-field>
@@ -265,10 +313,9 @@ onMounted(() => {
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="slPrice"
+                  v-model="slPriceStr"
                   type="number"
                   label="SL Price (optional)"
-                  @input="calculate"
                   variant="outlined"
                   density="comfortable"
                 ></v-text-field>
@@ -278,22 +325,21 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="leverage"
+                  v-model="leverageStr"
                   type="number"
                   label="Leverage"
-                  @input="calculate"
-                  :rules="[
-                    (v: boolean) => !!v || 'Required',
-                    (v: number) => v > 0 || 'Must be greater than 0',
-                  ]"
                   variant="outlined"
                   density="comfortable"
+                  :rules="[
+                    (v) => !!v || 'Required',
+                    (v) => parseFloat(v) > 0 || 'Must be greater than 0',
+                  ]"
                 ></v-text-field>
               </v-col>
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="rr"
+                  v-model="rrStr"
                   type="number"
                   min="1"
                   max="30"
@@ -302,10 +348,9 @@ onMounted(() => {
                   variant="outlined"
                   density="comfortable"
                   hint="Enter a value between 1 and 30"
-                  @input="calculate"
                   :rules="[
-                    (v: number) => v >= 1 || 'Value must be at least 1',
-                    (v: number) => v <= 30 || 'Value must be at most 30',
+                    (v) => parseFloat(v) >= 1 || 'Value must be at least 1',
+                    (v) => parseFloat(v) <= 30 || 'Value must be at most 30',
                   ]"
                 >
                   <template v-slot:append>
@@ -405,10 +450,9 @@ onMounted(() => {
             <v-row dense class="my-0">
               <v-col cols="12" class="py-1">
                 <v-text-field
-                  v-model="reduceAmount"
+                  v-model="reduceAmountStr"
                   type="number"
                   label="How much to reduce the trade for"
-                  @input="calculate"
                   variant="outlined"
                   density="comfortable"
                 ></v-text-field>
@@ -536,8 +580,18 @@ onMounted(() => {
     </v-row>
 
     <!-- Snackbars for feedback -->
-    <v-snackbar v-model="showError" color="error" timeout="3000">
+    <v-snackbar
+      :model-value="showError"
+      @update:model-value="setShowError"
+      color="error"
+      :timeout="3000"
+    >
       {{ errorMessage }}
+      <template v-slot:actions>
+        <v-btn color="white" variant="text" @click="() => setShowError(false)">
+          Close
+        </v-btn>
+      </template>
     </v-snackbar>
 
     <v-snackbar v-model="showCopySuccess" color="success" timeout="2000">

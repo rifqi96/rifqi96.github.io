@@ -104,23 +104,31 @@ defineProps<{
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: #4a4a4a;
+  -webkit-text-fill-color: rgb(var(--v-theme-primary));
 }
 
 .section-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(to right, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    to right,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   margin: 0 auto 16px;
   border-radius: 4px;
 }
 
 .section-description {
   font-size: 1.1rem;
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
   max-width: 600px;
   margin: 0 auto;
 }
@@ -139,7 +147,11 @@ defineProps<{
   position: absolute;
   right: -20px;
   bottom: -20px;
-  background: linear-gradient(135deg, var(--v-primary-base), #4a4a4a);
+  background: linear-gradient(
+    135deg,
+    var(--v-primary-base),
+    rgb(var(--v-theme-primary))
+  );
   color: white;
   padding: 20px;
   border-radius: 12px;
@@ -180,7 +192,7 @@ defineProps<{
 }
 
 .feature p {
-  color: #666;
+  color: rgb(var(--v-theme-text-muted));
 }
 
 /* Animation for section */
