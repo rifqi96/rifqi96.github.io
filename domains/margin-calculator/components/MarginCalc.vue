@@ -220,7 +220,8 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="stopLossPercent"
+                  :model-value="stopLossPercent"
+                  @update:model-value="(val) => (stopLossPercent = Number(val))"
                   type="number"
                   step="0.01"
                   label="Stop Loss Percentage"
@@ -236,7 +237,8 @@ onMounted(() => {
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="stopLossDollar"
+                  :model-value="stopLossDollar"
+                  @update:model-value="(val) => (stopLossDollar = Number(val))"
                   type="number"
                   label="Stop Loss in Dollar"
                   @input="calculate"
@@ -253,7 +255,8 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="smPrice"
+                  :model-value="smPrice"
+                  @update:model-value="(val) => (smPrice = Number(val))"
                   type="number"
                   step="0.01"
                   label="Stop Market Price (optional)"
@@ -265,7 +268,8 @@ onMounted(() => {
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="slPrice"
+                  :model-value="slPrice"
+                  @update:model-value="(val) => (slPrice = Number(val))"
                   type="number"
                   label="SL Price (optional)"
                   @input="calculate"
@@ -278,7 +282,8 @@ onMounted(() => {
             <v-row dense class="my-1">
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="leverage"
+                  :model-value="leverage"
+                  @update:model-value="(val) => (leverage = Number(val))"
                   type="number"
                   label="Leverage"
                   @input="calculate"
@@ -293,7 +298,8 @@ onMounted(() => {
 
               <v-col cols="12" md="6" class="py-1">
                 <v-text-field
-                  v-model="rr"
+                  :model-value="rr"
+                  @update:model-value="(val) => (rr = Number(val))"
                   type="number"
                   min="1"
                   max="30"
@@ -405,7 +411,8 @@ onMounted(() => {
             <v-row dense class="my-0">
               <v-col cols="12" class="py-1">
                 <v-text-field
-                  v-model="reduceAmount"
+                  :model-value="reduceAmount"
+                  @update:model-value="(val) => (reduceAmount = Number(val))"
                   type="number"
                   label="How much to reduce the trade for"
                   @input="calculate"
@@ -536,9 +543,9 @@ onMounted(() => {
     </v-row>
 
     <!-- Snackbars for feedback -->
-    <v-snackbar v-model="showError" color="error" timeout="3000">
+    <!-- <v-snackbar v-model="showError" color="error" timeout="3000">
       {{ errorMessage }}
-    </v-snackbar>
+    </v-snackbar> -->
 
     <v-snackbar v-model="showCopySuccess" color="success" timeout="2000">
       Copied to clipboard!
