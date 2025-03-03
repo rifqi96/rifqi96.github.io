@@ -61,8 +61,9 @@ const filteredTickers = computed(() => {
     .slice(0, 30); // Limit to 30 results for performance
 });
 
-const searchTickers = (value: string) => {
-  searchTerm.value = value;
+const searchTickers = (value) => {
+  // searchTerm.value = value;
+  searchTerm.value = pair.value;
   showTickerSuggestions.value = true;
 };
 
@@ -209,7 +210,11 @@ onMounted(() => {
                   max-height="300"
                   max-width="100%"
                 >
-                  <v-list v-if="filteredTickers.length > 0" density="compact">
+                  <v-list
+                    v-if="filteredTickers.length > 0"
+                    density="compact"
+                    width="200"
+                  >
                     <v-list-item
                       v-for="ticker in filteredTickers"
                       :key="ticker"
@@ -343,6 +348,19 @@ onMounted(() => {
             </v-row>
 
             <v-row dense class="mt-0 mb-0">
+              <v-col cols="12">
+                <v-alert
+                  v-if="formReady"
+                  type="success"
+                  density="compact"
+                  class="mb-2"
+                >
+                  Input fields are checked and correct
+                </v-alert>
+                <v-alert v-else type="info" density="compact" class="mb-2">
+                  Please key in input fields with the correct format
+                </v-alert>
+              </v-col>
               <v-col cols="6" md="3" class="py-1">
                 <v-btn
                   color="success"
