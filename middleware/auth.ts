@@ -1,5 +1,6 @@
 import { UserRole } from "@/domains/auth/types";
 import { useAuth } from "@/domains/auth/composables/useAuth";
+import { supabaseAuth } from "@/domains/auth/services/supabase";
 import type { H3Event } from "h3";
 
 // Helper function to check session existence
@@ -22,6 +23,24 @@ const incrementRedirectCount = () => {
   return count;
 };
 const resetRedirectCount = () => sessionStorage.removeItem(redirectKey);
+
+// Helper function to validate session with Supabase
+const validateSession = async () => {
+  try {
+    const { data, error } = await supabaseAuth.getSession();
+    if (error || !data?.session) {
+      // Session is invalid, clear auth state
+      localStorage.removeItem("sb-auth");
+      const authCookie = useCookie("sb-auth");
+      authCookie.value = null;
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Session validation error:", error);
+    return false;
+  }
+};
 
 // Middleware to check if user is authenticated
 export default defineNuxtRouteMiddleware(async (to, from) => {
@@ -63,6 +82,17 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const authDomain = config.public.authDomain;
     window.location.href = createAuthRedirectUrl(to.fullPath, authDomain);
     return;
+  }
+
+  // First validate the current session if it exists
+  if (hasValidSession()) {
+    const isValid = await validateSession();
+    if (!isValid) {
+      // Session is invalid, redirect to login
+      incrementRedirectCount();
+      await useAuth().signOut();
+      return;
+    }
   }
 
   // Check for session data in URL parameters (for cross-domain sync)
