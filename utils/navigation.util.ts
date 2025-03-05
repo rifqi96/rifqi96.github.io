@@ -43,7 +43,7 @@ export const createSessionSyncUrl = (
 ) => {
   const _mainDomain = mainDomain.startsWith("localhost")
     ? `http://${mainDomain}`
-    : `https://${mainDomain}`;
+    : mainDomain;
 
   return `${_mainDomain}/sync-session?redirect=${encodeURIComponent(
     targetPath,
@@ -62,8 +62,7 @@ export const createAuthRedirectUrl = (
   authDomain: string,
 ) => {
   const origin = window.location.origin;
-  const protocol = authDomain.startsWith("localhost") ? "http://" : "https://";
-  return `${protocol}${authDomain}/login?redirect=${encodeURIComponent(
-    origin + redirectPath,
-  )}`;
+  return `${
+    authDomain.startsWith("localhost") ? "http://" : ""
+  }${authDomain}/login?redirect=${encodeURIComponent(origin + redirectPath)}`;
 };

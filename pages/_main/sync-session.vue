@@ -34,18 +34,13 @@ onMounted(async () => {
     } else {
       // No session found, redirect to login
       const config = useRuntimeConfig();
-      const authDomain = config.public.authDomain;
-      const protocol = authDomain.startsWith("localhost")
-        ? "http://"
-        : "https://";
-      const authUrl = `${protocol}${authDomain}/login?redirect=${encodeURIComponent(
-        redirectUrl,
-      )}`;
-      console.log(
-        "Sync session - No session found, redirecting to login:",
-        authUrl,
+      const authDomain = config.public.authDomain.startsWith("localhost")
+        ? `http://${config.public.authDomain}`
+        : config.public.authDomain;
+      console.log("Sync session - No session found, redirecting to login");
+      window.location.replace(
+        `${authDomain}/login?redirect=${encodeURIComponent(redirectUrl)}`,
       );
-      window.location.replace(authUrl);
     }
   } catch (err: any) {
     console.error("Error during session sync:", err);
