@@ -29,7 +29,7 @@ defineProps<{
         Creating elegant solutions through clean code and modern technologies
       </p>
       <div class="hero-actions">
-        <v-btn to="/projects" size="large" color="primary" class="hero-btn mr-4"
+        <v-btn to="/projects" size="large" color="primary" class="hero-btn pr-4"
           >View My Work</v-btn
         >
         <v-btn

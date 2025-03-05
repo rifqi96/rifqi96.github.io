@@ -21,7 +21,7 @@ type ClassValue =
 const props = defineProps<{
   /** The route to navigate to. Can be a string path or route object */
   to: RouteLocationRaw;
-  /** Whether this is an external link that should open in a new tab */
+  /** Whether this is an external link */
   external?: boolean;
   /** Button color. Maps to Vuetify color system */
   color?: string;

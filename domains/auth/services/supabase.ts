@@ -34,10 +34,12 @@ export const supabaseAuth = {
     const supabase = useSupabaseClient();
     const { rememberMe } = options;
 
+    const redirectTo = `${window.location.origin}/callback`;
+
     return supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
         queryParams: {
           remember_me: rememberMe ? "true" : "false",
         },

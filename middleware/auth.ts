@@ -104,12 +104,18 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       ) {
         incrementRedirectCount();
         const currentUrl = window.location.href;
+        // Store intended path before cross-domain sync
+        localStorage.setItem("auth_redirect", to.fullPath);
+
         const mainDomain = config.public.mainDomain;
         window.location.href = createSessionSyncUrl(currentUrl, mainDomain);
         return;
       }
 
       // If we're on main domain or sync attempt failed, go to login
+      // Store intended path before redirect
+      localStorage.setItem("auth_redirect", to.fullPath);
+
       incrementRedirectCount();
       const authDomain = config.public.authDomain;
       window.location.href = createAuthRedirectUrl(to.fullPath, authDomain);

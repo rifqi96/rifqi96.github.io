@@ -45,7 +45,7 @@ const route = useRoute();
 </script>
 
 <template>
-  <v-app>
+  <v-app v-if="isAuthenticated && isSuperAdmin">
     <!-- Navigation drawer -->
     <v-navigation-drawer
       v-model="drawer"

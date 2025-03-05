@@ -176,10 +176,20 @@ onMounted(() => {
         >
         <CrossDomainButton
           to="/projects"
-          :className="['nav-btn', { 'white--text': transparentNavbar }]"
+          :className="['nav-btn mr-2', { 'white--text': transparentNavbar }]"
           variant="text"
           >Projects</CrossDomainButton
         >
+        <CrossDomainButton
+          v-if="isAuthenticated"
+          :to="config.public.consoleDomain"
+          :external="true"
+          :className="['nav-btn', { 'white--text': transparentNavbar }]"
+          variant="text"
+        >
+          <v-icon start>mdi-console</v-icon>
+          Console
+        </CrossDomainButton>
       </div>
     </v-app-bar>
 
@@ -206,6 +216,17 @@ onMounted(() => {
           </template>
           <v-list-item-title>Projects</v-list-item-title>
         </v-list-item>
+
+        <v-list-item
+          v-if="isAuthenticated"
+          :href="config.public.consoleDomain"
+          class="nav-item"
+        >
+          <template v-slot:prepend>
+            <v-icon>mdi-console</v-icon>
+          </template>
+          <v-list-item-title>Console</v-list-item-title>
+        </v-list-item>
       </v-list>
 
       <template v-slot:append>
@@ -213,6 +234,9 @@ onMounted(() => {
           <v-btn block color="primary" href="mailto:mail@rifqi.dev">
             Get In Touch
           </v-btn>
+        </div>
+        <div v-if="isAuthenticated" class="pa-4">
+          <v-btn block color="error" to="/logout"> Logout </v-btn>
         </div>
       </template>
     </v-navigation-drawer>
@@ -249,6 +273,13 @@ onMounted(() => {
               >
               <CrossDomainLink to="/projects" class="footer-link mb-1"
                 >Projects</CrossDomainLink
+              >
+              <CrossDomainLink
+                v-if="isAuthenticated"
+                :to="config.public.consoleDomain"
+                :external="true"
+                class="footer-link mb-1"
+                >Console</CrossDomainLink
               >
               <CrossDomainLink
                 v-if="isAuthenticated"
