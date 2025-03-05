@@ -26,7 +26,7 @@ useHead({
 });
 
 // Use ClientOnly to handle browser-side interactions
-const isClient = process.client;
+const isClient = import.meta.client;
 
 // Initialize refs with default values for SSR
 const windowHeight = ref(0);
@@ -34,14 +34,14 @@ const scrollPosition = ref(0);
 
 // Create client-only functions for window access
 const handleScroll = () => {
-  if (process.client) {
+  if (isClient) {
     scrollPosition.value = window.scrollY;
   }
 };
 
 // Update window dimensions
 const handleResize = () => {
-  if (process.client) {
+  if (isClient) {
     windowHeight.value = window.innerHeight;
   }
 };
@@ -60,7 +60,7 @@ const contactSectionRef = ref(null);
 
 // Set up observers for sections
 onMounted(async () => {
-  if (process.client) {
+  if (isClient) {
     // Set up scroll listener for parallax effect
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleResize);
@@ -84,7 +84,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (process.client) {
+  if (isClient) {
     window.removeEventListener("scroll", handleScroll);
     window.removeEventListener("resize", handleResize);
   }

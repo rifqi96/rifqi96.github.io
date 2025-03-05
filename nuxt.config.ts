@@ -2,6 +2,7 @@
 import path from "path";
 import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import { parseBoolean } from "./utils/input.util";
+
 export default defineNuxtConfig({
   // Enable SSR for better SEO
   ssr: true,
@@ -11,13 +12,27 @@ export default defineNuxtConfig({
     public: {
       baseURL: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
       buildEnv: process.env.NODE_ENV,
+      // Supabase configuration
+      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
+      supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY,
+      // Legacy margin calculator config (will be replaced by options from Supabase)
       mcRequiresPassword: parseBoolean(
         process.env.NUXT_PUBLIC_MC_SHOULD_USE_PASSWORD,
       ),
       mcAleeertDefaultSlot: process.env.NUXT_PUBLIC_MC_ALEEERT_DEFAULT_SLOT,
       mcAleeertDefaultSecret:
         process.env.NUXT_PUBLIC_MC_ALEEERT_DEFAULT_API_SECRET,
+      // Domain configuration
+      mainDomain: process.env.NUXT_PUBLIC_MAIN_DOMAIN || "rifqi.dev",
+      authDomain: process.env.NUXT_PUBLIC_AUTH_DOMAIN || "auth.rifqi.dev",
+      consoleDomain:
+        process.env.NUXT_PUBLIC_CONSOLE_DOMAIN || "console.rifqi.dev",
+      // Cookie configuration for authentication
+      cookieDomain: process.env.NUXT_PUBLIC_COOKIE_DOMAIN || ".rifqi.dev", // Shared across all subdomains
+      cookieSecure: process.env.NODE_ENV === "production", // Only secure in production
     },
+    // Private server-side config
+    supabaseServiceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
   },
 
   // Configure TypeScript
@@ -76,6 +91,39 @@ export default defineNuxtConfig({
     },
   },
 
+  // Configure cookie options for authentication
+  appConfig: {
+    nuxtCookies: {
+      sameSite: "lax", // Allow cookies to be sent on navigations
+    },
+  },
+
+  // Global middleware for authentication
+  routeRules: {
+    // Auth domain rules
+    "/auth/**": {
+      ssr: true,
+    },
+    // Console domain rules - protected by superadmin role
+    "/console/**": {
+      ssr: true,
+      appMiddleware: ["auth"],
+      // @todo: meta isn't available. to fix later
+      // meta: {
+      //   requireRole: "superadmin",
+      // },
+    },
+    // Margin calculator domain - protected by whitelist
+    "/margin-calculator/**": {
+      ssr: true,
+      appMiddleware: ["auth"],
+      // @todo: meta isn't available. to fix later
+      // meta: {
+      //   requireWhitelist: true,
+      // },
+    },
+  },
+
   // Include global CSS
   css: ["/assets/css/main.css"],
 
@@ -98,7 +146,7 @@ export default defineNuxtConfig({
   sitemap: {
     // Sitemap configuration
     urls: async () => {
-      const baseURL = process.env.NUXT_UBLIC_SITE_URL || "https://rifqi.dev";
+      const baseURL = process.env.NUXT_PUBLIC_SITE_URL || "https://rifqi.dev";
       // Default URLs
       const urls = ["/", "/projects", "/blog"].map((url) => `${baseURL}${url}`);
       return urls;
@@ -116,6 +164,16 @@ export default defineNuxtConfig({
         // @todo: enable indexing when the site is ready
         // allow: ["/"],
         disallow: ["/"],
+      },
+      // Auth domain should never be indexed
+      {
+        userAgent: "*",
+        disallow: ["/auth/**"],
+      },
+      // Console domain should never be indexed
+      {
+        userAgent: "*",
+        disallow: ["/console/**"],
       },
     ],
   },

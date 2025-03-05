@@ -5,6 +5,13 @@ import type { Trade } from "@/domains/margin-calculator/types";
 const showError = ref(false);
 const errorMessage = ref("");
 const showCopySuccess = ref(false);
+const authProvider = ref<{
+  requireAuth: () => Promise<boolean>;
+} | null>(null);
+
+defineExpose({
+  authProvider,
+});
 
 const {
   // State

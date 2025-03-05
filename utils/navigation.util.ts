@@ -29,3 +29,40 @@ export const handleLinkNavigation = (
   }
   // External links will proceed normally with default <a> behavior
 };
+
+/**
+ * Helper function to create main domain redirect for session synchronization
+ *
+ * @param targetPath The path to redirect to after synchronization
+ * @param mainDomain The main domain
+ * @returns The URL for session synchronization
+ */
+export const createSessionSyncUrl = (
+  targetPath: string,
+  mainDomain: string,
+) => {
+  const _mainDomain = mainDomain.startsWith("localhost")
+    ? `http://${mainDomain}`
+    : mainDomain;
+
+  return `${_mainDomain}/sync-session?redirect=${encodeURIComponent(
+    targetPath,
+  )}`;
+};
+
+/**
+ * Helper function to create auth redirect URL
+ *
+ * @param redirectPath The path to redirect to after login
+ * @param authDomain The auth domain
+ * @returns The URL for auth redirect
+ */
+export const createAuthRedirectUrl = (
+  redirectPath: string,
+  authDomain: string,
+) => {
+  const origin = window.location.origin;
+  return `${
+    authDomain.startsWith("localhost") ? "http://" : ""
+  }${authDomain}/login?redirect=${encodeURIComponent(origin + redirectPath)}`;
+};

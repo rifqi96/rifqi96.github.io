@@ -1,0 +1,13 @@
+graph TD
+    A["User Registration"] --> B{"Is First User?"}
+    B -->|Yes| C["Create as Superadmin"]
+    B -->|No| D{"Email in Whitelist?"}
+    D -->|Yes| E["Create as Whitelisted User"]
+    D -->|No| F["Registration Blocked"]
+    
+    G["User Login"] --> H{"Valid Credentials?"}
+    H -->|Yes| I["Get User Profile"]
+    H -->|No| J["Login Failed"]
+    I --> K{"Role?"}
+    K -->|"superadmin"| L["Full Access"]
+    K -->|"whitelisted_user"| M["Limited Access"]

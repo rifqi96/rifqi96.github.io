@@ -8,7 +8,7 @@ export function useVisibilityObserver() {
 
   const initObserver = () => {
     // Only create the observer on the client side
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     const options = {
       threshold: 0.2,
@@ -32,7 +32,7 @@ export function useVisibilityObserver() {
   // Observe an element
   const observe = (element: HTMLElement | null) => {
     // Skip if not in client or element doesn't exist
-    if (!process.client || !element) return;
+    if (!import.meta.client || !element) return;
 
     if (!observer) {
       initObserver();
@@ -57,13 +57,13 @@ export function useVisibilityObserver() {
 
   // Set up on mount and clean up on unmount
   onMounted(() => {
-    if (process.client) {
+    if (import.meta.client) {
       initObserver();
     }
   });
 
   onUnmounted(() => {
-    if (process.client) {
+    if (import.meta.client) {
       cleanup();
     }
   });

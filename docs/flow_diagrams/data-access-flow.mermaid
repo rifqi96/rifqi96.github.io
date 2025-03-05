@@ -1,0 +1,20 @@
+graph TD
+    A["User Request"] --> B{"Authenticated?"}
+    B -->|No| C["Public Data Only"]
+    B -->|Yes| D{"User Role?"}
+    
+    D -->|"superadmin"| E["Full Access"]
+    D -->|"whitelisted_user"| F["Limited Access"]
+    
+    E --> G["Portfolio CRUD"]
+    E --> H["Blog CRUD"]
+    E --> I["Whitelist Management"]
+    E --> J["Options Management"]
+    E --> K["Playground Features"]
+    
+    F --> L["View Playground Features"]
+    F --> M["Access Whitelisted Options"]
+    
+    C --> N["View Published Portfolio"]
+    C --> O["View Published Blog Posts"]
+    C --> P["Access Public Options"]

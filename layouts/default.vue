@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { useTheme } from "vuetify";
+import CrossDomainLink from "~/components/CrossDomainLink.vue";
+import CrossDomainButton from "~/components/CrossDomainButton.vue";
+import { useAuth } from "@/domains/auth/composables/useAuth";
 
 const route = useRoute();
 const drawer = ref(false);
@@ -9,11 +12,10 @@ const isMobile = ref(false);
 const isLoading = ref(false);
 const loadingProgress = ref(0);
 const loadingTimer = ref<number | null>(null);
+const { isAuthenticated } = useAuth();
 
 const config = useRuntimeConfig();
-const baseURL = import.meta.server
-  ? config.public.baseURL
-  : window.location.origin;
+const baseURL = computed(() => config.public.baseURL || "");
 
 // Theme toggle functionality
 const theme = useTheme();
@@ -128,7 +130,7 @@ onMounted(() => {
 
       <!-- Logo / Name -->
       <v-toolbar-title>
-        <NuxtLink
+        <CrossDomainLink
           to="/"
           class="logo-link"
           :style="{
@@ -136,14 +138,14 @@ onMounted(() => {
           }"
         >
           <img
-            :src="`${baseURL}/initials-logo.svg`"
+            src="/initials-logo.svg"
             alt="RR"
             class="initials-logo"
             :style="{
               filter: transparentNavbar ? 'brightness(0) invert(1)' : 'none',
             }"
           />
-        </NuxtLink>
+        </CrossDomainLink>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -165,17 +167,18 @@ onMounted(() => {
 
       <!-- Desktop only: Navigation links -->
       <div v-if="!isMobile" class="desktop-nav px-6">
-        <v-btn
+        <CrossDomainButton
           to="/"
-          class="nav-btn mr-2"
-          :class="{ 'white--text': transparentNavbar }"
-          >Home</v-btn
+          :className="['nav-btn mr-2', { 'white--text': transparentNavbar }]"
+          variant="text"
+          exact
+          >Home</CrossDomainButton
         >
-        <v-btn
+        <CrossDomainButton
           to="/projects"
-          class="nav-btn"
-          :class="{ 'white--text': transparentNavbar }"
-          >Projects</v-btn
+          :className="['nav-btn', { 'white--text': transparentNavbar }]"
+          variant="text"
+          >Projects</CrossDomainButton
         >
       </div>
     </v-app-bar>
@@ -183,11 +186,7 @@ onMounted(() => {
     <!-- Mobile Navigation Drawer -->
     <v-navigation-drawer v-model="drawer" app temporary>
       <div class="drawer-header py-6 px-4">
-        <img
-          :src="`${baseURL}/logo.svg`"
-          alt="Rifqi Ruhyattamam"
-          class="full-logo mb-2"
-        />
+        <img src="/logo.svg" alt="Rifqi Ruhyattamam" class="full-logo mb-2" />
         <p class="text-subtitle-2">Software Engineer</p>
       </div>
 
@@ -230,7 +229,7 @@ onMounted(() => {
           <v-col cols="12" md="4" class="mb-4 mb-md-0">
             <h3 class="text-h6 mb-3">
               <img
-                :src="`${baseURL}/logo.svg`"
+                src="/logo.svg"
                 alt="Rifqi Ruhyattamam"
                 class="full-logo mb-2"
               />
@@ -241,12 +240,21 @@ onMounted(() => {
             </p>
           </v-col>
 
+          <!-- In the template, modify the Links section in the footer -->
           <v-col cols="12" md="4" class="mb-4 mb-md-0">
             <h3 class="text-subtitle-1 mb-3">Links</h3>
             <div class="d-flex flex-column">
-              <NuxtLink to="/" class="footer-link mb-1">Home</NuxtLink>
-              <NuxtLink to="/projects" class="footer-link mb-1"
-                >Projects</NuxtLink
+              <CrossDomainLink to="/" class="footer-link mb-1"
+                >Home</CrossDomainLink
+              >
+              <CrossDomainLink to="/projects" class="footer-link mb-1"
+                >Projects</CrossDomainLink
+              >
+              <CrossDomainLink
+                v-if="isAuthenticated"
+                to="/logout"
+                class="footer-link mb-1"
+                >Logout</CrossDomainLink
               >
             </div>
           </v-col>

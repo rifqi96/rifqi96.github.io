@@ -11,13 +11,18 @@ import {
   generateBeCommand as generateBeCommandUtil,
   generateSLCommand,
 } from "@/domains/margin-calculator/utils/commandGenerators";
+import { useAuth } from "@/domains/auth/composables/useAuth";
+import { useOptions } from "@/domains/auth/composables/useOptions";
 
 export function useMarginCalculator() {
   const config = useRuntimeConfig();
 
+  // Import the options composable
+  const { getOptionValue } = useOptions();
+
   // Core state
-  const slot = ref<string>(config.public.mcAleeertDefaultSlot || "");
-  const apiSecret = ref<string>(config.public.mcAleeertDefaultSecret || "");
+  const slot = ref<string>("");
+  const apiSecret = ref<string>("");
   const text = ref<string>("");
   const reduceText = ref<string>("");
   const beText = ref<string>("");
@@ -49,19 +54,51 @@ export function useMarginCalculator() {
   // Trade history state
   const trades = ref<Trade[]>([]);
 
-  // Function to check if we should require a password
-  const shouldUsePassword = config.public.mcRequiresPassword;
+  // Authentication state
+  const { isAuthenticated, isWhitelisted } = useAuth();
+  const authProvider = ref<{
+    requireAuth: () => Promise<boolean>;
+  } | null>(null);
 
-  const authenticate = () => {
-    // Skip authentication if not required
-    if (!shouldUsePassword) {
-      return;
+  // Initialize authentication
+  const authenticate = async () => {
+    // First, try to load configuration from Supabase options
+    try {
+      const [defaultSlot, defaultSecret] = await Promise.all([
+        getOptionValue("MC_ALEEERT_DEFAULT_SLOT"),
+        getOptionValue("MC_ALEEERT_DEFAULT_API_SECRET"),
+      ]);
+
+      // Set the values from Supabase, or fall back to environment variables
+      slot.value = defaultSlot || config.public.mcAleeertDefaultSlot || "";
+      apiSecret.value =
+        defaultSecret || config.public.mcAleeertDefaultSecret || "";
+    } catch (err) {
+      console.error("Failed to load options from Supabase:", err);
+      // Fall back to environment variables
+      slot.value = config.public.mcAleeertDefaultSlot || "";
+      apiSecret.value = config.public.mcAleeertDefaultSecret || "";
     }
 
-    let password = prompt("Please enter the password to access this page:");
-    while (password !== "satuduatiga") {
-      alert("Wrong password! Please try again.");
-      password = prompt("Please enter the password to access this page:");
+    // Check if user is authenticated and whitelisted
+    if (!isAuthenticated.value || !isWhitelisted.value) {
+      // Use the auth provider to show login dialog or redirect
+      if (authProvider.value) {
+        await authProvider.value.requireAuth();
+      } else {
+        // Fall back to old password authentication if auth provider is not available
+        const shouldUsePassword = config.public.mcRequiresPassword;
+
+        if (shouldUsePassword) {
+          let password = prompt(
+            "Please enter the password to access this page:",
+          );
+          while (password !== "satuduatiga") {
+            alert("Wrong password! Please try again.");
+            password = prompt("Please enter the password to access this page:");
+          }
+        }
+      }
     }
   };
 
@@ -765,6 +802,7 @@ export function useMarginCalculator() {
     isLoading,
     error,
     trades,
+    authProvider,
 
     // Methods
     authenticate,
