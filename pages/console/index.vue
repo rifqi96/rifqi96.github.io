@@ -3,6 +3,7 @@ import { blogPost as blogService } from "@/domains/console/services/blogPost.ser
 import { projectService } from "@/domains/console/services/project.service";
 import { userService } from "@/domains/console/services/user.service";
 import { experienceService } from "@/domains/console/services/workExperience.service";
+import { whitelistService } from "@/domains/console/services/whitelist.service";
 
 // Dashboard page
 definePageMeta({
@@ -39,12 +40,14 @@ const loadDashboardData = async () => {
 
   try {
     // Fetch data in parallel
-    const [posts, projects, users, experiences] = await Promise.all([
-      blogService.getAllPosts(),
-      projectService.getAllProjects(),
-      experienceService.getAllExperiences(),
-      userService.getAllUsers(),
-    ]);
+    const [posts, projects, experiences, users, whitelistedUsers] =
+      await Promise.all([
+        blogService.getAllPosts(),
+        projectService.getAllProjects(),
+        experienceService.getAllExperiences(),
+        userService.getAllUsers(),
+        whitelistService.getAllEntries(),
+      ]);
 
     // Update stats
     stats.value = {
@@ -52,8 +55,7 @@ const loadDashboardData = async () => {
       projects: projects.length,
       workExperiences: experiences.length,
       users: users.length,
-      // @todo: revisit this
-      whitelistedUsers: users.length,
+      whitelistedUsers: whitelistedUsers.length,
     };
   } catch (err: any) {
     console.error("Failed to load dashboard data:", err);
