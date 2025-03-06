@@ -9,7 +9,7 @@ export const experienceService = {
     const { data, error } = await supabase
       .from("work_experiences")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("start_date", { ascending: false });
 
     if (error) throw error;
     return data as WorkExperience[];

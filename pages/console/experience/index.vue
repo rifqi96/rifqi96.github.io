@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { experienceService } from "@/domains/console/services/workExperience.service";
 import type { WorkExperience } from "@/types/WorkExperience";
-import CrossDomainButton from "@/components/CrossDomainButton.vue";
+import type { Media } from "@/types/Media";
+import { mediaService } from "@/domains/console/services/media.service";
 import CsvUploader from "@/domains/console/components/CsvUploader.vue";
 import {
   useCsvImport,
@@ -40,7 +42,26 @@ const {
   error: importError,
   handleCsvData,
   resetImport,
-} = useCsvImport();
+} = useCsvImport<WorkExperience>({
+  type: "workExperience",
+  transform: (data) => ({
+    company: data.company || "",
+    position: data.position || "",
+    location: data.location || "",
+    description: data.description || "",
+    start_date: data.start_date || "",
+    // end_date must be null if not provided or empty
+    end_date: data.end_date || null,
+    current: data.current === "true",
+    technologies: data.technologies?.split(",").filter(Boolean) || [],
+    company_url: data.company_url || "",
+  }),
+  validate: (data) => {
+    if (!data.company) throw new Error("Company is required");
+    if (!data.position) throw new Error("Position is required");
+    if (!data.start_date) throw new Error("Start date is required");
+  },
+});
 
 // Methods
 const openCompanyUrl = (url: string | null | undefined) => {
@@ -188,8 +209,8 @@ onMounted(async () => {
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
-          <CrossDomainButton
-            prepend-icon="mdi-pencil"
+          <v-btn
+            icon="mdi-pencil"
             size="small"
             color="primary"
             variant="text"
@@ -257,17 +278,27 @@ onMounted(async () => {
               </p>
               <p class="mb-2">Required columns:</p>
               <code
-                >company, location, role, startDate, description,
+                >company, location, position, start_date, description,
                 technologies</code
               >
               <p class="mt-2 mb-2">Optional columns:</p>
-              <code>endDate, company_url</code>
+              <code>end_date, company_url</code>
               <p class="mt-4 text-caption">
                 Note: Technologies should be comma-separated values, e.g.,
                 "React, TypeScript, Node.js"
               </p>
             </div>
-            <CsvUploader :onDataParsed="handleCsvData" />
+            <CsvUploader
+              :onDataParsed="handleCsvData"
+              :requiredColumns="[
+                'company',
+                'location',
+                'position',
+                'start_date',
+                'description',
+                'technologies',
+              ]"
+            />
           </div>
 
           <div v-else-if="importStatus === ImportStatus.PREVIEW">

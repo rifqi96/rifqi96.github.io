@@ -1,5 +1,6 @@
 import type { Media } from "@/types/Media";
 import { useSupabaseClient } from "@/composables/useSupabaseClient";
+import { mediaService as globalMediaService } from "@/services/media.service";
 
 export interface MediaUploadOptions {
   file: File;
@@ -7,6 +8,9 @@ export interface MediaUploadOptions {
 }
 
 export const mediaService = {
+  getPublicUrl(media: Media): string {
+    return globalMediaService.getPublicUrl(media);
+  },
   async upload({ file, folder }: MediaUploadOptions): Promise<Media> {
     const supabase = useSupabaseClient();
 
@@ -56,26 +60,17 @@ export const mediaService = {
       throw fetchError;
     }
 
-    // Delete from storage first
-    const { error: removeError } = await supabase.storage
+    // Now delete the database record
+    const { error: deleteError } = await supabase
       .from("media")
-      .remove([media.storage_path]);
+      .delete()
+      .eq("id", mediaId);
 
-    if (removeError) {
-      throw removeError;
+    if (deleteError) {
+      throw deleteError;
     }
 
-    // The database record will be automatically deleted by the trigger
-  },
-
-  getPublicUrl(media: Media): string {
-    console.log("Getting public URL for media:", media);
-    const supabase = useSupabaseClient();
-    const { data } = supabase.storage
-      .from("media")
-      .getPublicUrl(media.storage_path);
-
-    console.log("Public URL:", data.publicUrl);
-    return data.publicUrl;
+    // The storage object will be deleted by the database trigger
+    // No need to manually delete from storage as the trigger handles it
   },
 };

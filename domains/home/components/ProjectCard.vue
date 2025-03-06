@@ -1,36 +1,67 @@
 <script setup lang="ts">
+import { mediaService } from "@/services/media.service";
+import type { Project } from "@/types/Project";
+
 interface Props {
-  project: {
-    title: string;
-    description: string;
-    technologies: string[];
-    image: string;
-    link?: string;
-    isAvailable?: boolean;
-  };
+  project: Project;
 }
 
 const props = defineProps<Props>();
 const router = useRouter();
+
+const getLogoUrl = (project: Project) => {
+  // Handle media being an array
+  const mediaItem = Array.isArray(project.media)
+    ? project.media[0]
+    : project.media;
+
+  if (mediaItem && mediaService.isValidMedia(mediaItem)) {
+    return mediaService.getPublicUrl(mediaItem);
+  }
+
+  return project.image_url || "";
+};
 </script>
 
 <template>
   <div class="project-card">
     <div class="project-image">
-      <v-img :src="project.image" height="200" cover class="rounded-lg"></v-img>
+      <v-img
+        :src="getLogoUrl(props.project)"
+        height="200"
+        cover
+        class="rounded-lg"
+      ></v-img>
       <div class="project-overlay">
-        <v-btn
-          v-if="project.link && project.isAvailable !== false"
-          :href="project.link"
-          @click="(e: Event) => handleLinkNavigation(project.link!, e, router)"
-          color="primary"
-          variant="elevated"
-        >
-          View Project
-        </v-btn>
-        <v-btn v-else disabled color="primary" variant="elevated">
-          Coming Soon
-        </v-btn>
+        <div class="d-flex gap-2">
+          <v-btn
+            v-if="project.repo_url"
+            :href="project.repo_url"
+            target="_blank"
+            color="white"
+            variant="text"
+            icon="mdi-github"
+          />
+          <v-btn
+            v-if="project.link && project.is_available"
+            :href="project.link"
+            @click="
+              (e: Event) => handleLinkNavigation(project.link!, e, router)
+            "
+            color="primary"
+            variant="elevated"
+          >
+            View Project
+          </v-btn>
+          <v-btn
+            v-else-if="project.is_coming_soon"
+            disabled
+            color="primary"
+            variant="elevated"
+          >
+            Coming Soon
+          </v-btn>
+        </div>
       </div>
     </div>
     <div class="project-content">

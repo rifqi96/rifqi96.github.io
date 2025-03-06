@@ -2,7 +2,7 @@
 import { useProject } from "@/domains/home/composables/useProject";
 import ProjectCard from "./ProjectCard.vue";
 
-const { featuredProjects, status } = useProject();
+const { projects: featuredProjects, status } = useProject(true);
 const isLoading = computed(
   () => status.value === "pending" || status.value === "idle",
 );

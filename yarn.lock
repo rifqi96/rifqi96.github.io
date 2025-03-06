@@ -8519,6 +8519,16 @@ socket.io-parser@~4.2.4:
     "@socket.io/component-emitter" "~3.1.0"
     debug "~4.3.1"
 
+sortablejs@1.14.0:
+  version "1.14.0"
+  resolved "https://registry.npmjs.org/sortablejs/-/sortablejs-1.14.0.tgz#6d2e17ccbdb25f464734df621d4f35d4ab35b3d8"
+  integrity sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==
+
+sortablejs@^1.15.6:
+  version "1.15.6"
+  resolved "https://registry.npmjs.org/sortablejs/-/sortablejs-1.15.6.tgz#ff93699493f5b8ab8d828f933227b4988df1d393"
+  integrity sha512-aNfiuwMEpfBM/CN6LY0ibyhxPfPbyFeBTYJKCvzkJ2GkUpazIt3H+QIPAMHwqQ7tMKaHz1Qj+rJJCqljnf4p3A==
+
 source-map-js@^1.0.1, source-map-js@^1.2.0, source-map-js@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
@@ -9613,6 +9623,13 @@ vue@^3.4.15, vue@^3.5.13:
     "@vue/runtime-dom" "3.5.13"
     "@vue/server-renderer" "3.5.13"
     "@vue/shared" "3.5.13"
+
+vuedraggable-es@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/vuedraggable-es/-/vuedraggable-es-4.1.1.tgz#9d6289adc085fa857f85100f7cf7dc5139e5a8a0"
+  integrity sha512-F35pjSwC8HS/lnaOd+B59nYR4FZmwuhWAzccK9xftRuWds8SU1TZh5myKVM86j5dFOI7S26O64Kwe7LUHnXjlA==
+  dependencies:
+    sortablejs "1.14.0"
 
 vuetify@^3.7.14:
   version "3.7.14"

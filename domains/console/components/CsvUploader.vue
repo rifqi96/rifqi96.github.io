@@ -2,24 +2,16 @@
 import Papa from "papaparse";
 import { ref, computed } from "vue";
 
-interface Props {
-  onDataParsed: (data: any[]) => void;
+interface Props<T> {
+  onDataParsed: (data: T[]) => void;
+  requiredColumns: string[];
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props<any>>();
 const fileInput = ref<HTMLInputElement>();
 const csvData = ref<any[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-
-const requiredColumns = [
-  "company",
-  "location",
-  "role",
-  "startDate",
-  "description",
-  "technologies",
-];
 
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -50,7 +42,7 @@ const handleFileUpload = async (event: Event) => {
     })) as Papa.ParseResult<any>;
 
     // Validate required columns
-    const missingColumns = requiredColumns.filter(
+    const missingColumns = props.requiredColumns.filter(
       (col) => !result.meta.fields?.includes(col),
     );
 
@@ -59,20 +51,24 @@ const handleFileUpload = async (event: Event) => {
       return;
     }
 
-    // Clean and validate data
-    csvData.value = result.data.map((row) => ({
-      ...row,
-      company: row.company?.trim(),
-      location: row.location?.trim(),
-      role: row.role?.trim(),
-      startDate: row.startDate?.trim(),
-      endDate: row.endDate?.trim(),
-      description: row.description?.trim(),
-      technologies: row.technologies?.trim(),
-      company_url: row.company_url?.trim(),
-    }));
+    try {
+      // Transform and validate data
+      const transformedData = result.data.map((row, index) => {
+        try {
+          const transformedRow = row;
 
-    props.onDataParsed(csvData.value);
+          return transformedRow;
+        } catch (err: any) {
+          throw new Error(`Error in row ${index + 1}: ${err.message}`);
+        }
+      });
+
+      csvData.value = transformedData;
+      props.onDataParsed(transformedData);
+    } catch (err: any) {
+      error.value = err.message;
+      return;
+    }
   } catch (err) {
     error.value = "Error parsing CSV file";
     console.error(err);

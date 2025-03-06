@@ -43,7 +43,7 @@ Your database schema is designed to support a portfolio and utility website usin
 
 ---
 
-#### **b. `portfolio_items` Table**
+#### **b. `projects` Table**
 
 - **Purpose:**  
   - Stores portfolio data such as projects and work experiences.

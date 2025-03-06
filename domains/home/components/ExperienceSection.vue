@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useWorkExperience } from "@/domains/home/composables/useWorkExperience";
-import { mediaService } from "@/domains/console/services/media.service";
+import { mediaService } from "@/services/media.service";
 import type { Media } from "@/types/Media";
 import type { WorkExperience } from "@/types/WorkExperience";
 
 const { workExperience, status } = useWorkExperience();
-const config = useRuntimeConfig();
+console.log("successfully grabbed", workExperience);
 
 const isLoading = computed(
   () => status.value === "pending" || status.value === "idle",
@@ -15,22 +15,10 @@ const getLogoUrl = (job: WorkExperience) => {
   // Handle media being an array
   const mediaItem = Array.isArray(job.media) ? job.media[0] : job.media;
 
-  if (mediaItem && isValidMedia(mediaItem)) {
+  if (mediaItem && mediaService.isValidMedia(mediaItem)) {
     return mediaService.getPublicUrl(mediaItem);
   }
   return job.company_logo_url || null;
-};
-
-const isValidMedia = (media: Media | null) => {
-  if (!media) return false;
-  return (
-    media.id &&
-    media.bucket_name &&
-    media.storage_path &&
-    media.file_name &&
-    media.mime_type &&
-    typeof media.size_bytes === "number"
-  );
 };
 
 const formatDate = (date: string | null | undefined) => {

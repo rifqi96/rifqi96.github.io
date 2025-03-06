@@ -1,4 +1,4 @@
-id,title,description,image,link,technologies,isAvailable
+id,title,description,image,link,technologies,is_available
 "margin-calculator","Margin Calculator","Tool for crypto traders to calculate margins, stop-loss, and take-profit levels.","/projects/margin-calculator/hero.png","/margin-calculator","Vue 3,TypeScript,Vuetify",1
 "konti-lapis","Lapis","[Kontinentalist] Platform enabling users to craft and share data-driven stories without coding.","/projects/konti/lapis/hero.png","https://lapis-story.com/","Vue 3, Nuxt 3, Laravel, AWS, Docker",1
 "konti-kura-kura","Kontinentalist 2.0 - Kura-Kura","[Kontinentalist] Major upgrade with enhanced CMS and separated frontend.","/projects/konti/kura-kura/hero.png","https://medium.com/kontinentalist/why-we-abandoned-wordpress-to-build-our-own-cms-d6569d3540db","Laravel, Nuxt.js, Vuex, Vue 3, AWS, Docker, nginx, Redis, Beanstalkd, Algolia",1

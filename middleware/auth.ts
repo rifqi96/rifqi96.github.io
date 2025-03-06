@@ -46,6 +46,7 @@ const validateSession = async () => {
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Skip middleware if we're already in auth pages
   if (to.path.startsWith("/auth/")) {
+    console.log("Auth middleware skipping auth check on auth page");
     resetRedirectCount(); // Reset counter on auth pages
     return;
   }

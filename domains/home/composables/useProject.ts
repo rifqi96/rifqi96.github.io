@@ -2,31 +2,15 @@
  * Composable for loading projects data
  */
 import type { Ref } from "vue";
-import { useCSVParser } from "./useCSVParser";
+import type { Project } from "@/types/Project";
+import { projectService } from "@/services/project.service";
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  link: string;
-  technologies: string[];
-  isAvailable: boolean;
-}
-
-export function useProject(): {
+export function useProject(is_featured: boolean = false): {
   projects: Ref<Project[] | null>;
-  featuredProjects: Ref<Project[] | null>;
   status: Ref<"idle" | "pending" | "success" | "error">;
   error: Ref<Error | null>;
   refresh: () => Promise<void>;
 } {
-  const { parseCSV } = useCSVParser();
-  const config = useRuntimeConfig();
-  const baseURL = import.meta.server
-    ? config.public.baseURL
-    : window.location.origin;
-
   const {
     data: projects,
     status,
@@ -34,25 +18,20 @@ export function useProject(): {
     refresh,
   } = useAsyncData("projects", async () => {
     try {
-      const csvData = await $fetch(`${baseURL}/data/projects.csv`);
-      return parseCSV<Project>(String(csvData));
+      const data = !is_featured
+        ? await projectService.getAllProjects()
+        : await projectService.getAllFeaturedProjects();
+      return data.map((project) => ({
+        ...project,
+      }));
     } catch (err) {
       console.error("Error fetching projects:", err);
       throw err;
     }
   });
 
-  const featuredProjects = computed(() => {
-    return (
-      projects.value
-        ?.filter((project) => project.isAvailable === true)
-        .slice(0, 3) || []
-    );
-  });
-
   return {
     projects,
-    featuredProjects,
     status,
     error,
     refresh,
