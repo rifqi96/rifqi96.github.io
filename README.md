@@ -113,6 +113,8 @@ Contains components and logic specific to the landing page, including:
 - Work experience timeline
 - Contact information
 
+Everything in the home domain is accessible through the root/main domain.
+
 ### Margin Calculator Domain
 
 A specialized utility for trading calculations:
@@ -121,6 +123,26 @@ A specialized utility for trading calculations:
 - Margin position calculation
 - Trade history management
 - Command generation for trading platforms
+
+The route to this is `/margin-calculator`
+
+### Console Domain
+
+Contains components and logic specific to the console, including:
+
+- Projects management
+- Experience management
+- Media management
+
+The route to this is `console.{domain}`
+
+### Auth Domain
+
+Contains components and logic specific to authentication, including:
+
+- User authentication
+
+The route to this is `auth.{domain}`
 
 ## Getting Started
 

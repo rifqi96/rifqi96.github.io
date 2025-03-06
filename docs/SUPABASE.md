@@ -1,159 +1,251 @@
 # Database Schema Documentation
 
-## Overview
-
-Your database schema is designed to support a portfolio and utility website using Supabase. It leverages a domain-driven approach with robust security and role-based access. The key elements include:
-
-- **User Profiles & Roles:** Extends Supabase’s `auth.users` with a custom `profiles` table and a user role enumeration.
-- **Content Tables:** For portfolio items, blog posts, and work experiences.
-- **Access Control:** Via a whitelist for controlled feature access and an options table for environment variables.
-- **Playground Features:** For experimental features accessible based on user roles.
-- **Security Policies:** Using Row Level Security (RLS) and custom functions to enforce permissions.
-- **Triggers & Functions:** To manage user registration, role assignment, and data consistency.
+This document provides a consolidated overview of your Supabase-based database schema. It merges the original schema concepts with the latest changes and migrations, presenting the current final structure. The schema is domain-driven and security-focused, featuring role-based access, row-level security (RLS), and custom functions to handle data consistency and automation.
 
 ---
 
-## Schema Components
+## 1. Overview
 
-### 1. UUID Extension & Custom User Role
+- **Profiles & Roles**: Custom roles (`superadmin`, `whitelisted_user`) stored in a `profiles` table, extending Supabase’s `auth.users`.
+- **Content Tables**:
 
-- **UUID Extension:**  
-  - **Purpose:** Enables the generation of universally unique identifiers (UUIDs) using `uuid_generate_v4()`.
-  - **Usage:** All primary keys in various tables use UUIDs.
+  - `blog_posts` (posts with authorship)
+  - `projects` (portfolio items)
+  - `work_experiences` (professional experience)
+- **Media Management**: A dedicated `media` table to handle file uploads and references.
+- **Access Control**:
 
-- **Custom Type: `user_role`**  
-  - **Values:** `'superadmin'` and `'whitelisted_user'`.
-  - **Usage:** Defines the role of a user in the `profiles` table, influencing access controls.
-
----
-
-### 2. Tables
-
-#### **a. `profiles` Table**
-
-- **Purpose:**  
-  - Extends the `auth.users` table by storing additional user data and roles.
-- **Key Columns:**  
-  - `id` (UUID): References `auth.users(id)`, primary key.  
-  - `email` (TEXT): Unique email for the user.  
-  - `role` (user_role): Indicates the user’s role with a default of `'whitelisted_user'`.  
-  - `created_at` and `updated_at`: Timestamp fields to track record creation and modifications.
-- **Relationship:**  
-  - One-to-one mapping with Supabase’s `auth.users`.
+  - `whitelist` table for email-based feature control
+  - `options` table for storing environment variables
+- **Playground Features**: A `playground_features` table for experimental or restricted features.
+- **Row Level Security**: Enforced at the table level with policies that differentiate public, whitelisted, authenticated, and superadmin access.
+- **Triggers & Functions**: Automate user whitelisting, timestamps, and media cleanup.
 
 ---
 
-#### **b. `projects` Table**
+## 2. Key Components
 
-- **Purpose:**  
-  - Stores portfolio data such as projects and work experiences.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `title`, `description`, `image_url`, `project_url`: Core information about a portfolio item.  
-  - `technologies` (TEXT[]): An array listing technologies used.  
-  - `start_date`, `end_date`: Dates related to the project duration.  
-  - `is_published` (BOOLEAN): Determines if the item is visible publicly.  
-  - Timestamps (`created_at`, `updated_at`).
+### 2.1 Roles & Permissions
 
----
+A custom enum type `user_role` defines two roles:
 
-#### **c. `blog_posts` Table**
+1. **superadmin**  
+2. **whitelisted_user**  
 
-- **Purpose:**  
-  - Manages blog content including posts and metadata.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `title`, `content`, `excerpt`: Main content fields.  
-  - `slug` (TEXT): Unique identifier for URL routing.  
-  - `featured_image` (TEXT) and `tags` (TEXT[]): For visual appeal and categorization.  
-  - `is_published` (BOOLEAN): Flag for public visibility.  
-  - `published_at`: Timestamp for when the post is made public.  
-  - Timestamps (`created_at`, `updated_at`).
+These roles drive the logic behind row-level security policies, granting `superadmin` broad privileges while restricting `whitelisted_user` to certain elevated privileges.
 
 ---
 
-#### **d. `whitelist` Table**
+## 3. Tables & Relationships
 
-- **Purpose:**  
-  - Controls access to the playground features by storing approved email addresses.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `email` (TEXT): Unique email of the whitelisted user.  
-  - `added_by` (UUID): References the superadmin who added the email.  
-  - `created_at`: Timestamp when the email was added.
-- **Usage:**  
-  - Used during the user registration process to determine if a new user should be assigned a role based on email.
+### 3.1 `profiles`
+
+**Purpose**: Extends `auth.users` with additional user data and roles.  
+**Key Columns**:
+
+- `id` (UUID PK, references `auth.users.id`)
+- `email` (TEXT, unique)
+- `role` (user_role, defaults to `whitelisted_user`)
+- `created_at`, `updated_at` (timestamps)
+
+**Notable Triggers/Functions**:
+
+- **Auto-Whitelist Trigger**: If a new profile has a `superadmin` role, it automatically inserts the user’s email into the `whitelist`.
+
+### 3.2 `blog_posts`
+
+**Purpose**: Stores blog content and metadata.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `title`, `content`, `excerpt` (TEXT)
+- `slug` (TEXT, unique URL identifier)
+- `featured_image` (TEXT)
+- `tags` (TEXT[])
+- `is_published` (BOOLEAN)
+- `published_at` (TIMESTAMP)
+- `author_id` (UUID, references `profiles.id`)
+- `created_at`, `updated_at` (timestamps)
+
+**RLS Policies**:
+
+- **Public Read**: Anyone can read posts where `is_published = true`.
+- **Author Policies**: Authors (matching `author_id`) can update or delete their own posts.
+- **Superadmin**: Has full CRUD access.
+
+### 3.3 `work_experiences`
+
+**Purpose**: Records professional work experiences.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `company`, `location`, `role` (TEXT)
+- `start_date`, `end_date` (DATE)  
+- `description` (TEXT)
+- `technologies` (TEXT[])
+- `company_logo_url` (TEXT, optional external URL)
+- `company_logo_media_id` (UUID, references `media.id`)
+- `created_at`, `updated_at` (timestamps)
+
+**Constraints**:
+
+- `check_date_order`: Ensures `end_date > start_date` if `end_date` is not null.
+- `company_logo_check`: Enforces mutual exclusivity between `company_logo_url` and `company_logo_media_id` (or both null).
+
+**RLS Policies**:
+
+- **Authenticated Read**: Any authenticated user can select rows.
+- **Superadmin CRUD**: Full access for superadmins.
+
+**Triggers**:
+
+- `update_work_experiences_modtime`: Updates `updated_at` timestamp on modification.
+- `delete_media_on_work_experience_delete`: Removes associated media record (if any) after the experience is deleted.
+
+### 3.4 `projects`
+
+**Purpose**: Manages portfolio projects.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `title`, `description` (TEXT)
+- `image_url` (TEXT, optional external URL)
+- `link` (TEXT, replaces `project_url`)
+- `repo_url` (TEXT)
+- `technologies` (TEXT[])
+- `start_date`, `end_date` (DATE)
+- `is_published` (BOOLEAN)
+- `is_featured` (BOOLEAN)
+- `is_available` (BOOLEAN)
+- `is_coming_soon` (BOOLEAN)
+- `media_id` (UUID, references `media.id`)
+- `order` (INT, default 0, not null)
+- `created_at`, `updated_at` (timestamps)
+
+**Constraints**:
+
+- `media_check`: Similar exclusivity constraint on `image_url` vs. `media_id`.
+
+**RLS Policies**:
+
+- **Public Read**: Anyone can read rows where `is_published = true`.
+- **Superadmin CRUD**: Full access for superadmins.
+
+**Triggers**:
+
+- `update_projects_modtime`: Updates `updated_at` before modification.
+- `delete_media_on_project_delete`: Removes associated media record after the project is deleted.
+
+### 3.5 `media`
+
+**Purpose**: A centralized table for file references.  
+**Key Columns**:
+
+- `id` (UUID PK, defaults to `gen_random_uuid()`)
+- `bucket_name` (TEXT)
+- `storage_path` (TEXT)
+- `file_name` (TEXT)
+- `mime_type` (TEXT)
+- `size_bytes` (BIGINT)
+- `created_by` (UUID, defaults to `auth.uid()`)
+- `metadata` (JSONB, optional)
+- `created_at`, `updated_at` (timestamps)
+
+**Unique & Indexes**:
+
+- `UNIQUE(bucket_name, storage_path)`
+- Index on `(bucket_name, storage_path)` for fast lookups.
+
+**RLS Policies**:
+
+- **Public SELECT**: Everyone can read.
+- **Superadmin ALL**: Only superadmins can insert/update/delete.
+
+**Triggers**:
+
+- `update_media_updated_at`: Maintains `updated_at`.
+- `handle_media_deletion`: Deletes corresponding files from `storage.objects` after the `media` row is removed.
+- `handle_storage_deletion`: If a file in `storage.objects` is deleted, the matching `media` row is also removed (and vice versa).
+
+### 3.6 `whitelist`
+
+**Purpose**: Controls access to certain features via email-based whitelisting.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `email` (TEXT, unique)
+- `added_by` (UUID references `profiles.id`)
+- `created_at` (TIMESTAMP)
+
+**Usage**:
+
+- During signup, if a user’s email appears in the whitelist, they may receive an elevated role.
+
+**RLS & View**:
+
+- **Superadmin**: Full manage/view.
+- `whitelist_with_profiles` (VIEW): Joins `whitelist` with `profiles` for an overview of who added whom.
+
+### 3.7 `options`
+
+**Purpose**: Dynamic storage for environment variables and configurations.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `key` (TEXT, unique)
+- `value` (TEXT)
+- `description` (TEXT)
+- `access_level` (TEXT: `superadmin_only`, `whitelisted`, `public`)
+- `created_at`, `updated_at` (timestamps)
+
+**RLS**:
+
+- **Superadmin**: Full CRUD.
+- **Whitelisted**: Can select rows with `access_level IN ('whitelisted', 'public')`.
+- **Public**: Can select rows only if `access_level = 'public'`.
+
+### 3.8 `playground_features`
+
+**Purpose**: Stores experimental features that may be selectively rolled out.  
+**Key Columns**:
+
+- `id` (UUID PK)
+- `name` (TEXT)
+- `description` (TEXT)
+- `is_active` (BOOLEAN)
+- `created_at`, `updated_at` (timestamps)
+
+**RLS**:
+
+- Generally accessible to whitelisted users and superadmins, or based on your custom logic.
 
 ---
 
-#### **e. `options` Table**
+## 4. Security & RLS
 
-- **Purpose:**  
-  - Functions as a dynamic storage for environment variables and configuration values.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `key` (TEXT): Unique key identifier (e.g., `MC_ALEEERT_DEFAULT_SLOT`, `MC_ALEEERT_DEFAULT_API_SECRET`).  
-  - `value` (TEXT): The actual configuration data.  
-  - `description` (TEXT): Explains the purpose of the option.  
-  - `access_level` (TEXT): Defines who can access the option; possible values include `'superadmin_only'`, `'whitelisted'`, and `'public'`.  
-  - Timestamps (`created_at`, `updated_at`).
+- **Row-Level Security** (RLS) is enabled on all key tables: `profiles`, `blog_posts`, `work_experiences`, `projects`, `media`, `whitelist`, `options`, and `playground_features`.
+- **Policies**:
+  - **Superadmin** can typically perform all operations.
+  - **Authenticated** (or whitelisted users) have elevated read/write privileges in specific contexts.
+  - **Public** read access is limited to published content or explicitly allowed resources.
 
 ---
 
-#### **f. `playground_features` Table**
+## 5. Functions & Triggers (Summary)
 
-- **Purpose:**  
-  - Stores data related to experimental features that users can try.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `name` (TEXT): Name of the feature.  
-  - `description` (TEXT): Details about the feature.  
-  - `is_active` (BOOLEAN): Indicates if the feature is currently enabled.  
-  - Timestamps (`created_at`, `updated_at`).
+- **Timestamps**: `update_modified_column`, `update_updated_at_column`, `update_{table}_modtime` keep `updated_at` accurate on updates.
+- **Auto-Whitelist**: When a profile with role `superadmin` is created, insert it into `whitelist`.
+- **Media Cleanups**:
+  - **`handle_media_deletion`**: Removes an object from `storage.objects` if the corresponding `media` record is deleted.
+  - **`handle_storage_deletion`**: Removes a `media` row if the underlying storage object is deleted.
+  - **`delete_media_on_*_delete`**: Removes any attached media when a parent record (e.g., project, work_experience) is deleted.
 
----
-
-#### **g. `work_experiences` Table**
-
-- **Purpose:**  
-  - Records professional work experiences for the portfolio.
-- **Key Columns:**  
-  - `id` (UUID): Primary key.  
-  - `company`, `location`, `role`: Basic details of the work experience.  
-  - `start_date`, `end_date`: Dates marking the duration of the role.  
-  - `description`: Detailed account of responsibilities and achievements.  
-  - `technologies` (TEXT[]): Lists the tools and technologies used.  
-  - Timestamps (`created_at`, `updated_at`).
-- **Constraints:**  
-  - A check constraint ensures `end_date` (if provided) is after `start_date`.
+These functions and triggers ensure consistency between the database tables and Supabase’s storage objects.
 
 ---
 
-## 3. Security Policies & Row Level Security (RLS)
+## 6. Conclusion
 
-- **Profiles Table Policies:**  
-  - Users can view and update their own profile.
-  - Superadmins have full visibility.
+This schema is built for robust security, ease of content management, and flexibility in handling media assets. By combining **row-level security**, **role-based access**, and **automatic triggers**, it supports a scalable and maintainable portfolio and utility application. Future expansions can introduce additional roles, tables, and policies without disrupting the existing architecture.
 
-- **Portfolio & Blog Tables Policies:**  
-  - Public read access to published content.
-  - Superadmins are allowed full CRUD operations.
-
-- **Whitelist Policies:**  
-  - Only superadmins can view and manage whitelist entries.
-
-- **Options Policies:**  
-  - Superadmins can view and manage all options.
-  - Whitelisted users can view options with access levels of `'whitelisted'` or `'public'`.
-  - Public users are limited to viewing options marked as `'public'`.
-
-- **Playground Features Policies:**  
-  - Accessible by whitelisted users and superadmins.
-
-- **Work Experience Policies:**  
-  - Public can read.
-  - Full access is reserved for superadmins.
-
----
-
-This schema is structured to maintain security, scalability, and flexibility while ensuring a clean separation of concerns within your application. Let me know if you need any modifications!
+For any further adjustments or clarifications, feel free to reach out!

@@ -141,6 +141,7 @@ async function handleSubmit() {
       is_coming_soon: form.value.is_coming_soon,
       is_published: form.value.is_published,
       media_id: form.value.media_id,
+      image_url: form.value.image_url,
     });
 
     // Redirect to projects list
