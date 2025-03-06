@@ -1,10 +1,8 @@
-import {
-  supabaseAuth,
-  supabaseWhitelist,
-  useSupabaseClient,
-} from "../services/supabase";
-import type { AuthOptions, AuthState, UserProfile } from "../types";
-import { UserRole } from "../types";
+import { supabaseAuth, supabaseWhitelist } from "../services/supabase.service";
+import { useSupabaseClient } from "@/composables/useSupabaseClient";
+import type { AuthOptions, AuthState } from "../types";
+import type { UserProfile } from "@/types/User";
+import { UserRole } from "@/types/User";
 
 export function useAuth() {
   // Create a reactive auth state

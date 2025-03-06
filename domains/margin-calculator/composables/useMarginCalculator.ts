@@ -12,7 +12,7 @@ import {
   generateSLCommand,
 } from "@/domains/margin-calculator/utils/commandGenerators";
 import { useAuth } from "@/domains/auth/composables/useAuth";
-import { useOptions } from "@/domains/auth/composables/useOptions";
+import { useOptions } from "@/composables/useOptions";
 
 export function useMarginCalculator() {
   const config = useRuntimeConfig();

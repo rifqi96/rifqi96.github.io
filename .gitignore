@@ -8,7 +8,7 @@ dist
 
 # Logs and databases
 *.log
-*.sql
+# *.sql
 *.sqlite
 
 # Operating system files

@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import {
-  blogService,
-  projectService,
-  userService,
-  experienceService,
-} from "@/domains/console/services/supabase";
+import { blogPost as blogService } from "@/domains/console/services/blogPost.service";
+import { projectService } from "@/domains/console/services/project.service";
+import { userService } from "@/domains/console/services/user.service";
+import { experienceService } from "@/domains/console/services/workExperience.service";
 
 // Dashboard page
 definePageMeta({

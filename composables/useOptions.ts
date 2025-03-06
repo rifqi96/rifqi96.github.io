@@ -1,7 +1,7 @@
-import { supabaseOptions } from "../services/supabase";
-import type { AppOption } from "../types";
-import { OptionAccessLevel } from "../types";
-import { useAuth } from "./useAuth";
+import { optionsService as supabaseOptions } from "@/services/options.service";
+import type { AppOption } from "@/types/Option";
+import { OptionAccessLevel } from "@/types/Option";
+import { useAuth } from "@/domains/auth/composables/useAuth";
 
 export function useOptions() {
   const options = useState<AppOption[]>("app-options", () => []);
@@ -126,37 +126,6 @@ export function useOptions() {
     return option ? option.value : null;
   };
 
-  // Update an option (superadmin only)
-  const updateOption = async (id: string, value: string) => {
-    loading.value = true;
-    error.value = null;
-
-    // Check if user is superadmin
-    if (!isSuperAdmin.value) {
-      error.value = "Only superadmins can update options";
-      loading.value = false;
-      return null;
-    }
-
-    try {
-      const data = await supabaseOptions.updateOption(id, value);
-
-      // Update the state
-      const index = options.value.findIndex((opt) => opt.id === id);
-      if (index !== -1) {
-        options.value[index] = data[0];
-      }
-
-      return data[0];
-    } catch (err: any) {
-      console.error("Failed to update option:", err);
-      error.value = err.message || "Failed to update option";
-      return null;
-    } finally {
-      loading.value = false;
-    }
-  };
-
   return {
     options: computed(() => options.value),
     loading: computed(() => loading.value),
@@ -165,6 +134,5 @@ export function useOptions() {
     loadOptions,
     getOption,
     getOptionValue,
-    updateOption,
   };
 }

@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import {
-  userService,
-  whitelistService,
-} from "@/domains/console/services/supabase";
-import { supabaseWhitelist } from "@/domains/auth/services/supabase";
-import type { UserProfile } from "@/domains/auth/types";
-import type { WhitelistEntry } from "@/domains/auth/types";
+import { whitelistService } from "@/domains/console/services/whitelist.service";
+import { userService } from "@/domains/console/services/user.service";
+import type { UserProfile } from "@/types/User";
+import type { WhitelistEntry } from "@/types/Whitelist";
 import { useAuth } from "@/domains/auth/composables/useAuth";
 
 // Users management page
@@ -343,7 +340,7 @@ onMounted(async () => {
             >
               <!-- Added by column -->
               <template v-slot:[`item.added_by`]="{ item }">
-                {{ item.added_by || "Unknown" }}
+                {{ item.added_by_email || "Unknown" }}
               </template>
 
               <!-- Created at column -->

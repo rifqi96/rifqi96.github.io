@@ -1,15 +1,50 @@
 <script setup lang="ts">
 import { useWorkExperience } from "@/domains/home/composables/useWorkExperience";
+import { mediaService } from "@/domains/console/services/media.service";
+import type { Media } from "@/types/Media";
+import type { WorkExperience } from "@/types/WorkExperience";
 
 const { workExperience, status } = useWorkExperience();
+const config = useRuntimeConfig();
+
 const isLoading = computed(
   () => status.value === "pending" || status.value === "idle",
 );
+
+const getLogoUrl = (job: WorkExperience) => {
+  // Handle media being an array
+  const mediaItem = Array.isArray(job.media) ? job.media[0] : job.media;
+
+  if (mediaItem && isValidMedia(mediaItem)) {
+    return mediaService.getPublicUrl(mediaItem);
+  }
+  return job.company_logo_url || null;
+};
+
+const isValidMedia = (media: Media | null) => {
+  if (!media) return false;
+  return (
+    media.id &&
+    media.bucket_name &&
+    media.storage_path &&
+    media.file_name &&
+    media.mime_type &&
+    typeof media.size_bytes === "number"
+  );
+};
+
+const formatDate = (date: string | null | undefined) => {
+  if (!date) return "Present";
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+};
 </script>
 
 <template>
   <section class="experience-section">
-    <v-container>
+    <v-container class="px-4">
       <div class="section-header">
         <h2 class="section-title">Work Experience</h2>
         <div class="section-divider"></div>
@@ -34,32 +69,59 @@ const isLoading = computed(
           v-for="(job, index) in workExperience"
           :key="index"
           class="timeline-item"
+          :class="{ 'timeline-item-even': index % 2 === 1 }"
         >
           <div class="timeline-dot"></div>
           <div class="timeline-content">
             <div class="timeline-date">
-              {{ job.startDate }} - {{ job.endDate }}
+              {{ formatDate(job.start_date) }} - {{ formatDate(job.end_date) }}
             </div>
-            <div class="timeline-card">
-              <h3 class="timeline-title">{{ job.role }}</h3>
-              <h4 class="timeline-company">
-                {{ job.company }}
-                <span class="timeline-location">{{ job.location }}</span>
-              </h4>
-              <p class="timeline-description">
-                {{ job.description }}
-              </p>
-              <div class="timeline-tech">
-                <v-chip
-                  v-for="tech in job.technologies"
-                  :key="tech"
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                  class="mr-1 mb-1"
-                >
-                  {{ tech }}
-                </v-chip>
+            <div class="timeline-card elevation-1">
+              <div class="d-flex">
+                <div class="company-logo mr-4">
+                  <v-img
+                    v-if="getLogoUrl(job)"
+                    :src="getLogoUrl(job) as string"
+                    :alt="`${job.company} logo`"
+                    width="48"
+                    height="48"
+                    cover
+                    class="rounded"
+                  />
+                  <div v-else class="company-logo-placeholder">
+                    {{ job.company.charAt(0) }}
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <h3 class="timeline-title">{{ job.position }}</h3>
+                  <h4 class="timeline-company">
+                    <a
+                      v-if="job.company_url"
+                      :href="job.company_url"
+                      target="_blank"
+                      class="company-link"
+                    >
+                      {{ job.company }}
+                    </a>
+                    <span v-else>{{ job.company }}</span>
+                    <span class="timeline-location">{{ job.location }}</span>
+                  </h4>
+                  <p class="timeline-description">
+                    {{ job.description }}
+                  </p>
+                  <div class="timeline-tech">
+                    <v-chip
+                      v-for="tech in job.technologies"
+                      :key="tech"
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      class="mr-1 mb-1"
+                    >
+                      {{ tech }}
+                    </v-chip>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -126,113 +188,171 @@ const isLoading = computed(
   content: "";
   position: absolute;
   left: 50%;
-  top: 0;
+  top: 14px;
   bottom: 0;
-  width: 3px;
-  background: linear-gradient(
-    to bottom,
-    var(--v-primary-base),
-    rgb(var(--v-theme-primary))
-  );
+  width: 2px;
+  background-color: rgba(var(--v-theme-on-surface), 0.12);
   transform: translateX(-50%);
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 60px;
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.timeline-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.timeline-item:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.timeline-item:nth-child(4) {
+  animation-delay: 0.6s;
+}
+.timeline-item:nth-child(5) {
+  animation-delay: 0.8s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-item::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: calc(50% - 20px);
+  height: 2px;
+  background-color: rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.timeline-item-even::after {
+  left: auto;
+  right: 50%;
 }
 
 .timeline-dot {
   position: absolute;
   left: 50%;
   top: 10px;
-  width: 20px;
-  height: 20px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--v-primary-base),
-    rgb(var(--v-theme-primary))
-  );
-  transform: translateX(-50%);
-  z-index: 1;
-  box-shadow: 0 0 0 4px rgba(106, 99, 255, 0.2);
+  background-color: rgb(var(--v-theme-primary));
+  border: 2px solid rgb(var(--v-theme-surface));
+  transform: translateX(-50%) scale(1);
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.timeline-item:hover .timeline-dot {
+  transform: translateX(-50%) scale(1.5);
+}
+
+.company-logo {
+  flex-shrink: 0;
+}
+
+.company-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background-color: rgba(var(--v-theme-primary), 0.12);
+  color: rgb(var(--v-theme-primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .timeline-content {
   position: relative;
-  width: 45%;
+  width: calc(50% - 32px);
   margin-left: auto;
 }
 
-.timeline-item:nth-child(even) .timeline-content {
+.timeline-item-even .timeline-content {
   margin-left: 0;
   margin-right: auto;
 }
 
 .timeline-date {
-  position: absolute;
-  top: -18px;
-  width: max-content;
-  padding: 8px 16px;
-  background: linear-gradient(
-    135deg,
-    var(--v-primary-base),
-    rgb(var(--v-theme-primary))
-  );
-  color: rgb(var(--v-theme-primary));
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  z-index: 2; /* Add this to ensure date appears above other elements */
-}
-
-.timeline-item .timeline-date {
-  left: -120px;
-  transform: translateY(-50%); /* Add this to vertically center the date */
-}
-
-.timeline-item:nth-child(even) .timeline-date {
-  right: -120px;
-  left: auto;
-  transform: translateY(-50%); /* Add this to vertically center the date */
+  margin-bottom: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 .timeline-card {
   padding: 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  margin-top: 30px;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 8px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  transition: all 0.2s ease;
+  transform: translateY(0);
+}
+
+.timeline-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .timeline-title {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 4px;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.4;
 }
 
 .timeline-company {
-  font-size: 1.1rem;
-  color: rgb(var(--v-theme-text-muted));
-  margin-bottom: 12px;
+  font-size: 1rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.company-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.company-link:hover {
+  color: rgb(var(--v-theme-primary));
 }
 
 .timeline-location {
-  font-size: 0.9rem;
-  color: rgb(var(--v-theme-neutral-light));
-  font-style: italic;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  color: rgba(var(--v-theme-on-surface), 0.7);
 }
 
 .timeline-description {
-  margin-bottom: 16px;
-  line-height: 1.6;
-  color: rgb(var(--v-theme-neutral-dark));
+  margin-bottom: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  line-height: 1.5;
+  font-size: 0.9375rem;
 }
 
 .timeline-tech {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 /* Animation for section */
@@ -250,7 +370,7 @@ const isLoading = computed(
 }
 
 /* Media Queries */
-@media (max-width: 960px) {
+@media (max-width: 959px) {
   .experience-section {
     padding: 80px 0;
   }
@@ -260,42 +380,79 @@ const isLoading = computed(
   }
 
   .timeline::before {
-    left: 30px;
+    left: 28px;
+    top: 14px;
   }
 
   .timeline-dot {
-    left: 30px;
+    left: 28px;
+  }
+
+  .timeline-item::after {
+    display: none;
   }
 
   .timeline-content {
-    width: calc(100% - 70px);
-    margin-left: 70px !important;
+    width: calc(100% - 56px);
+    margin-left: 56px !important;
   }
 
-  .timeline-item .timeline-date,
-  .timeline-item:nth-child(even) .timeline-date {
-    left: 70px;
-    right: auto;
-    top: -15px;
+  .timeline-date {
+    margin-bottom: 8px;
+  }
+
+  .timeline-item {
+    margin-bottom: 32px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
   .experience-section {
     padding: 60px 0;
   }
 
-  .timeline-date {
-    position: relative;
-    left: 0 !important;
-    top: 0 !important;
-    right: auto !important;
-    display: inline-block;
-    margin-bottom: 10px;
+  .timeline::before {
+    left: 24px;
+  }
+
+  .timeline-dot {
+    left: 24px;
+  }
+
+  .timeline-content {
+    width: calc(100% - 48px);
+    margin-left: 48px !important;
   }
 
   .timeline-card {
-    margin-top: 10px;
+    padding: 16px;
+  }
+
+  .company-logo {
+    margin-right: 12px !important;
+  }
+
+  .company-logo-placeholder,
+  .v-img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .company-logo-placeholder {
+    font-size: 16px !important;
+  }
+
+  .timeline-title {
+    font-size: 1rem;
+  }
+
+  .timeline-company,
+  .timeline-description {
+    font-size: 0.875rem;
+  }
+
+  .timeline-item {
+    margin-bottom: 24px;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from "vue-router";
-import { UserRole } from "@/domains/auth/types";
+import { UserRole } from "@/types/User";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -9,7 +9,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: "Margin Calculator",
       middleware: ["auth"],
-      requiredRole: UserRole.SUPERADMIN,
       requireWhitelist: true,
     },
   },

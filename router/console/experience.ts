@@ -1,45 +1,43 @@
 import type { RouteRecordRaw } from "vue-router";
 import { UserRole } from "@/types/User";
-import experienceRoutes from "./experience";
 
 const routes: RouteRecordRaw[] = [
   {
-    path: "/console",
-    name: "console",
-    component: () => import("~/pages/console/index.vue"),
+    path: "/console/experience",
+    name: "console-experience",
+    component: () => import("~/pages/console/experience/index.vue"),
     meta: {
       layout: "console",
-      title: "Console",
+      title: "Work Experience",
       middleware: ["auth"],
       requiredRole: UserRole.SUPERADMIN,
       requireWhitelist: true,
     },
   },
   {
-    path: "/console/settings",
-    name: "console-settings",
-    component: () => import("~/pages/console/settings.vue"),
+    path: "/console/experience/new",
+    name: "console-experience-new",
+    component: () => import("~/pages/console/experience/new.vue"),
     meta: {
       layout: "console",
-      title: "Settings",
+      title: "Add Work Experience",
       middleware: ["auth"],
       requiredRole: UserRole.SUPERADMIN,
       requireWhitelist: true,
     },
   },
   {
-    path: "/console/users",
-    name: "console-users",
-    component: () => import("~/pages/console/users/index.vue"),
+    path: "/console/experience/:id",
+    name: "console-experience-edit",
+    component: () => import("~/pages/console/experience/[id].vue"),
     meta: {
       layout: "console",
-      title: "Users",
+      title: "Edit Work Experience",
       middleware: ["auth"],
       requiredRole: UserRole.SUPERADMIN,
       requireWhitelist: true,
     },
   },
-  ...experienceRoutes,
 ];
 
 export default routes;

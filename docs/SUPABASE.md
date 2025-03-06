@@ -113,7 +113,7 @@ Your database schema is designed to support a portfolio and utility website usin
 
 ---
 
-#### **g. `work_experience` Table**
+#### **g. `work_experiences` Table**
 
 - **Purpose:**  
   - Records professional work experiences for the portfolio.

@@ -1,31 +1,6 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { AuthOptions, UserProfile } from "../types";
-
-// Create a single supabase client for interacting with the database
-export const createSupabaseClient = () => {
-  const config = useRuntimeConfig();
-  const supabaseUrl = config.public.supabaseUrl;
-  const supabaseKey = config.public.supabaseKey;
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  });
-};
-
-const supabaseClient = ref<SupabaseClient | undefined>();
-
-// Helper to get the supabase client with proper typing
-export const useSupabaseClient = () => {
-  if (!supabaseClient.value) {
-    supabaseClient.value = createSupabaseClient();
-  }
-
-  return supabaseClient.value;
-};
+import { useSupabaseClient } from "@/composables/useSupabaseClient";
+import type { AuthOptions } from "../types";
+import type { UserProfile } from "@/types/User";
 
 // Authentication methods
 export const supabaseAuth = {
@@ -89,44 +64,6 @@ export const supabaseAuth = {
   },
 };
 
-// Options methods
-export const supabaseOptions = {
-  // Get all options
-  async getAllOptions() {
-    const supabase = useSupabaseClient();
-    const { data, error } = await supabase.from("options").select("*");
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Get option by key
-  async getOptionByKey(key: string) {
-    const supabase = useSupabaseClient();
-    const { data, error } = await supabase
-      .from("options")
-      .select("*")
-      .eq("key", key)
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  // Update option
-  async updateOption(id: string, value: string) {
-    const supabase = useSupabaseClient();
-    const { data, error } = await supabase
-      .from("options")
-      .update({ value, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select();
-
-    if (error) throw error;
-    return data;
-  },
-};
-
 // Whitelist methods
 export const supabaseWhitelist = {
   // Check if an email is whitelisted
@@ -154,24 +91,16 @@ export const supabaseWhitelist = {
     return data;
   },
 
-  // Add email to whitelist
-  async addToWhitelist(email: string, addedBy: string) {
+  // Check if a user is on the whitelist
+  async checkEmail(email: string) {
     const supabase = useSupabaseClient();
     const { data, error } = await supabase
       .from("whitelist")
-      .insert([{ email, added_by: addedBy }])
-      .select();
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
 
     if (error) throw error;
-    return data[0];
-  },
-
-  // Remove email from whitelist
-  async removeFromWhitelist(id: string) {
-    const supabase = useSupabaseClient();
-    const { error } = await supabase.from("whitelist").delete().eq("id", id);
-
-    if (error) throw error;
-    return true;
+    return !!data; // Return true if data exists
   },
 };

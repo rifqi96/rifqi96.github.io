@@ -1,6 +1,6 @@
-import { UserRole } from "@/domains/auth/types";
+import { UserRole } from "@/types/User";
 import { useAuth } from "@/domains/auth/composables/useAuth";
-import { supabaseAuth } from "@/domains/auth/services/supabase";
+import { supabaseAuth } from "@/domains/auth/services/supabase.service";
 import type { H3Event } from "h3";
 
 // Helper function to check session existence
