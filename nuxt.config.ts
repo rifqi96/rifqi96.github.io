@@ -146,7 +146,8 @@ export default defineNuxtConfig({
   sitemap: {
     // Sitemap configuration
     urls: async () => {
-      const baseURL = process.env.NUXT_PUBLIC_SITE_URL || "https://rifqi.dev";
+      const baseURL =
+        process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000";
       // Default URLs
       const urls = ["/", "/projects", "/blog"].map((url) => `${baseURL}${url}`);
       return urls;
@@ -160,10 +161,7 @@ export default defineNuxtConfig({
     groups: [
       {
         userAgent: "*",
-        // Temporarily disable indexing until the site is ready
-        // @todo: enable indexing when the site is ready
-        // allow: ["/"],
-        disallow: ["/"],
+        allow: ["/"],
       },
       // Auth domain should never be indexed
       {
