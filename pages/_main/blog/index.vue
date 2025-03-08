@@ -1,4 +1,8 @@
-<script setup>
+<script setup lang="ts">
+import { blogPostService } from "@/services/blogPost.service";
+import type { BlogPost } from "@/types/BlogPost";
+import { mediaService } from "@/services/media.service";
+
 // Blog listing page
 definePageMeta({
   layout: "default",
@@ -16,19 +20,28 @@ useHead({
   ],
 });
 
-// Fetch all blog posts
-const { data: posts } = await useAsyncData("blog-posts", () =>
-  queryContent("/blog").sort({ date: -1 }).limit(20).find(),
+// Fetch all published blog posts
+const { data: posts } = await useAsyncData<BlogPost[]>("blog-posts", () =>
+  blogPostService.getAllPublishedPosts(),
 );
 
 // Format date
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   }).format(date);
+};
+
+// Get image URL
+const getImageUrl = (post: BlogPost) => {
+  if (post.media) {
+    return mediaService.getPublicUrl(post.media);
+  }
+  return post.image_url || "";
 };
 </script>
 
@@ -45,17 +58,21 @@ const formatDate = (dateString) => {
     </v-row>
 
     <v-row v-if="posts && posts.length">
-      <v-col
-        v-for="post in posts"
-        :key="post._path"
-        cols="12"
-        md="6"
-        class="mb-6"
-      >
-        <v-card class="h-100" :to="post._path">
-          <v-img v-if="post.image" :src="post.image" height="200" cover></v-img>
+      <v-col v-for="post in posts" :key="post.id" cols="12" md="6" class="mb-6">
+        <v-card class="h-100" :to="`/blog/${post.slug}`">
+          <v-img
+            v-if="getImageUrl(post)"
+            :src="getImageUrl(post)"
+            height="200"
+            cover
+          ></v-img>
           <v-card-title class="text-h5">{{ post.title }}</v-card-title>
-          <v-card-subtitle>{{ formatDate(post.date) }}</v-card-subtitle>
+          <v-card-subtitle>
+            {{ formatDate(post.published_at || post.created_at) }}
+            <span v-if="post.author" class="ml-2"
+              >by {{ post.author.email }}</span
+            >
+          </v-card-subtitle>
           <v-card-text class="pb-2">
             <p>{{ post.description }}</p>
 
@@ -73,7 +90,7 @@ const formatDate = (dateString) => {
             </div>
           </v-card-text>
           <v-card-actions>
-            <v-btn color="primary" :to="post._path" variant="text">
+            <v-btn color="primary" :to="`/blog/${post.slug}`" variant="text">
               Read More
             </v-btn>
           </v-card-actions>

@@ -1,0 +1,128 @@
+# Development Guidelines
+
+## Component Development Guidelines
+
+1. Use Vue 3 `<script setup>` SFCs with TypeScript
+2. Follow naming conventions: PascalCase for components, kebab-case in templates
+3. Group imports by type (Vue, libraries, internal)
+4. Use strict typing with TypeScript interfaces for object types
+5. Place domain-specific components within their respective domain folders
+6. Leverage composables for reusable logic
+
+Here are some specific component guidelines:
+
+### Editor Component and Extensions Development Guidelines
+
+1. Core Principles
+Tiptap-Based: Understand Tiptap's core concepts (nodes, marks, extensions).
+Extension-Driven: Implement features and modifications as Tiptap extensions.
+2. Extension Structure
+Location: components/Editor/extensions/.
+Naming: Descriptive names (e.g., ImageGalleryBlock, SpokenQuoteText).
+Implementation: Each extension is a separate file exporting a Tiptap extension object.
+Node Views: Use VueNodeViewRenderer for complex content blocks with Vue components.
+Registration: Register extensions in getAllExtensions in components/ui/StoryEditor/extensions/index.ts.
+3. Extension Types and Patterns
+Node Extensions (Block-Level):
+Define block-level elements.
+Use VueNodeViewRenderer to render Vue components.
+Define attributes for styling and data.
+Example: BoxedText.extension.ts
+Mark Extensions (Inline Styles):
+Extend the base TextStyle extension.
+Add attributes for styling (e.g., fontSize).
+Add commands to apply/remove attributes.
+Example: TextStyleExtended.extension.ts
+Utility Extensions:
+Modify editor behavior or add functionality.
+Customize placeholder behavior.
+Example: PlaceholderExtended.extension.ts
+4. Key Considerations
+Props: Use component props (extensions, editable, options) for customization.
+Data Flow: modelValue is the single source of truth. Use setContent to update the editor.
+Styling: Use SCSS and :deep() selectors for Tiptap elements.
+Performance: Optimize updates and lazy-load resources.
+Accessibility: Ensure keyboard navigation and screen reader support.
+5. Example Extension Analysis
+BoxedText: A Node extension that renders a styled container using a Vue component (BoxedText.vue). It defines attributes for background color, border color, and corner radius.
+TextStyleExtended: A Mark extension that extends the base TextStyle extension to add font size styling. It provides commands to set and unset the font size.
+PlaceholderExtended: A utility extension that customizes the placeholder text based on the node type. It uses a function to determine the appropriate placeholder text for each node.
+
+## Workflow Guidelines
+
+1. When running in agentic mode, always run `yarn typecheck` after making changes that are related to typescript and fix any errors that come up, don't stop until all errors are fixed.
+
+## Technical Stacks
+
+1. Nuxt 3 for the main frontend library.
+2. Vuetify for the component library.
+3. Supabase for the BaaS.
+4. Tiptap for the editor library.
+
+## Supabase and Database Schema Guidelines
+
+1. Refer to docs/SUPABASE.md for the full guidelines.
+
+## Coding Pattern and Architecture Guidelines
+
+### Design Patterns
+
+#### Domain-Driven Organization
+
+Code is organized by feature domains rather than technical concerns:
+
+- Each domain contains its own components, composables, and types
+- Cross-domain functionality is placed in the root directory with dedicated folders depending on the nature of the functionality
+- Clear boundaries between different application features
+
+### Domain Organization
+
+The project follows a domain-driven approach, organizing code by feature domains.
+
+Although it's a nuxt project, but due to domain-driven architecture and
+some of them are handled in different subdomains, we handle the routing manually.
+It's organized under the `router` directory.
+
+The domains are:
+
+#### Home Domain
+
+Contains components and logic specific to the landing page, including:
+
+- Hero section with parallax effects
+- Statistics display
+- Featured projects showcase
+- About and skills sections
+- Work experience timeline
+- Contact information
+
+Everything in the home domain is accessible through the root/main domain.
+
+#### Margin Calculator Domain
+
+A specialized utility for trading calculations:
+
+- Real-time price fetching via API
+- Margin position calculation
+- Trade history management
+- Command generation for trading platforms
+
+The route to this is `/margin-calculator`
+
+#### Console Domain
+
+Contains components and logic specific to the console, including:
+
+- Projects management
+- Experience management
+- Media management
+
+The route to this is `console.{domain}`
+
+#### Auth Domain
+
+Contains components and logic specific to authentication, including:
+
+- User authentication
+
+The route to this is `auth.{domain}`

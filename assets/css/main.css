@@ -106,3 +106,8 @@ button:focus-visible {
 .text-overline {
   font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif !important;
 }
+
+em {
+  font-style: italic !important;
+  font-family: sans-serif !important;
+}

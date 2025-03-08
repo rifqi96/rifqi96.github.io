@@ -13,7 +13,7 @@ const { user, isAuthenticated, isSuperAdmin, signOut } = useAuth();
 // Navigation items
 const navItems = [
   { title: "Dashboard", icon: "mdi-view-dashboard", to: "/" },
-  { title: "Blog Posts", icon: "mdi-post", to: "/blog" },
+  { title: "Blog Posts", icon: "mdi-post-outline", to: "/blog" },
   { title: "Projects", icon: "mdi-briefcase", to: "/projects" },
   {
     title: "Work Experience",
@@ -77,7 +77,7 @@ const route = useRoute();
           :prepend-icon="item.icon"
           :title="item.title"
           :to="item.to"
-          :active="route.path === item.to"
+          :active="route.path.startsWith(item.to)"
           rounded="lg"
           class="mb-1"
         ></v-list-item>

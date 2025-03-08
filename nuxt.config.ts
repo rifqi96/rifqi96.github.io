@@ -125,7 +125,7 @@ export default defineNuxtConfig({
   },
 
   // Include global CSS
-  css: ["/assets/css/main.css"],
+  css: ["/assets/css/main.css", "/components/Editor/styles/editor.scss"],
 
   // Configure content module
   content: {

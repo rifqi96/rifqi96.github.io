@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from "vue-router";
 import { UserRole } from "@/types/User";
 import experienceRoutes from "./experience";
 import projectRoutes from "./projects";
+import blogRoutes from "./blog";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -42,6 +43,7 @@ const routes: RouteRecordRaw[] = [
   },
   ...experienceRoutes,
   ...projectRoutes,
+  ...blogRoutes,
 ];
 
 export default routes;

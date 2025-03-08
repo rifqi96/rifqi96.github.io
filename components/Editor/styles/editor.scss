@@ -1,0 +1,303 @@
+/* Base editor styles */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-width: 740px;
+  margin: 0 auto;
+
+  & *:focus {
+    outline: none;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 1rem;
+  }
+
+  /* Title input styles */
+  .title-input {
+    font-size: 2.5rem;
+    font-weight: 700;
+    width: 100%;
+    border: none;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    font-family: inherit;
+    color: inherit;
+    background: transparent;
+
+    &::placeholder {
+      color: rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 600px) {
+      font-size: 2rem;
+    }
+  }
+
+  /* Editor wrapper */
+  .editor-wrapper {
+    position: relative;
+  }
+
+  /* Editor content styles */
+  .tiptap {
+    :first-child {
+      margin-top: 0;
+    }
+
+    /* Heading styles */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      line-height: 1.1;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2em;
+    }
+
+    h2 {
+      font-size: 1.7em;
+    }
+
+    h3 {
+      font-size: 1.4em;
+    }
+
+    /* Paragraph styles */
+    p {
+      margin-bottom: 1rem;
+
+      &:empty {
+        position: relative;
+
+        &::before {
+          content: "Empty paragraph will be removed on backspace";
+          position: absolute;
+          color: rgba(200, 0, 0, 0.4);
+          font-style: italic;
+          font-size: 0.8em;
+          pointer-events: none;
+        }
+      }
+    }
+
+    .editor-paragraph {
+      margin-bottom: 1rem;
+
+      &:empty {
+        position: relative;
+        min-height: 1.5rem;
+
+        &::before {
+          content: "Empty paragraph will be removed on backspace";
+          position: absolute;
+          color: rgba(200, 0, 0, 0.4);
+          font-style: italic;
+          font-size: 0.8em;
+          pointer-events: none;
+        }
+      }
+    }
+
+    /* List styles */
+    ul,
+    ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+
+      p {
+        margin: 0;
+      }
+    }
+
+    /* Code styles */
+    code {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 3px;
+      padding: 0.2em 0.4em;
+      font-family: monospace;
+    }
+
+    pre {
+      background-color: #0d0d0d;
+      color: #fff;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+
+      code {
+        background: none;
+        padding: 0;
+        color: inherit;
+      }
+    }
+
+    /* Image styles */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.25rem;
+    }
+
+    .editor-image {
+      display: block;
+      margin: 1.5rem auto;
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.25rem;
+    }
+
+    /* Enhanced image indentation styles - make them !important to ensure they apply */
+    img[data-indentation="left"],
+    .editor-image[data-indentation="left"] {
+      margin-left: 0 !important;
+      margin-right: auto !important;
+      display: block !important;
+      text-align: left !important;
+    }
+
+    img[data-indentation="center"],
+    .editor-image[data-indentation="center"] {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      display: block !important;
+      text-align: center !important;
+    }
+
+    img[data-indentation="right"],
+    .editor-image[data-indentation="right"] {
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      display: block !important;
+      text-align: right !important;
+    }
+
+    /* Ensure image indentation works within block wrappers */
+    div[data-type="block-wrapper"][data-indentation="left"] img,
+    div[data-type="block-wrapper"][data-indentation="left"] .editor-image {
+      margin-left: 0 !important;
+      margin-right: auto !important;
+      display: block !important;
+    }
+
+    div[data-type="block-wrapper"][data-indentation="center"] img,
+    div[data-type="block-wrapper"][data-indentation="center"] .editor-image {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      display: block !important;
+    }
+
+    div[data-type="block-wrapper"][data-indentation="right"] img,
+    div[data-type="block-wrapper"][data-indentation="right"] .editor-image {
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      display: block !important;
+    }
+
+    /* Block wrapper styles */
+    div[data-type="block-wrapper"] {
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    /* Indentation styles */
+    [data-indentation="left"] {
+      text-align: left;
+    }
+
+    [data-indentation="center"] {
+      text-align: center;
+    }
+
+    [data-indentation="right"] {
+      text-align: right;
+    }
+
+    /* Image with caption styles */
+    .editor-image-figure {
+      display: block;
+      margin: 1.5rem auto;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .editor-image-caption {
+      font-size: 0.875rem;
+      color: #666;
+      padding: 0.5rem;
+      text-align: center;
+      font-style: italic;
+      min-height: 1.5rem;
+      cursor: text;
+
+      &:empty::before {
+        content: "Add a caption...";
+        color: #999;
+        font-style: italic;
+      }
+
+      &:focus {
+        outline: 1px dashed #ccc;
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+    }
+
+    /* Blockquote styles */
+    blockquote {
+      border-left: 3px solid rgba(0, 0, 0, 0.1);
+      padding-left: 1rem;
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid rgba(0, 0, 0, 0.1);
+      margin: 2rem 0;
+    }
+
+    /* Placeholder styles - only show on current focus */
+    .is-empty.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      height: 0;
+      font-style: italic;
+    }
+
+    /* Only show placeholder when the editor has focus */
+    p.is-empty::before {
+      content: "";
+    }
+  }
+
+  /* Special styling when the editor has focus */
+  .has-focus {
+    p.is-empty[data-placeholder]::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      height: 0;
+      font-style: italic;
+    }
+  }
+}

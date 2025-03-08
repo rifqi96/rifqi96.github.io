@@ -1,0 +1,8 @@
+---
+description: Supabase and Database Schema Guidelines. Always refer to this to follow the context of the database schema and backend of the project.
+globs: 
+alwaysApply: false
+---
+# Supabase and Database Schema Guidelines
+
+Please refer to [SUPABASE.md](mdc:docs/SUPABASE.md) for the full guidelines.

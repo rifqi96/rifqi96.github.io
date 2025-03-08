@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { blogPost as blogService } from "@/domains/console/services/blogPost.service";
+import { blogPostService as blogService } from "@/domains/console/services/blogPost.service";
 import { projectService } from "@/domains/console/services/project.service";
 import { userService } from "@/domains/console/services/user.service";
 import { experienceService } from "@/domains/console/services/workExperience.service";

@@ -82,3 +82,18 @@ export const parseBoolean = (
 
   return false;
 };
+
+/**
+ * Generates a slug from a title.
+ *
+ * @param title - The title to generate a slug from
+ * @returns The generated slug
+ */
+export const generateSlug = (title: string) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+};

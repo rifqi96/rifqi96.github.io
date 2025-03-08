@@ -1,0 +1,11 @@
+---
+description: Stacks that the project use.
+globs: 
+alwaysApply: false
+---
+# Technical Stacks
+
+1. Nuxt 3 for the main frontend library.
+2. Vuetify for the component library.
+3. Supabase for the BaaS.
+4. Tiptap for the editor library.

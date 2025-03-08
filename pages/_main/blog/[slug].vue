@@ -1,14 +1,19 @@
-<script setup>
+<script setup lang="ts">
+import { blogPostService } from "@/services/blogPost.service";
+import type { BlogPost } from "@/types/BlogPost";
+import { mediaService } from "@/services/media.service";
+
 // Dynamic route for blog posts
 definePageMeta({
   layout: "default",
 });
 
 const route = useRoute();
+const slug = route.params.slug as string;
 
-// Get content for the current page
-const { data: post } = await useAsyncData(`content-${route.path}`, () =>
-  queryContent(route.path).findOne(),
+// Get blog post by slug
+const { data: post } = await useAsyncData<BlogPost>(`blog-post-${slug}`, () =>
+  blogPostService.getPostBySlug(slug),
 );
 
 // Handle missing content
@@ -29,14 +34,15 @@ useHead({
     { property: "og:type", content: "article" },
     {
       property: "og:image",
-      content: post.value.image || "/img/default-og.jpg",
+      content: getImageUrl(post.value) || "/img/default-og.jpg",
     },
     { name: "twitter:card", content: "summary_large_image" },
   ],
 });
 
 // Format date
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
@@ -44,10 +50,23 @@ const formatDate = (dateString) => {
     day: "numeric",
   }).format(date);
 };
+
+// Get image URL
+function getImageUrl(post: BlogPost) {
+  if (post.media) {
+    return mediaService.getPublicUrl(post.media);
+  }
+  return post.image_url || "";
+}
+
+// Parse content as HTML
+function renderContent(content: string) {
+  return content;
+}
 </script>
 
 <template>
-  <v-container class="blog-post">
+  <v-container v-if="post" class="blog-post">
     <v-row>
       <v-col cols="12" class="mb-6">
         <v-btn
@@ -62,7 +81,12 @@ const formatDate = (dateString) => {
 
         <h1 class="text-h3 mb-4">{{ post.title }}</h1>
         <div class="mb-6 d-flex align-center">
-          <span class="text-subtitle-1">{{ formatDate(post.date) }}</span>
+          <span class="text-subtitle-1">
+            {{ formatDate(post.published_at || post.created_at) }}
+            <span v-if="post.author" class="ml-2"
+              >by {{ post.author.email }}</span
+            >
+          </span>
           <v-spacer></v-spacer>
           <div>
             <v-chip
@@ -83,95 +107,21 @@ const formatDate = (dateString) => {
     <v-row>
       <v-col cols="12" md="10" lg="8" class="mx-auto">
         <v-img
-          v-if="post.image"
-          :src="post.image"
+          v-if="post && getImageUrl(post)"
+          :src="getImageUrl(post)"
           :alt="post.title"
           class="mb-8 rounded"
           height="400"
           cover
         ></v-img>
 
-        <div class="content-container">
-          <ContentRenderer :value="post" />
-        </div>
+        <div
+          class="content-container"
+          v-html="post ? renderContent(post.content) : ''"
+        ></div>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<style>
-.blog-post h1 {
-  font-weight: 700;
-}
-
-.content-container {
-  font-size: 1.1rem;
-  line-height: 1.8;
-}
-
-.content-container h1,
-.content-container h2,
-.content-container h3,
-.content-container h4,
-.content-container h5,
-.content-container h6 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.content-container p {
-  margin-bottom: 1.5rem;
-}
-
-.content-container ul,
-.content-container ol {
-  margin-bottom: 1.5rem;
-  padding-left: 2rem;
-}
-
-.content-container li {
-  margin-bottom: 0.5rem;
-}
-
-.content-container pre {
-  background-color: rgb(var(--v-theme-bg-alt));
-  padding: 1rem;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin-bottom: 1.5rem;
-}
-
-.content-container code {
-  font-family: monospace;
-  background-color: rgb(var(--v-theme-bg-alt));
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-}
-
-.content-container pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.content-container blockquote {
-  border-left: 4px solid var(--v-primary-base);
-  padding-left: 1rem;
-  font-style: italic;
-  margin: 1.5rem 0;
-  color: rgba(0, 0, 0, 0.7);
-}
-
-.content-container img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin: 1.5rem 0;
-}
-
-@media (max-width: 600px) {
-  .content-container {
-    font-size: 1rem;
-  }
-}
-</style>
+<style></style>

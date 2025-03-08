@@ -1,0 +1,68 @@
+---
+description: Coding Pattern and Architecture Guidelines. Always refer to this to follow the coding best practices for this project.
+globs: 
+alwaysApply: false
+---
+# Coding Pattern and Architecture Guidelines
+
+## Design Patterns
+
+### Domain-Driven Organization
+
+Code is organized by feature domains rather than technical concerns:
+
+- Each domain contains its own components, composables, and types
+- Cross-domain functionality is placed in the root directory with dedicated folders depending on the nature of the functionality
+- Clear boundaries between different application features
+
+## Domain Organization
+
+The project follows a domain-driven approach, organizing code by feature domains.
+
+Although it's a nuxt project, but due to domain-driven architecture and
+some of them are handled in different subdomains, we handle the routing manually.
+It's organized under the `router` directory.
+
+The domains are:
+
+### Home Domain
+
+Contains components and logic specific to the landing page, including:
+
+- Hero section with parallax effects
+- Statistics display
+- Featured projects showcase
+- About and skills sections
+- Work experience timeline
+- Contact information
+
+Everything in the home domain is accessible through the root/main domain.
+
+### Margin Calculator Domain
+
+A specialized utility for trading calculations:
+
+- Real-time price fetching via API
+- Margin position calculation
+- Trade history management
+- Command generation for trading platforms
+
+The route to this is `/margin-calculator`
+
+### Console Domain
+
+Contains components and logic specific to the console, including:
+
+- Projects management
+- Experience management
+- Media management
+
+The route to this is `console.{domain}`
+
+### Auth Domain
+
+Contains components and logic specific to authentication, including:
+
+- User authentication
+
+The route to this is `auth.{domain}`
