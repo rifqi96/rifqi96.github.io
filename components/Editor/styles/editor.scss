@@ -1,5 +1,6 @@
 /* Base editor styles */
-.editor {
+.editor,
+.content-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -43,6 +44,7 @@
   }
 
   /* Editor content styles */
+  &,
   .tiptap {
     :first-child {
       margin-top: 0;

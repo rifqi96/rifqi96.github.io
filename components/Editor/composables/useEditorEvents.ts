@@ -7,6 +7,7 @@ export function useEditorEvents(options: {
     onImageUpload?: (file: File) => void;
     onImageDialog?: () => void;
     onImageIndentation?: (indentation: string) => void;
+    onFeaturedImage?: () => void;
   };
 }) {
   const { editor, editorRef, handlers = {} } = options;
@@ -27,6 +28,13 @@ export function useEditorEvents(options: {
   const handleImageDialog = () => {
     if (handlers.onImageDialog) {
       handlers.onImageDialog();
+    }
+  };
+
+  // Event handler for featured image
+  const handleFeaturedImage = () => {
+    if (handlers.onFeaturedImage) {
+      handlers.onFeaturedImage();
     }
   };
 
@@ -52,6 +60,10 @@ export function useEditorEvents(options: {
     editorWrapper.addEventListener("tiptap-image-upload", handleImageUpload);
     editorWrapper.addEventListener("tiptap-image-dialog", handleImageDialog);
     editorWrapper.addEventListener(
+      "tiptap-featured-image",
+      handleFeaturedImage,
+    );
+    editorWrapper.addEventListener(
       "tiptap-set-image-indentation",
       handleImageIndentation,
     );
@@ -66,6 +78,10 @@ export function useEditorEvents(options: {
     // Remove event listeners
     editorWrapper.removeEventListener("tiptap-image-upload", handleImageUpload);
     editorWrapper.removeEventListener("tiptap-image-dialog", handleImageDialog);
+    editorWrapper.removeEventListener(
+      "tiptap-featured-image",
+      handleFeaturedImage,
+    );
     editorWrapper.removeEventListener(
       "tiptap-set-image-indentation",
       handleImageIndentation,

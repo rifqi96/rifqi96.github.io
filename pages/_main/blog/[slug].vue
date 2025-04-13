@@ -110,7 +110,7 @@ function renderContent(content: string) {
           v-if="post && getImageUrl(post)"
           :src="getImageUrl(post)"
           :alt="post.title"
-          class="mb-8 rounded"
+          class="featured-image"
           height="400"
           cover
         ></v-img>
@@ -124,4 +124,38 @@ function renderContent(content: string) {
   </v-container>
 </template>
 
-<style></style>
+<style>
+@import "@/components/Editor/styles/editor.scss";
+
+.content-container {
+  margin-top: 2rem;
+}
+
+.featured-image {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+/* Responsive styling for different screen sizes */
+@media (max-width: 960px) {
+  .blog-post h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .featured-image {
+    border-radius: 0;
+    margin-left: -16px;
+    margin-right: -16px;
+    width: calc(100% + 32px);
+  }
+
+  .blog-post h1 {
+    font-size: 1.75rem;
+  }
+}
+</style>
