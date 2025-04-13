@@ -16,7 +16,7 @@ declare module "@tiptap/core" {
        * @param pos - The position of the cursor
        * @returns - The result of the command
        */
-      addOrSplitParagraph: (pos: number) => ReturnType;
+      addOrSplitParagraph: () => ReturnType; // No longer needs pos
 
       /**
        * Insert a block wrapper at the cursor position
@@ -188,57 +188,14 @@ export const BlockWrapper = Node.create({
   addCommands() {
     return {
       addOrSplitParagraph:
-        (pos: number) =>
+        () =>
+        // No longer needs pos argument
         ({ chain, editor }) => {
-          // Find the parent paragraph node at the given position
-          const paragraphNode = findSelectedNode(
-            editor,
-            (node) => node.type.name === "paragraph",
-            { pos },
-          );
-          if (!paragraphNode) {
-            return false;
-          }
-
-          const offset = pos - paragraphNode.start;
-          const text = paragraphNode.node.textContent;
-
-          // If the paragraph is empty, delegate to inserting a new block wrapper below
-          if (!text.trim()) {
-            return chain().insertBlockWrapperBelow(pos).run();
-          }
-
-          // If the cursor is at the beginning of the paragraph, insert a new block wrapper above
-          if (offset === 0) {
-            return chain().insertBlockWrapperAbove(pos).run();
-          }
-
-          // If the cursor is at the end of the paragraph, insert a new block wrapper below
-          // Note: A paragraph node with no text typically has nodeSize 2 (opening and closing tokens)
-          if (offset === paragraphNode.node.nodeSize - 2) {
-            return chain().insertBlockWrapperBelow(pos).run();
-          }
-
-          // Otherwise, split the paragraph into two
-          const clonedNode = paragraphNode.node.toJSON();
-          return (
-            chain()
-              // Duplicate the paragraph node to create the split part
-              .insertContentAt(paragraphNode.end, clonedNode)
-              // Delete from the new cloned node: remove content before the split point
-              .deleteRange({
-                from: paragraphNode.end + 2,
-                to: paragraphNode.end + offset,
-              })
-              // Delete from the original paragraph: remove content after the split point
-              .deleteRange({
-                from: paragraphNode.start + offset,
-                to: paragraphNode.end - 2,
-              })
-              // Set the cursor at the beginning of the new paragraph
-              .setTextSelection(paragraphNode.end + 2)
-              .run()
-          );
+          // Use Tiptap's built-in splitBlock command
+          // It handles splitting at start, middle, end, and empty paragraphs correctly.
+          // It will split the current block (expected to be paragraph within blockWrapper)
+          // and insert a new default block (paragraph) after it.
+          return chain().splitBlock().run();
         },
 
       insertBlockWrapper:
@@ -317,28 +274,28 @@ export const BlockWrapper = Node.create({
         const ignoreNodeTypes = ["header"];
         for (const type of ignoreNodeTypes) {
           if (findSelectedNode(editor, (node) => node.type.name === type)) {
-            return false;
+            return false; // Let default Enter handling occur (or other extension)
           }
         }
 
-        // Do addBlockWrapperBelow instead of addOrSplitParagraph for descendants of the following node types
+        // Delegate to insertBlockWrapperBelow for specific parent types
         const exceptionNodeTypes = ["caption", "listItem"];
         for (const type of exceptionNodeTypes) {
           if (findSelectedNode(editor, (node) => node.type.name === type)) {
+            // Use 'from' which represents the cursor position before potential deletion
             return editor.chain().insertBlockWrapperBelow(from).run();
           }
         }
 
-        // Delete current selection (default behavior of hitting enter)
+        // Delete current selection if any (standard Enter behavior)
         if (from !== to) {
-          const ok = editor.commands.deleteSelection();
-          if (!ok) {
-            return false;
-          }
+          editor.commands.deleteSelection();
+          // Note: We don't need to update 'from' as splitBlock works on the current selection
         }
 
-        // Use our improved addOrSplitParagraph command
-        return editor.chain().addOrSplitParagraph(from).run();
+        // Use the simplified addOrSplitParagraph which now just calls splitBlock
+        // Pass focus to ensure the editor remains focused after the operation
+        return editor.chain().focus().addOrSplitParagraph().run();
       },
     };
   },
