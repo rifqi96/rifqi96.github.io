@@ -117,6 +117,7 @@ const defaultItems = [
 const defaultSuggestion: Omit<SuggestionOptions, "editor"> = {
   char: "/",
   startOfLine: true,
+  allowSpaces: true,
   command: ({
     editor,
     range,
@@ -129,8 +130,10 @@ const defaultSuggestion: Omit<SuggestionOptions, "editor"> = {
     // Execute the command of the selected item
     if (props && typeof props.command === "function") {
       // Execute the command with proper parameters
-      console.log("Executing slash command with props:", props);
-      props.command({ editor, range });
+      if (props && typeof props.command === "function") {
+        // Execute the command with proper parameters
+        props.command({ editor, range });
+      }
     }
   },
   items: ({ query }: { query: string }) => {
@@ -310,26 +313,50 @@ const defaultSuggestion: Omit<SuggestionOptions, "editor"> = {
 
         // Handle enter
         if (event.key === "Enter") {
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-
+          // Check if an item is selected
           if (items[selectedIndex]) {
             const selectedItem = items[selectedIndex];
 
-            // Ensure immediate execution
-            setTimeout(() => {
-              if (props && props.command && selectedItem) {
-                // Use the same pattern as the click handler
-                props.command(selectedItem);
-              }
-              popup.remove();
-            }, 0);
+            // Check if the selected item has a command function and props are available
+            if (
+              selectedItem &&
+              typeof selectedItem.command === "function" &&
+              props
+            ) {
+              // Execute the command
+              selectedItem.command({
+                editor: props.editor,
+                range: props.range,
+              });
 
-            return true;
+              // Stop event propagation *after* command execution
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              popup.remove(); // Close the popup
+              return true; // Indicate event handled
+            } else {
+              // Handle case where item exists but command is invalid/missing props
+              // Still prevent default action (like newline) and close popup
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              popup.remove();
+              return true;
+            }
+          } else {
+            // Fallback: No item selected, but Enter was pressed.
+            // Prevent default action (newline) and stop propagation.
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            popup.remove(); // Close the popup
+            return true; // Indicate event handled
           }
 
-          return true;
+          // Fallback if no item selected? Maybe just close popup.
+          popup.remove();
+          return true; // Still prevent default even if no item action taken
         }
 
         return false;

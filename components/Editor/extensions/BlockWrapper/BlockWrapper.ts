@@ -3,8 +3,9 @@ import {
   mergeAttributes,
   type KeyboardShortcutCommand,
 } from "@tiptap/core";
-import { NodeSelection } from "prosemirror-state";
+import { NodeSelection, PluginKey } from "prosemirror-state"; // Remove getPluginState from here
 import { Node as ProseMirrorNode } from "prosemirror-model";
+// Remove the problematic import for suggestion plugin key
 import { findSelectedNode } from "../../utils/tiptap.util";
 
 declare module "@tiptap/core" {
@@ -267,6 +268,18 @@ export const BlockWrapper = Node.create({
        * Hit enter to create a new paragraph. If the cursor position is at the middle of a paragraph, split the paragraph.
        */
       Enter: ({ editor }) => {
+        // Check if the Suggestion plugin (used by SlashCommand) is active
+        // Access the plugin state using the default imported key and editor state
+        // Use the default imported key and its getState method
+        // Access the suggestion plugin state using the conventional string key
+        const suggestionState = editor.state["suggestion$"];
+
+        // If the suggestion plugin is active and showing the menu, let it handle Enter
+        if (suggestionState?.active && suggestionState.show) {
+          // Returning false allows the event to propagate to the Suggestion plugin's handler
+          return false;
+        }
+
         const { selection } = editor.state;
         const { from, to } = selection;
 
